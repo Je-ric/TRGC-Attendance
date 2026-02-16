@@ -1,0 +1,26 @@
+# TRGC Attendance – AI Agent Guide
+
+- Stack: Laravel 12 (PHP 8.2), Livewire 3.7, Vite + Tailwind 4 (package.json), simple CDN Tailwind + @livewireScripts in layout [resources/views/layouts/app.blade.php](resources/views/layouts/app.blade.php#L1-L27).
+- Core routes flow: redirect `/` → `/attendance`, type listing → session creation → session check-in → records ([routes/web.php](routes/web.php#L6-L23)).
+- Controller duties: listing types, creating sessions, showing a session, and records aggregation with eager loads ([app/Http/Controllers/AttendanceController.php](app/Http/Controllers/AttendanceController.php#L11-L56)).
+- Domain models: `AttendanceType`, `AttendanceSession`, `AttendanceRecord`, `Person`, `Family` (see models in [app/Models](app/Models)).
+- DB shape: families, people (enum category, optional family, contact), attendance types (recurring/day), sessions unique per (type,date) with optional notes/service_name, records unique per (session,person) with status + remarks (migrations in [database/migrations](database/migrations)).
+- Seed data: `AttendanceTypeSeeder` creates a default “Sunday Service”; wired in `DatabaseSeeder` ([database/seeders](database/seeders)).
+- Livewire check-in page: `attendance.show` renders `<livewire:attendance-checkin>` ([resources/views/attendance/show.blade.php](resources/views/attendance/show.blade.php#L1-L7)).
+- Component `AttendanceCheckin` handles type-specific state, debounced search of people, toggle attendance map, validates `service_name`, creates session + records, flashes success ([app/Livewire/AttendanceCheckin.php](app/Livewire/AttendanceCheckin.php)).
+- Event wiring: `PersonSearch` dispatches `togglePerson`; `AttendanceCheckin` listens via `#[On('togglePerson')]` to flip `checked` map; `PersonCreate` dispatches `personCreated` to auto-select the new person ([app/Livewire/PersonSearch.php](app/Livewire/PersonSearch.php), [app/Livewire/PersonCreate.php](app/Livewire/PersonCreate.php)).
+- Person browsing: initial load shows all people; `updatedSearch` filters by first/last/contact (order by last name) ([app/Livewire/PersonSearch.php](app/Livewire/PersonSearch.php#L10-L35)).
+- Person creation modal: `open()` resets state and shows modal; `save()` validates and persists, then dispatches to parent ([resources/views/livewire/person-create.blade.php](resources/views/livewire/person-create.blade.php)).
+- Attendance selection UI: selected attendees listed with category/auto_category helper; uses `Person` accessors `full_name`, `age`, `auto_category` ([resources/views/livewire/attendance-checkin.blade.php](resources/views/livewire/attendance-checkin.blade.php), [app/Models/Person.php](app/Models/Person.php)).
+- Session details page renders placeholder component `attendance-checkin-session` (currently empty view) ([resources/views/attendance/session.blade.php](resources/views/attendance/session.blade.php)).
+- Records page: eager-loaded sessions with people, ordered by date desc + service name ([resources/views/attendance/records.blade.php](resources/views/attendance/records.blade.php)).
+- Layout/nav: single header link back to Attendance list; wrap new pages in `layouts.app` and use Tailwind utility classes.
+- Validation rules to mirror: `service_name` required for session creation (controller + Livewire) and `first_name/last_name` required for people; categories constrained to enum in migration.
+- Unique constraints to respect: one session per attendance_type/date; one record per session/person; use `updateOrCreate` if modifying attendance.
+- Dev workflow: install deps (`composer install && npm install`); run migrations/seed (`php artisan migrate --seed`). Default scripts create `database/database.sqlite` if missing.
+- Local dev command: `composer run dev` launches `php artisan serve`, `queue:listen --tries=1`, `php artisan pail --timeout=0`, and `npm run dev` via `npx concurrently` (colors/names baked in).
+- Frontend build: `npm run build` (Vite). No Mix. Tailwind 4 via Vite plugin; CDN already included for simple views.
+- Testing: PHPUnit 11 (`php artisan test`). No bespoke tests yet.
+- Queue/logs: queue listener and `pail` log watcher are part of the dev script; keep them running if you add jobs or need real-time log tailing.
+- Data entry path: create session per type → check in attendees via search + add person modal → see aggregated records; keep this flow consistent when adding features (exports, editing, etc.).
+- Auth: app currently open (no middleware). Add guards/routes cautiously if introducing authentication.
