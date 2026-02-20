@@ -1,57 +1,53 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="min-h-screen from-slate-50 to-blue-50 py-8 px-4">
-        <div class="max-w-7xl mx-auto">
-            <h2 class="text-3xl font-serif font-bold text-slate-800 mb-8 text-center">Attendance Records</h2>
+    <div class="space-y-7">
+        <div class="flex items-center justify-between">
+            <h2 class="brand-font text-3xl text-[#6B0F1A]">Attendance Records</h2>
+            <a href="{{ route('attendance.index') }}" class="text-sm font-medium text-[#6B0F1A] hover:underline">&larr; Dashboard</a>
+        </div>
 
-            <div class="space-y-8">
-                @foreach($typeSummaries as $typeSummary)
-                    <div class="bg-white rounded-xl shadow-lg p-6 border border-slate-200 hover:shadow-xl transition-shadow duration-300">
-                        <h3 class="font-serif font-bold text-xl text-slate-800 mb-4">{{ $typeSummary['type']->name }}</h3>
-
-                        <div class="space-y-4">
-                            @foreach($typeSummary['sessions'] as $sessionSummary)
-                                <div class="border-l-4 border-indigo-500 pl-6 py-3 bg-slate-50 rounded-r-lg">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <div class="font-semibold text-slate-800">
-                                                {{ $sessionSummary['session']->date->format('M d, Y') }}
-                                                @if($sessionSummary['session']->service_name)
-                                                    <span class="text-indigo-600 ml-2">| {{ $sessionSummary['session']->service_name }}</span>
-                                                @endif
-                                            </div>
-                                            <div class="text-sm text-slate-600 mt-2">
-                                                Total: <strong class="text-slate-800">{{ $sessionSummary['attendeeCount'] }}</strong>
-                                                @if($sessionSummary['categoryCounts']->isNotEmpty())
-                                                    <span class="mx-2">|</span>
-                                                    @foreach($sessionSummary['categoryCounts'] as $cat => $count)
-                                                        <span class="text-slate-700">{{ $cat }}: {{ $count }}</span>
-                                                        @if(!$loop->last), @endif
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <div class="mt-6 pt-4 border-t border-slate-200 text-sm text-slate-600">
-                            Total Sessions: <strong class="text-slate-800">{{ $typeSummary['totalSessions'] }}</strong>
-                            <span class="mx-2">|</span>
-                            Total Attendees: <strong class="text-slate-800">{{ $typeSummary['totalAttendees'] }}</strong>
-                        </div>
-                    </div>
-                @endforeach
+        @if(empty($typeSummaries))
+            <div class="rounded-2xl border border-[#D4AF37]/35 bg-white p-8 text-center text-slate-600">
+                <p class="text-lg">No attendance sessions yet.</p>
+                <p class="text-sm mt-2">Start by creating an event or service from the dashboard.</p>
             </div>
+        @endif
 
-            @if(empty($typeSummaries))
-                <div class="bg-white rounded-xl shadow-lg p-8 text-center text-slate-500 border border-slate-200">
-                    <p class="text-lg">No attendance sessions yet.</p>
-                    <p class="text-sm mt-2">Start by adding an event or service to track attendance.</p>
-                </div>
-            @endif
+        <div class="space-y-6">
+            @foreach($typeSummaries as $typeSummary)
+                <section class="rounded-2xl border border-[#D4AF37]/30 bg-white p-6 shadow-sm">
+                    <h3 class="brand-font text-2xl text-[#111111] mb-4">{{ $typeSummary['type']->name }}</h3>
+
+                    <div class="space-y-3">
+                        @foreach($typeSummary['sessions'] as $sessionSummary)
+                            <article class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <div class="font-semibold text-[#6B0F1A]">
+                                    {{ $sessionSummary['session']->date->format('M d, Y') }}
+                                    @if($sessionSummary['session']->service_name)
+                                        <span class="text-slate-700 ml-2">| {{ $sessionSummary['session']->service_name }}</span>
+                                    @endif
+                                </div>
+                                <div class="text-sm text-slate-700 mt-2">
+                                    Total: <strong>{{ $sessionSummary['attendeeCount'] }}</strong>
+                                    @if($sessionSummary['categoryCounts']->isNotEmpty())
+                                        <span class="mx-2">|</span>
+                                        @foreach($sessionSummary['categoryCounts'] as $cat => $count)
+                                            <span>{{ $cat }}: {{ $count }}</span>@if(!$loop->last), @endif
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-slate-200 text-sm text-slate-700">
+                        Total Sessions: <strong>{{ $typeSummary['totalSessions'] }}</strong>
+                        <span class="mx-2">|</span>
+                        Total Attendees: <strong>{{ $typeSummary['totalAttendees'] }}</strong>
+                    </div>
+                </section>
+            @endforeach
         </div>
     </div>
 @endsection

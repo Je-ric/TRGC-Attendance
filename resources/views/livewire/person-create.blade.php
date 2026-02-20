@@ -1,10 +1,10 @@
 <div>
-    <button wire:click="open" class="bg-green-600 text-white px-3 py-2 rounded">+ Add Person</button>
+    <button wire:click="open" class="px-3 py-2 rounded text-[#111111] gold-gradient font-semibold shadow">+ Add Person</button>
 
     @if($show)
     <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-        <div class="bg-white w-full max-w-lg rounded shadow p-6 space-y-4">
-            <h2 class="text-xl font-bold">{{ $editing ? 'Edit Person' : 'Add Person' }}</h2>
+        <div class="bg-white w-full max-w-lg rounded-xl border border-[#D4AF37]/30 shadow-xl p-6 space-y-4">
+            <h2 class="brand-font text-2xl text-[#6B0F1A]">{{ $editing ? 'Edit Person' : 'Add Person' }}</h2>
 
             <div class="grid grid-cols-2 gap-2">
                 <input wire:model.defer="first_name" placeholder="First name" class="border p-2 rounded">
@@ -35,7 +35,7 @@
 
             <div class="flex justify-end gap-2 pt-2">
                 <button wire:click="$set('show', false)" class="px-4 py-2 border rounded">Cancel</button>
-                <button wire:click="save" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+                <button wire:click="save" class="px-4 py-2 rounded text-[#111111] gold-gradient font-semibold">Save</button>
             </div>
         </div>
     </div>

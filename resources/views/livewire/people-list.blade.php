@@ -4,15 +4,15 @@
     <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
         <div class="flex gap-2">
             <button wire:click="setViewMode('flat')"
-                    class="px-3 py-1 border rounded {{ $viewMode === 'flat' ? 'bg-blue-600 text-white' : 'bg-white' }}">
+                    class="px-3 py-1 border rounded {{ $viewMode === 'flat' ? 'bg-[#6B0F1A] text-[#F5D76E]' : 'bg-white' }}">
                 Flat
             </button>
             <button wire:click="setViewMode('family')"
-                    class="px-3 py-1 border rounded {{ $viewMode === 'family' ? 'bg-blue-600 text-white' : 'bg-white' }}">
+                    class="px-3 py-1 border rounded {{ $viewMode === 'family' ? 'bg-[#6B0F1A] text-[#F5D76E]' : 'bg-white' }}">
                 By Family
             </button>
             <button wire:click="setViewMode('category')"
-                    class="px-3 py-1 border rounded {{ $viewMode === 'category' ? 'bg-blue-600 text-white' : 'bg-white' }}">
+                    class="px-3 py-1 border rounded {{ $viewMode === 'category' ? 'bg-[#6B0F1A] text-[#F5D76E]' : 'bg-white' }}">
                 By Category
             </button>
         </div>
@@ -39,7 +39,7 @@
     <!-- People List -->
     @if($viewMode === 'flat')
         @forelse($people as $person)
-            <div class="border rounded p-4 bg-white shadow flex justify-between items-center mb-2">
+            <div class="border border-[#D4AF37]/25 rounded-xl p-4 bg-white shadow-sm flex justify-between items-center mb-2">
                 <div>
                     <strong>{{ $person->full_name }}</strong>
                     <span class="text-gray-500 text-sm">
@@ -48,12 +48,12 @@
                     </span>
                 </div>
                 <div class="flex gap-2">
-                    <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="text-blue-600 hover:underline">Edit</button>
+                    <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="text-[#6B0F1A] hover:underline">Edit</button>
                     <button wire:click="deletePerson({{ $person->id }})" class="text-red-600 hover:underline">Delete</button>
                 </div>
             </div>
         @empty
-            <div class="border rounded p-4 bg-white text-gray-500">No people match the current filters.</div>
+            <div class="border border-[#D4AF37]/25 rounded-xl p-4 bg-white text-gray-500">No people match the current filters.</div>
         @endforelse
 
     @elseif($viewMode === 'family')
@@ -63,7 +63,7 @@
             });
         @endphp
         @forelse($peopleByFamily as $familyKey => $familyPeople)
-            <div class="border rounded p-4 bg-white shadow mb-4">
+            <div class="border border-[#D4AF37]/25 rounded-xl p-4 bg-white shadow-sm mb-4">
                 <div class="flex justify-between items-start mb-2">
                     <div>
                         @if($familyKey === 'no-family')
@@ -91,7 +91,7 @@
                                 <span class="text-gray-500 text-xs">({{ $person->effective_category }})</span>
                             </div>
                             <div class="flex gap-2">
-                                <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="text-blue-600 hover:underline text-sm">Edit</button>
+                                <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="text-[#6B0F1A] hover:underline text-sm">Edit</button>
                                 <button wire:click="deletePerson({{ $person->id }})" class="text-red-600 hover:underline text-sm">Delete</button>
                             </div>
                         </li>
@@ -99,7 +99,7 @@
                 </ul>
             </div>
         @empty
-            <div class="border rounded p-4 bg-white text-gray-500">No family groups match the current filters.</div>
+            <div class="border border-[#D4AF37]/25 rounded-xl p-4 bg-white text-gray-500">No family groups match the current filters.</div>
         @endforelse
 
     @elseif($viewMode === 'category')
@@ -114,13 +114,13 @@
                         <span class="text-gray-500 text-sm font-normal">({{ $catPeople->count() }} {{ Str::plural('person', $catPeople->count()) }})</span>
                     </h3>
                     @foreach($catPeople as $person)
-                        <div class="border rounded p-4 bg-white shadow flex justify-between items-center mb-2">
+                        <div class="border border-[#D4AF37]/25 rounded-xl p-4 bg-white shadow-sm flex justify-between items-center mb-2">
                             <div>
                                 <strong>{{ $person->full_name }}</strong>
                                 <span class="text-gray-500 text-xs">Family: {{ $person->family->family_name ?? 'No family' }}</span>
                             </div>
                             <div class="flex gap-2">
-                                <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="text-blue-600 hover:underline text-sm">Edit</button>
+                                <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="text-[#6B0F1A] hover:underline text-sm">Edit</button>
                                 <button wire:click="deletePerson({{ $person->id }})" class="text-red-600 hover:underline text-sm">Delete</button>
                             </div>
                         </div>

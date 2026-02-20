@@ -1,20 +1,20 @@
 <div class="space-y-6">
     <!-- Header with Add Button -->
     <div class="flex justify-between items-center">
-        <h3 class="text-xl font-bold">Family Management</h3>
-        <button wire:click="open" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        <h3 class="brand-font text-2xl text-[#6B0F1A]">Family Management</h3>
+        <button wire:click="open" class="px-4 py-2 rounded text-[#111111] gold-gradient font-semibold shadow">
             + Add Family
         </button>
     </div>
 
     <!-- Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white p-4 rounded shadow">
+        <div class="bg-white p-4 rounded-xl border border-[#D4AF37]/25 shadow-sm">
             <div class="text-sm text-gray-500">Total Families</div>
             <div class="text-2xl font-bold">{{ $families->count() }}</div>
         </div>
         @foreach($categories as $cat)
-            <div class="bg-white p-4 rounded shadow">
+            <div class="bg-white p-4 rounded-xl border border-[#D4AF37]/20 shadow-sm">
                 <div class="text-sm text-gray-500">{{ $cat }}</div>
                 <div class="text-2xl font-bold">{{ $categoryCounts[$cat] ?? 0 }}</div>
             </div>
@@ -24,7 +24,7 @@
     <!-- Family List -->
     <div class="space-y-4">
         @forelse($families as $family)
-            <div class="bg-white border rounded p-4 shadow">
+            <div class="bg-white border border-[#D4AF37]/25 rounded-xl p-4 shadow-sm">
                 <div class="flex justify-between items-start mb-2">
                     <div>
                         <h4 class="font-bold text-lg">{{ $family->family_name }}</h4>
@@ -38,7 +38,7 @@
                     <div class="flex gap-2">
                         <button
                             wire:click="edit({{ $family->id }})"
-                            class="text-blue-600 hover:underline text-sm">
+                            class="text-[#6B0F1A] hover:underline text-sm">
                             Edit
                         </button>
                         <button
@@ -67,7 +67,7 @@
                 @endif
             </div>
         @empty
-            <div class="bg-white border rounded p-8 text-center text-gray-500">
+            <div class="bg-white border border-[#D4AF37]/25 rounded-xl p-8 text-center text-gray-500">
                 No families found. Click "Add Family" to create one.
             </div>
         @endforelse
@@ -76,8 +76,8 @@
     <!-- Add/Edit Modal -->
     @if($show)
     <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" wire:click="$set('show', false)">
-        <div class="bg-white w-full max-w-lg rounded shadow p-6 space-y-4" wire:click.stop>
-            <h2 class="text-xl font-bold">{{ $editing ? 'Edit Family' : 'Add Family' }}</h2>
+        <div class="bg-white w-full max-w-lg rounded-xl border border-[#D4AF37]/30 shadow-xl p-6 space-y-4" wire:click.stop>
+            <h2 class="brand-font text-2xl text-[#6B0F1A]">{{ $editing ? 'Edit Family' : 'Add Family' }}</h2>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Family Name *</label>
@@ -115,7 +115,7 @@
                 </button>
                 <button
                     wire:click="save"
-                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    class="px-4 py-2 rounded text-[#111111] gold-gradient font-semibold">
                     Save
                 </button>
             </div>
