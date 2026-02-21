@@ -4,9 +4,8 @@
         Add Person
     </button>
 
-    @teleport('body')
     @if($show)
-    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" style="z-index:9999">
         <div class="ui-card-soft w-full max-w-lg shadow-xl p-6 space-y-4">
             <h2 class="page-title text-2xl text-[#6B0F1A] flex items-center gap-2">
                 <i class='bx {{ $editing ? 'bx-edit' : 'bx-user-plus' }} text-[#D4AF37]'></i>
@@ -55,5 +54,4 @@
         </div>
     </div>
     @endif
-    @endteleport
 </div>

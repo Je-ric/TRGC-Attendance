@@ -22,6 +22,9 @@
 
             {{-- Server-side filters --}}
             <div class="flex gap-2 flex-wrap">
+                <input type="text" wire:model.live="search"
+                       placeholder="Search name or contact…"
+                       class="ui-input" style="width:auto;min-width:180px">
                 <select wire:model.live="filterFamily" class="ui-input" style="width:auto;min-width:140px">
                     <option value="">All Families</option>
                     @foreach($families as $family)

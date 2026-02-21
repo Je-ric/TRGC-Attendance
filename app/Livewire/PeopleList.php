@@ -11,6 +11,7 @@ class PeopleList extends Component
     public $viewMode = 'flat'; // 'flat', 'family', 'category'
     public $filterCategory = '';
     public $filterFamily = null;
+    public $search = '';
 
     protected $listeners = [
         'personCreated' => '$refresh',
@@ -36,6 +37,14 @@ class PeopleList extends Component
 
         if ($this->filterFamily) {
             $query->where('family_id', $this->filterFamily);
+        }
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('first_name', 'like', "%{$this->search}%")
+                  ->orWhere('last_name', 'like', "%{$this->search}%")
+                  ->orWhere('contact_number', 'like', "%{$this->search}%");
+            });
         }
 
         $people = $query->get();

@@ -86,9 +86,8 @@
     </div>
 
     <!-- Add/Edit Modal -->
-    @teleport('body')
     @if($show)
-    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" wire:click="$set('show', false)">
+    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" style="z-index:9999" wire:click="$set('show', false)">
         <div class="ui-card-soft w-full max-w-lg shadow-xl p-6 space-y-4" wire:click.stop>
             <h2 class="page-title text-2xl text-[#6B0F1A] flex items-center gap-2">
                 <i class='bx {{ $editing ? 'bx-edit' : 'bx-plus-circle' }} text-[#C9A84C]'></i>
@@ -142,5 +141,4 @@
         </div>
     </div>
     @endif
-    @endteleport
 </div>
