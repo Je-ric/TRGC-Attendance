@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kingdom Ledger — UI/UX Design Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Oswald:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ─────────────────────────────────────────
+       TOKENS
+    ───────────────────────────────────────── */
+    :root {
+      --maroon:        #6B0F1A;
+      --maroon-light:  #8B2635;
+      --maroon-dim:    rgba(107,15,26,0.08);
+      --gold:          #C9A84C;
+      --gold-light:    #E8CА72;
+      --gold-muted:    rgba(201,168,76,0.18);
+      --gold-border:   rgba(201,168,76,0.32);
+
+      --ink:           #1A1A2E;   /* deep navy-black — not raw #000 */
+      --ink-muted:     #4A4A6A;
+      --ink-faint:     #8888A8;
+
+      --surface:       #F8F7F4;   /* warm off-white body bg */
+      --surface-card:  #FFFFFF;
+      --surface-soft:  #FDFBF5;   /* warm tint for alt cards */
+      --border:        #EAE3D0;   /* warm stone border */
+      --border-strong: #D4C5A0;
+
+      --green:   #15803D;
+      --green-bg:#F0FDF4;
+      --red:     #B91C1C;
+      --red-bg:  #FEF2F2;
+      --amber:   #B45309;
+      --amber-bg:#FFFBEB;
+      --blue:    #1E40AF;
+      --blue-bg: #EFF6FF;
+
+      /* spacing */
+      --r-xs:  4px;
+      --r-sm:  6px;
+      --r-md:  8px;
+      --r-lg:  10px;
+      --r-xl:  12px;
+
+      /* shadows — restrained */
+      --shadow-card:   0 1px 3px rgba(26,26,46,0.07), 0 1px 2px rgba(26,26,46,0.04);
+      --shadow-modal:  0 4px 20px rgba(26,26,46,0.12);
+      --shadow-input:  0 0 0 3px rgba(201,168,76,0.22);
+    }
+
+    /* ─────────────────────────────────────────
+       GUIDE BASE
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    .guide-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--maroon);
+      color: #fff;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--gold);
+    }
+    .guide-nav .brand { font-family:'Cinzel',serif; font-size:15px; letter-spacing:.06em; }
+    .guide-nav .toc { display:flex; gap:24px; font-size:12px; font-weight:500; opacity:.85; }
+    .guide-nav .toc a { color:#fff; text-decoration:none; }
+    .guide-nav .toc a:hover { opacity:1; text-decoration:underline; }
+
+    .guide-body { max-width:960px; margin:0 auto; padding:48px 24px 96px; }
+
+    h1.guide-h1 { font-family:'Cinzel',serif; font-size:32px; font-weight:700; color:var(--maroon); margin-bottom:6px; }
+    .guide-subtitle { font-size:14px; color:var(--ink-muted); margin-bottom:48px; }
+
+    .section { margin-bottom:64px; }
+    .section-label {
+      font-family:'Oswald',sans-serif;
+      font-size:11px;
+      font-weight:600;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--gold);
+      margin-bottom:6px;
+    }
+    .section-title {
+      font-family:'Oswald',sans-serif;
+      font-size:22px;
+      font-weight:600;
+      color:var(--ink);
+      margin-bottom:4px;
+      letter-spacing:.02em;
+    }
+    .section-desc { font-size:13.5px; color:var(--ink-muted); margin-bottom:28px; max-width:640px; }
+
+    .divider {
+      height:1px;
+      background: linear-gradient(90deg, transparent, var(--border-strong), var(--gold-border), var(--border-strong), transparent);
+      margin:40px 0;
+    }
+
+    .callout {
+      background: var(--surface-soft);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 var(--r-sm) var(--r-sm) 0;
+      padding: 12px 16px;
+      font-size:13px;
+      color:var(--ink-muted);
+      margin-bottom:24px;
+    }
+    .callout strong { color:var(--ink); }
+
+    /* ─────────────────────────────────────────
+       COLORS
+    ───────────────────────────────────────── */
+    .color-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; }
+    .swatch {
+      border-radius: var(--r-md);
+      overflow:hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+    }
+    .swatch-block { height:64px; }
+    .swatch-info { background:#fff; padding:8px 10px; }
+    .swatch-name { font-size:11px; font-weight:600; color:var(--ink); }
+    .swatch-hex  { font-size:10px; color:var(--ink-faint); font-family:monospace; }
+
+    /* ─────────────────────────────────────────
+       TYPOGRAPHY
+    ───────────────────────────────────────── */
+    .type-row { margin-bottom:16px; }
+    .type-meta { font-size:10px; font-family:monospace; color:var(--ink-faint); background:var(--surface-soft); border:1px solid var(--border); border-radius:var(--r-xs); padding:2px 6px; display:inline-block; margin-bottom:4px; }
+
+    .t-hero    { font-family:'Cinzel',serif; font-size:28px; font-weight:700; color:var(--maroon); letter-spacing:.04em; }
+    .t-page    { font-family:'Oswald',sans-serif; font-size:22px; font-weight:600; color:var(--ink); letter-spacing:.03em; text-transform:uppercase; }
+    .t-section { font-family:'Oswald',sans-serif; font-size:16px; font-weight:500; color:var(--ink); letter-spacing:.02em; }
+    .t-body    { font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); }
+    .t-small   { font-family:'DM Sans',sans-serif; font-size:12px; color:var(--ink-muted); }
+    .t-label   { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); }
+
+    /* ─────────────────────────────────────────
+       SPACING & RADIUS TABLE
+    ───────────────────────────────────────── */
+    .token-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .token-table th { text-align:left; padding:8px 12px; background:var(--surface-soft); border:1px solid var(--border); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-muted); }
+    .token-table td { padding:8px 12px; border:1px solid var(--border); }
+    .token-table td:first-child { font-family:monospace; font-size:11.5px; color:var(--maroon); }
+    .token-table td .demo-r { display:inline-block; width:40px; height:24px; background:var(--maroon); }
+
+    /* ─────────────────────────────────────────
+       COMPONENTS
+    ───────────────────────────────────────── */
+
+    /* Buttons */
+    .btn-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:20px; }
+
+    .kl-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:9px 16px; font-size:13.5px; font-weight:500;
+      border-radius: var(--r-sm);
+      border:1px solid transparent;
+      cursor:pointer; transition:all 150ms ease;
+      font-family:'DM Sans',sans-serif;
+      white-space:nowrap;
+    }
+    .kl-btn:hover { transform:translateY(-1px); }
+
+    .kl-btn-primary {
+      background: linear-gradient(135deg, #B8952A, #DFC056);
+      color: var(--ink);
+      border-color: rgba(107,15,26,0.14);
+    }
+    .kl-btn-primary:hover { filter:brightness(.96); }
+
+    .kl-btn-maroon {
+      background: linear-gradient(135deg, var(--maroon), var(--maroon-light));
+      color: #FFF5D6;
+      border-color: rgba(107,15,26,0.2);
+    }
+    .kl-btn-maroon:hover { filter:brightness(1.05); }
+
+    .kl-btn-ghost {
+      background: #fff;
+      color: var(--maroon);
+      border-color: var(--border-strong);
+    }
+    .kl-btn-ghost:hover { background: var(--gold-muted); }
+
+    .kl-btn-danger {
+      background: var(--red-bg);
+      color: var(--red);
+      border-color: #FCA5A5;
+    }
+    .kl-btn-danger:hover { background:#FEE2E2; }
+
+    .kl-btn-sm { padding:6px 12px; font-size:12px; border-radius:var(--r-xs); }
+    .kl-btn-sm:hover { transform:none; }
+
+    /* Badges */
+    .badge-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+    .badge {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:2px 10px; font-size:11px; font-weight:600;
+      border-radius: var(--r-xs);
+      letter-spacing:.04em;
+    }
+    .badge-present  { background:var(--green-bg);  color:var(--green);  border:1px solid #86EFAC; }
+    .badge-absent   { background:#F1F5F9;           color:#475569;       border:1px solid #CBD5E1; }
+    .badge-maroon   { background:var(--maroon-dim); color:var(--maroon); border:1px solid rgba(107,15,26,0.2); }
+    .badge-gold     { background:var(--gold-muted); color:#92701A;       border:1px solid var(--gold-border); }
+    .badge-warning  { background:var(--amber-bg);   color:var(--amber);  border:1px solid #FCD34D; }
+
+    /* Cards */
+    .card-demo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-bottom:24px; }
+
+    .kl-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-card);
+      padding:16px;
+    }
+    .kl-card-soft {
+      background: var(--surface-soft);
+      border: 1px solid var(--gold-border);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-card);
+      padding:16px;
+    }
+    .stat-value { font-family:'Oswald',sans-serif; font-size:28px; font-weight:600; color:var(--ink); line-height:1; }
+    .stat-label { font-size:12px; color:var(--ink-muted); margin-top:4px; }
+    .stat-delta { font-size:11px; font-weight:600; margin-top:6px; display:inline-block; padding:1px 6px; border-radius:var(--r-xs); }
+    .stat-up    { background:var(--green-bg); color:var(--green); }
+    .stat-down  { background:var(--red-bg); color:var(--red); }
+
+    /* Form Elements */
+    .form-demo { max-width:380px; }
+    .form-group { margin-bottom:14px; }
+    .form-label { display:block; font-size:12px; font-weight:600; color:var(--ink-muted); margin-bottom:5px; letter-spacing:.04em; }
+    .kl-input {
+      width:100%; padding:9px 12px; font-size:13.5px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-sm);
+      background: #FDFCF8;
+      color:var(--ink);
+      outline:none;
+      transition: border-color 140ms, box-shadow 140ms;
+      font-family:'DM Sans',sans-serif;
+    }
+    .kl-input:focus { border-color: var(--gold); box-shadow: var(--shadow-input); }
+    .kl-input.error { border-color: #F87171; box-shadow: 0 0 0 3px rgba(239,68,68,.15); }
+    .field-hint  { font-size:11.5px; color:var(--ink-faint); margin-top:4px; }
+    .field-error { font-size:11.5px; color:var(--red); margin-top:4px; }
+
+    /* Checkbox */
+    .kl-check-row {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius:var(--r-sm);
+      border:1px solid transparent;
+      cursor:pointer;
+      transition:background 120ms;
+    }
+    .kl-check-row:hover { background:var(--gold-muted); border-color:var(--gold-border); }
+    .kl-check-row.is-checked { background:var(--gold-muted); border-color:var(--gold-border); }
+    .kl-check-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--maroon); }
+    .check-person-name { font-size:13.5px; font-weight:500; }
+    .check-person-sub  { font-size:11px; color:var(--ink-faint); }
+
+    /* Table */
+    .kl-table-wrap { border:1px solid var(--border); border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--shadow-card); }
+    .kl-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .kl-table thead th {
+      background:var(--surface-soft);
+      padding:10px 14px;
+      text-align:left;
+      font-size:10.5px;
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      color:var(--ink-muted);
+      border-bottom:1px solid var(--border);
+    }
+    .kl-table tbody tr { border-bottom:1px solid var(--border); }
+    .kl-table tbody tr:last-child { border-bottom:none; }
+    .kl-table tbody tr:hover { background:var(--gold-muted); }
+    .kl-table td { padding:10px 14px; color:var(--ink); vertical-align:middle; }
+    .kl-table td .person-avatar {
+      width:28px; height:28px; border-radius:50%;
+      background: linear-gradient(135deg,var(--maroon),var(--maroon-light));
+      color:#FFF5D6; display:inline-flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:700; margin-right:8px;
+      flex-shrink:0;
+    }
+    .cell-name { display:flex; align-items:center; }
+
+    /* Navbar demo */
+    .navbar-demo {
+      background: rgba(107,15,26,0.88);
+      backdrop-filter:blur(10px);
+      border-bottom: 1px solid rgba(201,168,76,0.22);
+      padding:14px 24px;
+      border-radius:var(--r-lg);
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:24px;
+    }
+    .navbar-brand { font-family:'Cinzel',serif; font-size:15px; color:#fff; letter-spacing:.06em; }
+    .navbar-links { display:flex; gap:20px; }
+    .navbar-link {
+      font-size:12.5px; font-weight:500; color:rgba(255,245,214,.8);
+      display:flex; align-items:center; gap:5px;
+      padding-bottom:2px;
+      position:relative;
+      text-decoration:none;
+    }
+    .navbar-link.active { color:#E8CA72; }
+    .navbar-link.active::after {
+      content:''; position:absolute; left:0; bottom:-4px;
+      width:100%; height:2px; background:var(--gold);
+      border-radius:1px;
+    }
+
+    /* Modal demo */
+    .modal-demo {
+      border:1px solid var(--border);
+      border-radius:var(--r-xl);
+      box-shadow: var(--shadow-modal);
+      overflow:hidden;
+      max-width:420px;
+    }
+    .modal-header {
+      padding:18px 20px 14px;
+      border-bottom:1px solid var(--border);
+      background:var(--surface-soft);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .modal-title { font-family:'Oswald',sans-serif; font-size:17px; font-weight:600; color:var(--maroon); letter-spacing:.03em; text-transform:uppercase; }
+    .modal-close {
+      width:28px; height:28px; border-radius:var(--r-xs);
+      border:1px solid var(--border-strong); background:#fff;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--ink-muted); cursor:pointer; font-size:14px;
+    }
+    .modal-body { padding:20px; background:#fff; }
+    .modal-footer { padding:14px 20px; background:var(--surface-soft); border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+
+    /* Page header pattern */
+    .page-header-demo {
+      display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:12px;
+      padding:20px; background:#fff; border:1px solid var(--border);
+      border-radius:var(--r-lg); box-shadow:var(--shadow-card); margin-bottom:20px;
+    }
+    .pager-eyebrow { font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:2px; }
+    .pager-title { font-family:'Oswald',sans-serif; font-size:22px; font-weight:600; color:var(--maroon); text-transform:uppercase; letter-spacing:.03em; display:flex; align-items:center; gap:8px; }
+    .pager-desc { font-size:12.5px; color:var(--ink-muted); margin-top:3px; }
+    .pager-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* Divider rule */
+    .kl-divider {
+      height:1px;
+      background:linear-gradient(90deg, transparent, var(--border-strong) 20%, var(--gold-border) 50%, var(--border-strong) 80%, transparent);
+      margin:16px 0;
+      border:none;
+    }
+
+    /* Flash / toast demo */
+    .toast-demo {
+      display:flex; align-items:flex-start; gap:10px;
+      padding:12px 14px;
+      border-radius:var(--r-sm);
+      font-size:13px;
+      margin-bottom:10px;
+    }
+    .toast-success { background:var(--green-bg);  border:1px solid #86EFAC; color:#166534; }
+    .toast-error   { background:var(--red-bg);    border:1px solid #FCA5A5; color:#991B1B; }
+    .toast-warning { background:var(--amber-bg);  border:1px solid #FCD34D; color:#92400E; }
+    .toast-info    { background:var(--blue-bg);   border:1px solid #93C5FD; color:#1E3A8A; }
+
+    /* Guidelines list */
+    .do-dont { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+    .do-box, .dont-box { padding:12px 14px; border-radius:var(--r-sm); font-size:13px; }
+    .do-box   { background:var(--green-bg);  border:1px solid #86EFAC; color:#14532D; }
+    .dont-box { background:var(--red-bg);    border:1px solid #FCA5A5; color:#7F1D1D; }
+    .do-box strong, .dont-box strong { display:block; margin-bottom:4px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+
+    /* Mobile toc */
+    @media(max-width:600px) {
+      .guide-nav .toc { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="guide-nav">
+  <span class="brand">Kingdom Ledger — UI/UX Guide</span>
+  <div class="toc">
+    <a href="#colors">Colors</a>
+    <a href="#typography">Typography</a>
+    <a href="#spacing">Spacing</a>
+    <a href="#components">Components</a>
+    <a href="#patterns">Patterns</a>
+    <a href="#rules">Rules</a>
+  </div>
+</nav>
+
+<div class="guide-body">
+
+  <h1 class="guide-h1">UI / UX Design Guide</h1>
+  <p class="guide-subtitle">Kingdom Ledger · TRGC Attendance System · v1.0 · Feb 2026</p>
+
+  <!-- ─── OVERVIEW ─────────────────────────── -->
+  <div class="callout">
+    <strong>Design Principle.</strong>
+    Kingdom Ledger is a data-first tool used during or after church services, often on mobile.
+    The UI should feel <em>purposeful and efficient</em> — trust, warmth, and clarity over decoration.
+    The TRGC brand (maroon + gold) anchors visual identity; everything else serves the user task.
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ─── COLORS ──────────────────────────── -->
+  <section class="section" id="colors">
+    <div class="section-label">01 — Foundation</div>
+    <div class="section-title">Color System</div>
+    <p class="section-desc">Two brand anchors (maroon, gold) + warm neutrals + semantic status colors. Use maroon for authority, gold for interaction highlights, neutrals for content surfaces.</p>
+
+    <div style="margin-bottom:10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);">Brand</div>
+    <div class="color-grid" style="margin-bottom:24px;">
+      <div class="swatch"><div class="swatch-block" style="background:#6B0F1A;"></div><div class="swatch-info"><div class="swatch-name">Maroon</div><div class="swatch-hex">#6B0F1A — primary CTA, headings, navbar</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#8B2635;"></div><div class="swatch-info"><div class="swatch-name">Maroon Light</div><div class="swatch-hex">#8B2635 — hover states, gradient end</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#C9A84C;"></div><div class="swatch-info"><div class="swatch-name">Gold</div><div class="swatch-hex">#C9A84C — accents, active links, borders</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#DFC056;"></div><div class="swatch-info"><div class="swatch-name">Gold Light</div><div class="swatch-hex">#DFC056 — button gradient end</div></div></div>
+    </div>
+
+    <div style="margin-bottom:10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);">Neutrals</div>
+    <div class="color-grid" style="margin-bottom:24px;">
+      <div class="swatch"><div class="swatch-block" style="background:#1A1A2E;"></div><div class="swatch-info"><div class="swatch-name">Ink</div><div class="swatch-hex">#1A1A2E — primary text</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#4A4A6A;"></div><div class="swatch-info"><div class="swatch-name">Ink Muted</div><div class="swatch-hex">#4A4A6A — secondary text, labels</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#8888A8;"></div><div class="swatch-info"><div class="swatch-name">Ink Faint</div><div class="swatch-hex">#8888A8 — placeholders, meta</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#F8F7F4;"></div><div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">#F8F7F4 — page background</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#FDFBF5; border:1px solid #EAE3D0;"></div><div class="swatch-info"><div class="swatch-name">Surface Soft</div><div class="swatch-hex">#FDFBF5 — alt cards, modal headers</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#EAE3D0;"></div><div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-hex">#EAE3D0 — all borders</div></div></div>
+    </div>
+
+    <div style="margin-bottom:10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);">Semantic</div>
+    <div class="color-grid">
+      <div class="swatch"><div class="swatch-block" style="background:#15803D;"></div><div class="swatch-info"><div class="swatch-name">Present</div><div class="swatch-hex">#15803D — present / success</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#B91C1C;"></div><div class="swatch-info"><div class="swatch-name">Absent / Error</div><div class="swatch-hex">#B91C1C — absent / danger</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#B45309;"></div><div class="swatch-info"><div class="swatch-name">Warning</div><div class="swatch-hex">#B45309 — warnings, late</div></div></div>
+      <div class="swatch"><div class="swatch-block" style="background:#1E40AF;"></div><div class="swatch-info"><div class="swatch-name">Info</div><div class="swatch-hex">#1E40AF — info, notes</div></div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── TYPOGRAPHY ───────────────────────── -->
+  <section class="section" id="typography">
+    <div class="section-label">02 — Foundation</div>
+    <div class="section-title">Typography</div>
+    <p class="section-desc">Three fonts, each with a specific role. Never mix roles. DM Sans replaces Oswald for body/data text — it's more legible at small sizes on data-heavy screens.</p>
+
+    <div class="type-row">
+      <div class="type-meta">Cinzel 700 · Brand / App name only</div>
+      <div class="t-hero">Kingdom Ledger</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">Oswald 600 · Page titles, section headers</div>
+      <div class="t-page">Attendance Dashboard</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">Oswald 500 · Sub-section headers, card titles</div>
+      <div class="t-section">Sunday Service · Feb 21</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">DM Sans 400 · Body text, descriptions</div>
+      <div class="t-body">Manage individuals, family links, and category distribution across the congregation.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">DM Sans 400 · Small / meta text</div>
+      <div class="t-small">Last updated · 3 sessions this month</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">DM Sans 600 · Data labels, table headers</div>
+      <div class="t-label">Total Present · Category</div>
+    </div>
+
+    <div class="do-dont" style="margin-top:20px;">
+      <div class="do-box"><strong>✓ Do</strong> Use Oswald UPPERCASE for page/card headers with 0.02–0.04em letter-spacing.</div>
+      <div class="dont-box"><strong>✗ Don't</strong> Use Cinzel for anything other than the app name/logo mark.</div>
+    </div>
+    <div class="do-dont">
+      <div class="do-box"><strong>✓ Do</strong> Use DM Sans for all data, form labels, table cells, and body content.</div>
+      <div class="dont-box"><strong>✗ Don't</strong> Use Oswald in all-caps for paragraph text — only for headings.</div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── SPACING & RADIUS ──────────────────── -->
+  <section class="section" id="spacing">
+    <div class="section-label">03 — Foundation</div>
+    <div class="section-title">Spacing, Radius &amp; Shadow</div>
+    <p class="section-desc">Restrained rounding — enough to feel modern, not bubbly. One shadow level for cards. No heavy drop shadows anywhere.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+      <div>
+        <div class="type-meta" style="margin-bottom:10px;">Border Radius</div>
+        <table class="token-table">
+          <thead><tr><th>Token</th><th>Value</th><th>Use</th><th>Demo</th></tr></thead>
+          <tbody>
+            <tr><td>--r-xs</td><td>4px</td><td>Buttons (sm), badges, tags</td><td><div class="demo-r" style="border-radius:4px;"></div></td></tr>
+            <tr><td>--r-sm</td><td>6px</td><td>Buttons, inputs, toasts</td><td><div class="demo-r" style="border-radius:6px;"></div></td></tr>
+            <tr><td>--r-md</td><td>8px</td><td>Small cards, color swatches</td><td><div class="demo-r" style="border-radius:8px;"></div></td></tr>
+            <tr><td>--r-lg</td><td>10px</td><td>Primary cards, tables, panels</td><td><div class="demo-r" style="border-radius:10px;"></div></td></tr>
+            <tr><td>--r-xl</td><td>12px</td><td>Modals, large containers</td><td><div class="demo-r" style="border-radius:12px;"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="type-meta" style="margin-bottom:10px;">Shadows — one level, kept subtle</div>
+        <table class="token-table">
+          <thead><tr><th>Token</th><th>Usage</th></tr></thead>
+          <tbody>
+            <tr><td>--shadow-card</td><td>All cards, table wrappers, inputs on hover</td></tr>
+            <tr><td>--shadow-modal</td><td>Modals only — slightly more presence</td></tr>
+            <tr><td>--shadow-input</td><td>Focus ring on inputs only</td></tr>
+          </tbody>
+        </table>
+        <div class="callout" style="margin-top:12px;">
+          <strong>Rule:</strong> Never stack box-shadows. Never use blur above 20px for box-shadow. Never add drop-shadow to buttons.
+        </div>
+      </div>
+    </div>
+
+    <div class="type-meta" style="margin-bottom:10px;">Page Spacing Scale</div>
+    <table class="token-table">
+      <thead><tr><th>Context</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Between page sections</td><td>40–48px</td></tr>
+        <tr><td>Card internal padding</td><td>16–24px</td></tr>
+        <tr><td>Between cards in a grid</td><td>12–16px</td></tr>
+        <tr><td>Form field gap</td><td>12–14px</td></tr>
+        <tr><td>Button internal padding</td><td>8–9px top/bottom · 14–16px left/right</td></tr>
+        <tr><td>Table cell padding</td><td>10px top/bottom · 14px left/right</td></tr>
+        <tr><td>Page horizontal padding</td><td>16px mobile · 24px tablet · 32px desktop</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── COMPONENTS ────────────────────────── -->
+  <section class="section" id="components">
+    <div class="section-label">04 — Components</div>
+    <div class="section-title">UI Component Library</div>
+    <p class="section-desc">All interactive components below. Behaviour notes included.</p>
+
+    <!-- Navbar -->
+    <div class="type-meta" style="margin-bottom:8px;">Navbar</div>
+    <div class="navbar-demo">
+      <span class="navbar-brand">Kingdom Ledger</span>
+      <div class="navbar-links">
+        <a class="navbar-link active"   href="#">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          Attendance
+        </a>
+        <a class="navbar-link" href="#">Records</a>
+        <a class="navbar-link" href="#">People</a>
+        <a class="navbar-link" href="#">Families</a>
+      </div>
+    </div>
+    <div class="callout">Active link: gold text + 2px gold underline. Hover: white. Navbar bg transitions from 75% to 92% maroon on scroll — never fully opaque to preserve scroll context.</div>
+
+    <!-- Buttons -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:24px;">Buttons</div>
+    <div class="btn-row">
+      <button class="kl-btn kl-btn-primary">&#9733; Save Attendance</button>
+      <button class="kl-btn kl-btn-maroon">＋ Add Event</button>
+      <button class="kl-btn kl-btn-ghost">← Back</button>
+      <button class="kl-btn kl-btn-danger">🗑 Delete</button>
+    </div>
+    <div class="btn-row">
+      <button class="kl-btn kl-btn-sm kl-btn-ghost">Edit</button>
+      <button class="kl-btn kl-btn-sm kl-btn-maroon">Check In</button>
+      <button class="kl-btn kl-btn-sm kl-btn-danger">Remove</button>
+    </div>
+    <div class="callout">
+      <strong>Primary (gold gradient)</strong> — confirmation / save. One per form.<br>
+      <strong>Maroon</strong> — create / open new entry.<br>
+      <strong>Ghost</strong> — secondary action, navigation back.<br>
+      <strong>Danger</strong> — destructive only. Always paired with a confirmation step.
+    </div>
+
+    <!-- Badges -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:24px;">Badges / Status Tags</div>
+    <div class="badge-row">
+      <span class="badge badge-present">● Present</span>
+      <span class="badge badge-absent">● Absent</span>
+      <span class="badge badge-maroon">Sunday Service</span>
+      <span class="badge badge-gold">Youth</span>
+      <span class="badge badge-warning">⚠ Late</span>
+    </div>
+    <div class="callout">Use semantic colors only for status. Brand (maroon/gold) badges for categories or type labels only.</div>
+
+    <!-- Stat cards -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:24px;">Stat Cards</div>
+    <div class="card-demo-grid">
+      <div class="kl-card">
+        <div class="stat-label">Total Present</div>
+        <div class="stat-value">48</div>
+        <div class="stat-delta stat-up">↑ 4 from last week</div>
+      </div>
+      <div class="kl-card">
+        <div class="stat-label">Youth</div>
+        <div class="stat-value">12</div>
+        <div class="stat-delta stat-down">↓ 2</div>
+      </div>
+      <div class="kl-card-soft">
+        <div class="stat-label">Sessions this month</div>
+        <div class="stat-value">6</div>
+      </div>
+      <div class="kl-card-soft">
+        <div class="stat-label">Total Families</div>
+        <div class="stat-value">18</div>
+      </div>
+    </div>
+    <div class="callout">Stat value: Oswald 600, 28px. Label: DM Sans 12px, ink-muted. Delta badge is optional — use only when historical comparison data exists.</div>
+
+    <!-- Form -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:24px;">Form Elements</div>
+    <div class="form-demo">
+      <div class="form-group">
+        <label class="form-label">Service Name</label>
+        <input class="kl-input" type="text" placeholder="e.g., Morning Service" value="Sunday Morning Service" />
+        <div class="field-hint">Optional — leave blank for a general session.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input class="kl-input" type="date" value="2026-02-21" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="kl-input">
+          <option>All Categories</option>
+          <option>Adult</option>
+          <option>Youth</option>
+          <option>Children</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Family Name *</label>
+        <input class="kl-input error" type="text" placeholder="Family name" value="R" />
+        <div class="field-error">Minimum 2 characters required.</div>
+      </div>
+    </div>
+    <div class="callout">Input default border: <code>#D4C5A0</code>. Focus: gold border + 3px gold focus ring. Error state: red border + red ring. No floating labels — keep static labels above for clarity in a fast-paced check-in environment.</div>
+
+    <!-- Checklist person row -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:24px;">Check-in Row (Attendee List)</div>
+    <div style="border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;max-width:480px;box-shadow:var(--shadow-card);">
+      <div class="kl-check-row is-checked">
+        <input type="checkbox" checked />
+        <div class="flex-1">
+          <div class="check-person-name">Juan dela Cruz</div>
+          <div class="check-person-sub">Adult · 34 yrs · dela Cruz Family</div>
+        </div>
+        <span class="badge badge-present">Present</span>
+      </div>
+      <div class="kl-check-row" style="border-top:1px solid var(--border);">
+        <input type="checkbox" />
+        <div>
+          <div class="check-person-name">Maria Santos</div>
+          <div class="check-person-sub">Youth · 17 yrs</div>
+        </div>
+      </div>
+      <div class="kl-check-row" style="border-top:1px solid var(--border);">
+        <input type="checkbox" />
+        <div>
+          <div class="check-person-name">Pedro Reyes</div>
+          <div class="check-person-sub">Children · 10 yrs · Reyes Family</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout">Checked row gets gold-tinted background + gold border. Full row is the click target (not just the checkbox). Max height with overflow-y scroll for long lists.</div>
+
+    <!-- Table -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:28px;">Data Table</div>
+    <div class="kl-table-wrap" style="max-width:580px;">
+      <table class="kl-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Family</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="cell-name"><span class="person-avatar">JD</span>Juan dela Cruz</div></td>
+            <td>Adult</td>
+            <td>dela Cruz</td>
+            <td><span class="badge badge-present">Present</span></td>
+          </tr>
+          <tr>
+            <td><div class="cell-name"><span class="person-avatar">MS</span>Maria Santos</div></td>
+            <td>Youth</td>
+            <td>—</td>
+            <td><span class="badge badge-absent">Absent</span></td>
+          </tr>
+          <tr>
+            <td><div class="cell-name"><span class="person-avatar">PR</span>Pedro Reyes</div></td>
+            <td>Children</td>
+            <td>Reyes</td>
+            <td><span class="badge badge-present">Present</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">Table headers: DM Sans 600 10.5px UPPERCASE, ink-muted. Row hover: gold tint. Border-radius on the wrapper div — not on the table itself. No zebra striping; use row hover instead.</div>
+
+    <!-- Toasts -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:28px;">Feedback / Toasts</div>
+    <div style="max-width:420px;">
+      <div class="toast-demo toast-success">✓ &nbsp;<div><strong>Saved.</strong> Attendance for Sunday Morning Service has been recorded.</div></div>
+      <div class="toast-demo toast-error">✕ &nbsp;<div><strong>Error.</strong> A session for this date already exists.</div></div>
+      <div class="toast-demo toast-warning">⚠ &nbsp;<div><strong>Note.</strong> No attendees selected — saving an empty session.</div></div>
+      <div class="toast-demo toast-info">ℹ &nbsp;<div><strong>Tip.</strong> You can edit check-in records by reopening a past session.</div></div>
+    </div>
+    <div class="callout">Toasts appear top-right, auto-dismiss after 4s. Always include an icon + bold lead word. Stack vertically if multiple. No heavy shadows on toasts.</div>
+
+    <!-- Modal -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:28px;">Modal</div>
+    <div class="modal-demo">
+      <div class="modal-header">
+        <span class="modal-title">＋ Add Event / Service</span>
+        <button class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Event / Service Name *</label>
+          <input class="kl-input" type="text" placeholder="e.g., Sunday Service" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Day of Week</label>
+          <select class="kl-input"><option>Sunday</option><option>Wednesday</option><option>Flexible Schedule</option></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="kl-btn kl-btn-ghost kl-btn-sm">Cancel</button>
+        <button class="kl-btn kl-btn-primary kl-btn-sm">Save</button>
+      </div>
+    </div>
+    <div class="callout">Modal uses <code>border-radius: 12px</code> (largest allowed). Header bg: surface-soft. Footer bg: surface-soft. Overlay: <code>bg-black/45</code> — not too dark. Use <code>@teleport('body')</code> or <code>@push('modals')</code> to escape containing blocks.</div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── PATTERNS ──────────────────────────── -->
+  <section class="section" id="patterns">
+    <div class="section-label">05 — Patterns</div>
+    <div class="section-title">Page Layout Patterns</div>
+    <p class="section-desc">Reusable structural patterns across all pages.</p>
+
+    <!-- Page header -->
+    <div class="type-meta" style="margin-bottom:8px;">Standard Page Header</div>
+    <div class="page-header-demo">
+      <div>
+        <div class="pager-eyebrow">Attendance</div>
+        <div class="pager-title">
+          <span style="color:var(--gold);font-size:22px;">✦</span>
+          Attendance Dashboard
+        </div>
+        <div class="pager-desc">Track services, review records, and manage congregation attendance.</div>
+      </div>
+      <div class="pager-actions">
+        <button class="kl-btn kl-btn-ghost">View Records</button>
+        <button class="kl-btn kl-btn-maroon">＋ Add Service</button>
+      </div>
+    </div>
+    <hr class="kl-divider" />
+    <div class="callout">Every page: eyebrow label (10.5px uppercase gold) → Oswald CAPS page title → DM Sans description. Action buttons right-aligned. Divider separates header from content.</div>
+
+    <!-- Layout grid -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:24px;">Content Grid Guidelines</div>
+    <table class="token-table">
+      <thead><tr><th>Screen</th><th>Shell padding</th><th>Stat cards</th><th>Content max-width</th></tr></thead>
+      <tbody>
+        <tr><td>Mobile (&lt;640px)</td><td>16px</td><td>1 col</td><td>100%</td></tr>
+        <tr><td>Tablet (640–1024px)</td><td>24px</td><td>2 col</td><td>100%</td></tr>
+        <tr><td>Desktop (&gt;1024px)</td><td>32px</td><td>3–6 col</td><td>1280px</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Navigation flow -->
+    <div class="type-meta" style="margin-bottom:8px;margin-top:24px;">Navigation Flow</div>
+    <div class="callout" style="font-size:13.5px;">
+      <strong>Attendance</strong> (index — event cards)
+      → <strong>Check-in</strong> (show — person list + save)
+      → [implicit save feedback, stay on page]<br><br>
+      <strong>Records</strong> — read-only sessions history, filter by type/date<br>
+      <strong>People</strong> — CRUD list + add modal inline<br>
+      <strong>Families</strong> — CRUD list + inline modal<br><br>
+      <strong>Rule:</strong> Never navigate away after a form save unless it's a true "create and go to detail" flow.
+      Use inline success feedback (toast or inline message) so the user stays in context.
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ─── RULES ─────────────────────────────── -->
+  <section class="section" id="rules">
+    <div class="section-label">06 — Guidelines</div>
+    <div class="section-title">Do's &amp; Don'ts</div>
+    <p class="section-desc">Quick reference rules for maintaining visual consistency.</p>
+
+    <div class="do-dont">
+      <div class="do-box"><strong>✓ Borders over shadows</strong> Use a 1px <code>#EAE3D0</code> border to define cards. Rely on shadows only for elevation (modals, floating elements).</div>
+      <div class="dont-box"><strong>✗ No heavy shadows</strong> Avoid <code>box-shadow: 0 8px 30px ...</code> on cards or buttons. It makes the UI feel heavy and dated.</div>
+    </div>
+    <div class="do-dont">
+      <div class="do-box"><strong>✓ Consistent radius</strong> Cards always 10px. Inputs/buttons 6px. Badges 4px. Modals 12px. Nothing above 12px.</div>
+      <div class="dont-box"><strong>✗ No excessive rounding</strong> Avoid <code>rounded-full</code> on anything other than avatars and circular icon buttons.</div>
+    </div>
+    <div class="do-dont">
+      <div class="do-box"><strong>✓ One primary action per page</strong> The gold-gradient button should appear once per screen context — the most important action.</div>
+      <div class="dont-box"><strong>✗ No competing primaries</strong> Never put two gold/primary buttons side-by-side. One primary, the rest ghost or maroon.</div>
+    </div>
+    <div class="do-dont">
+      <div class="do-box"><strong>✓ Use modals outside .kingdom-shell</strong> Always render modals via <code>@push('modals')</code> or <code>@teleport('body')</code> to avoid backdrop-filter clipping.</div>
+      <div class="dont-box"><strong>✗ No nested fixed elements</strong> Never place <code>position:fixed</code> inside a container with <code>backdrop-filter</code> or <code>transform</code>.</div>
+    </div>
+    <div class="do-dont">
+      <div class="do-box"><strong>✓ Data-dense but airy</strong> Use enough white space between sections (40px+), but keep form controls compact (9px padding). Data tables should show 8–10 rows without scrolling on desktop.</div>
+      <div class="dont-box"><strong>✗ No decorative patterns on data screens</strong> The maroon + gold background radial gradients are subtle. Don't add textures, patterns, or decorative images on data-heavy pages.</div>
+    </div>
+    <div class="do-dont">
+      <div class="do-box"><strong>✓ Mobile-first interaction</strong> Check-in happens on mobile during a live service. Touch targets minimum 44×44px. Checkboxes full-row interactive.</div>
+      <div class="dont-box"><strong>✗ No tiny tap targets</strong> Icon-only buttons under 32px in data tables are hard to tap during service under pressure.</div>
+    </div>
+
+    <div class="callout" style="margin-top:24px;">
+      <strong>CSS Classes to Implement.</strong> Replace the current <code>rounded-2xl</code> (16px) on <code>.kingdom-shell</code> with <code>rounded-xl</code> (12px).
+      Replace <code>rounded-xl</code> (12px) on cards with <code>rounded-[10px]</code>.
+      Replace <code>rounded-xl</code> on inputs with <code>rounded-[6px]</code>.
+      Keep <code>.ui-card</code>, <code>.ui-card-soft</code>, <code>.ui-btn</code> class names — just adjust the radius and shadow values inside them.
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <p style="font-size:11px;color:var(--ink-faint);text-align:center;">
+    Kingdom Ledger · TRGC Attendance · UI/UX Guide v1.0 · Internal Use Only
+  </p>
+
+</div>
+</body>
+</html>

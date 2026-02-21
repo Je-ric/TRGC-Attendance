@@ -14,9 +14,9 @@
 
 
 @theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Oswald', ui-sans-serif, system-ui, sans-serif;
 
-    --font-inter: 'Inter', sans-serif;
+    --font-inter: 'Oswald', sans-serif;
     --font-oswald: 'Oswald', sans-serif;
     --font-anton: 'Anton', sans-serif;
 }

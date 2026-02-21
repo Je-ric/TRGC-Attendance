@@ -1,125 +1,146 @@
 <div class="space-y-6">
     <!-- Header with Add Button -->
     <div class="flex justify-between items-center">
-        <h3 class="brand-font text-2xl text-[#6B0F1A]">Family Management</h3>
-        <button wire:click="open" class="px-4 py-2 rounded text-[#111111] gold-gradient font-semibold shadow">
-            + Add Family
+        <h3 class="page-title text-2xl text-[#6B0F1A] flex items-center gap-2">
+            <i class='bx bx-home-heart text-[#C9A84C]'></i>
+            Family Management
+        </h3>
+        <button wire:click="open" class="ui-btn ui-btn-primary">
+            <i class='bx bx-plus-circle'></i>
+            Add Family
         </button>
     </div>
 
+    <hr class="ui-divider">
+
     <!-- Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <div class="bg-white p-4 rounded-xl border border-[#D4AF37]/25 shadow-sm">
-            <div class="text-sm text-gray-500">Total Families</div>
-            <div class="text-2xl font-bold">{{ $families->count() }}</div>
+        <div class="ui-card-soft p-4">
+            <div class="stat-label">Total Families</div>
+            <div class="stat-value">{{ $families->count() }}</div>
         </div>
         @foreach($categories as $cat)
-            <div class="bg-white p-4 rounded-xl border border-[#D4AF37]/20 shadow-sm">
-                <div class="text-sm text-gray-500">{{ $cat }}</div>
-                <div class="text-2xl font-bold">{{ $categoryCounts[$cat] ?? 0 }}</div>
+            <div class="ui-card p-4">
+                <div class="stat-label">{{ $cat }}</div>
+                <div class="stat-value" style="color:var(--maroon)">{{ $categoryCounts[$cat] ?? 0 }}</div>
             </div>
         @endforeach
     </div>
 
     <!-- Family List -->
-    <div class="space-y-4">
+    <div class="columns-1 md:columns-2 gap-4 space-y-4">
         @forelse($families as $family)
-            <div class="bg-white border border-[#D4AF37]/25 rounded-xl p-4 shadow-sm">
+            <div class="ui-card p-4 break-inside-avoid">
                 <div class="flex justify-between items-start mb-2">
                     <div>
-                        <h4 class="font-bold text-lg">{{ $family->family_name }}</h4>
+                        <h4 class="font-bold text-lg flex items-center gap-2">
+                            <i class='bx bx-buildings text-[#6B0F1A]'></i>
+                            {{ $family->family_name }}
+                        </h4>
                         @if($family->address)
-                            <p class="text-sm text-gray-500">{{ $family->address }}</p>
+                            <p class="dm-sans text-sm" style="color:var(--ink-muted)">{{ $family->address }}</p>
                         @endif
                         @if($family->contact_person)
-                            <p class="text-sm text-gray-500">Contact: {{ $family->contact_person }}</p>
+                            <p class="dm-sans text-sm" style="color:var(--ink-muted)">Contact: {{ $family->contact_person }}</p>
                         @endif
                     </div>
                     <div class="flex gap-2">
                         <button
                             wire:click="edit({{ $family->id }})"
-                            class="text-[#6B0F1A] hover:underline text-sm">
+                            class="ui-btn ui-btn-edit text-sm py-1.5 px-3">
+                            <i class='bx bx-edit-alt'></i>
                             Edit
                         </button>
                         <button
                             wire:click="deleteFamily({{ $family->id }})"
                             onclick="return confirm('Are you sure? This will remove the family association from all people in this family.');"
-                            class="text-red-600 hover:underline text-sm">
+                            class="ui-btn ui-btn-delete text-sm py-1.5 px-3">
+                            <i class='bx bx-trash'></i>
                             Delete
                         </button>
                     </div>
                 </div>
                 <div class="mt-2">
-                    <span class="text-sm text-gray-600">
-                        <strong>{{ $family->people_count }}</strong>
+                    <span class="dm-sans text-sm" style="color:var(--ink-muted)">
+                        <strong style="color:var(--ink)">{{ $family->people_count }}</strong>
                         {{ Str::plural('person', $family->people_count) }} in this family
                     </span>
                 </div>
                 @if($family->people->count() > 0)
-                    <ul class="mt-2 space-y-1">
+                    <hr class="ui-divider my-3">
+                        <ul>
                         @foreach($family->people as $person)
-                            <li class="text-sm text-gray-700 border-b pb-1">
+                            <li class="dm-sans text-sm py-1" style="color:var(--ink);border-bottom:1px solid var(--border)">
                                 {{ $person->full_name }}
-                                <span class="text-gray-500">({{ $person->effective_category }})</span>
+                                <span class="text-xs" style="color:var(--ink-faint)">({{ $person->effective_category }})</span>
                             </li>
                         @endforeach
                     </ul>
                 @endif
             </div>
         @empty
-            <div class="bg-white border border-[#D4AF37]/25 rounded-xl p-8 text-center text-gray-500">
+            <div class="ui-card-soft p-8 text-center dm-sans" style="color:var(--ink-muted)">
                 No families found. Click "Add Family" to create one.
             </div>
         @endforelse
     </div>
 
     <!-- Add/Edit Modal -->
+    @teleport('body')
     @if($show)
     <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" wire:click="$set('show', false)">
-        <div class="bg-white w-full max-w-lg rounded-xl border border-[#D4AF37]/30 shadow-xl p-6 space-y-4" wire:click.stop>
-            <h2 class="brand-font text-2xl text-[#6B0F1A]">{{ $editing ? 'Edit Family' : 'Add Family' }}</h2>
+        <div class="ui-card-soft w-full max-w-lg shadow-xl p-6 space-y-4" wire:click.stop>
+            <h2 class="page-title text-2xl text-[#6B0F1A] flex items-center gap-2">
+                <i class='bx {{ $editing ? 'bx-edit' : 'bx-plus-circle' }} text-[#C9A84C]'></i>
+                {{ $editing ? 'Edit Family' : 'Add Family' }}
+            </h2>
+
+            <hr class="ui-divider">
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Family Name *</label>
+                <label class="form-label">Family Name *</label>
                 <input
                     type="text"
                     wire:model.defer="family_name"
                     placeholder="Family Name"
-                    class="border p-2 rounded w-full">
+                    class="ui-input">
                 @error('family_name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label class="form-label">Address</label>
                 <input
                     type="text"
                     wire:model.defer="address"
                     placeholder="Address"
-                    class="border p-2 rounded w-full">
+                    class="ui-input">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
+                <label class="form-label">Contact Person</label>
                 <input
                     type="text"
                     wire:model.defer="contact_person"
                     placeholder="Contact Person"
-                    class="border p-2 rounded w-full">
+                    class="ui-input">
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
                 <button
                     wire:click="$set('show', false)"
-                    class="px-4 py-2 border rounded hover:bg-gray-50">
+                    class="ui-btn ui-btn-ghost">
+                    <i class='bx bx-x'></i>
                     Cancel
                 </button>
                 <button
                     wire:click="save"
-                    class="px-4 py-2 rounded text-[#111111] gold-gradient font-semibold">
+                    class="ui-btn ui-btn-primary">
+                    <i class='bx bx-save'></i>
                     Save
                 </button>
             </div>
         </div>
     </div>
     @endif
+    @endteleport
 </div>

@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Kingdom Ledger' }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Oswald:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -12,86 +16,344 @@
 
     <style>
         :root {
+            --maroon:         #6B0F1A;
+            --maroon-light:   #8B2635;
+            --gold:           #C9A84C;
+            --gold-light:     #DFC056;
+            --gold-muted:     rgba(201,168,76,0.14);
+            --gold-border:    rgba(201,168,76,0.30);
+            --ink:            #1A1A2E;
+            --ink-muted:      #4A4A6A;
+            --ink-faint:      #8888A8;
+            --surface:        #F8F7F4;
+            --surface-card:   #FFFFFF;
+            --surface-soft:   #FDFBF5;
+            --border:         #EAE3D0;
+            --border-strong:  #D4C5A0;
+            --shadow-card:    0 1px 3px rgba(26,26,46,0.07), 0 1px 2px rgba(26,26,46,0.04);
+            --shadow-modal:   0 4px 20px rgba(26,26,46,0.14);
+            --shadow-focus:   0 0 0 3px rgba(201,168,76,0.24);
+            /* legacy compat */
             --kingdom-maroon: #6B0F1A;
-            --kingdom-gold: #D4AF37;
-            --kingdom-black: #111111;
-            --kingdom-white: #FFFFFF;
-            --kingdom-gold-gradient: linear-gradient(135deg, #C5A028, #F5D76E);
+            --kingdom-gold:   #C9A84C;
+            --kingdom-gold-gradient: linear-gradient(135deg, #B8952A, #DFC056);
+            --kingdom-maroon-gradient: linear-gradient(135deg, #6B0F1A, #8B2635);
+            --kingdom-border: rgba(107,15,26,0.16);
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            color: var(--kingdom-black);
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
             background:
-                radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.12), transparent 40%),
-                radial-gradient(circle at 90% 20%, rgba(107, 15, 26, 0.15), transparent 45%),
-                #f8f5ef;
+                radial-gradient(circle at 8% 8%, rgba(201,168,76,0.08), transparent 40%),
+                radial-gradient(circle at 92% 12%, rgba(107,15,26,0.06), transparent 36%),
+                var(--surface);
         }
 
         .brand-font {
             font-family: 'Cinzel', serif;
         }
 
-        .gold-gradient {
-            background: var(--kingdom-gold-gradient);
+        .page-title {
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
         }
 
+        .dm-sans {
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        /* ── Shell ── */
         .kingdom-shell {
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(212, 175, 55, 0.22);
-            box-shadow: 0 10px 35px rgba(17, 17, 17, 0.08);
-            backdrop-filter: blur(8px);
+            background: var(--surface-card);
+            border: 1px solid var(--gold-border);
+            box-shadow: var(--shadow-card);
         }
 
+        /* ── Navbar ── */
         #kingdom-navbar[data-scrolled="false"] {
-            background: transparent;
-            border-color: transparent;
+            background: rgba(107, 15, 26, 0.78);
+            backdrop-filter: blur(10px);
+            border-color: rgba(201, 168, 76, 0.18);
+        }
+        #kingdom-navbar[data-scrolled="true"] {
+            background: rgba(107, 15, 26, 0.94);
+            backdrop-filter: blur(12px);
+            border-color: rgba(201, 168, 76, 0.30);
         }
 
-        #kingdom-navbar[data-scrolled="true"] {
-            background: rgba(107, 15, 26, 0.95);
-            border-color: rgba(212, 175, 55, 0.28);
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: rgba(255, 245, 214, 0.82);
+            padding: 0.4rem 0;
+            position: relative;
+            transition: 160ms ease;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13.5px;
+            font-weight: 500;
         }
+        .nav-link:hover { color: #ffffff; }
+        .active-link { color: #E8CA72; }
+        .active-link::after {
+            content: "";
+            position: absolute;
+            left: 0; bottom: -6px;
+            width: 100%; height: 2px;
+            background: var(--gold);
+            border-radius: 1px;
+        }
+
+        /* ── Cards ── */
+        .ui-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow-card);
+        }
+        .ui-card-soft {
+            background: var(--surface-soft);
+            border: 1px solid var(--gold-border);
+            border-radius: 10px;
+            box-shadow: var(--shadow-card);
+        }
+
+        /* ── Divider ── */
+        .ui-divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--border-strong) 20%,
+                var(--gold-border) 50%,
+                var(--border-strong) 80%,
+                transparent);
+        }
+
+        /* ── Buttons ── */
+        .ui-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-radius: 6px;
+            padding: 0.5rem 0.9rem;
+            font-size: 13.5px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 150ms ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .ui-btn:hover { transform: translateY(-1px); }
+
+        .ui-btn-primary {
+            background: var(--kingdom-gold-gradient);
+            color: var(--ink);
+            border-color: rgba(107,15,26,0.14);
+        }
+        .ui-btn-primary:hover { filter: brightness(0.96); }
+
+        .ui-btn-maroon {
+            background: var(--kingdom-maroon-gradient);
+            color: #FFF5D6;
+        }
+        .ui-btn-maroon:hover { filter: brightness(1.06); }
+
+        .ui-btn-ghost {
+            background: var(--surface-card);
+            border-color: var(--border-strong);
+            color: var(--maroon);
+        }
+        .ui-btn-ghost:hover { background: var(--gold-muted); }
+
+        .ui-btn-edit {
+            background: #EFF6FF;
+            border-color: #BFDBFE;
+            color: #1D4ED8;
+        }
+        .ui-btn-edit:hover { background: #DBEAFE; }
+
+        .ui-btn-delete {
+            background: #FEF2F2;
+            border-color: #FECACA;
+            color: #DC2626;
+        }
+        .ui-btn-delete:hover { background: #FEE2E2; }
+
+        /* Alpine cloak */
+        [x-cloak] { display: none !important; }
+
+        /* ── Inputs ── */
+        .ui-input {
+            width: 100%;
+            border: 1px solid var(--border-strong);
+            border-radius: 6px;
+            padding: 0.52rem 0.7rem;
+            background: #FDFCF8;
+            color: var(--ink);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13.5px;
+            outline: none;
+            transition: border-color 140ms, box-shadow 140ms;
+        }
+        .ui-input:focus {
+            border-color: var(--gold);
+            box-shadow: var(--shadow-focus);
+        }
+
+        /* ── Stat values ── */
+        .stat-value {
+            font-family: 'Oswald', sans-serif;
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1;
+        }
+        .stat-label {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            color: var(--ink-muted);
+            margin-bottom: 4px;
+        }
+
+        /* ── Form labels ── */
+        .form-label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--ink-muted);
+            letter-spacing: 0.04em;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+        .badge-present { background: #F0FDF4; color: #15803D; border: 1px solid #86EFAC; }
+        .badge-absent  { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
+        .badge-gold    { background: var(--gold-muted); color: #7A5F12; border: 1px solid var(--gold-border); }
+
+        /* ── Toast feedback ── */
+        .toast-success { background: #F0FDF4; border: 1px solid #86EFAC; color: #166534; border-radius: 6px; padding: 10px 14px; font-size: 13px; }
+        .toast-error   { background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; border-radius: 6px; padding: 10px 14px; font-size: 13px; }
+        .toast-info    { background: #EFF6FF; border: 1px solid #93C5FD; color: #1E3A8A; border-radius: 6px; padding: 10px 14px; font-size: 13px; }
+
+        /* ── Check-in row ── */
+        .checkin-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 120ms;
+        }
+        .checkin-row:hover { background: var(--gold-muted); }
+        .checkin-row.is-checked {
+            background: rgba(201,168,76,0.12);
+            border-left: 3px solid var(--gold);
+        }
+        .checkin-row:not(.is-checked) { border-left: 3px solid transparent; }
+
+        /* ── Page eyebrow ── */
+        .page-eyebrow {
+            font-size: 10.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+            margin-bottom: 2px;
+        }
+
+        /* ── Table ── */
+        .kl-table-wrap {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+        .kl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .kl-table thead th {
+            background: var(--surface-soft);
+            padding: 9px 14px;
+            text-align: left;
+            font-size: 10.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--ink-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .kl-table tbody tr { border-bottom: 1px solid var(--border); }
+        .kl-table tbody tr:last-child { border-bottom: none; }
+        .kl-table tbody tr:hover { background: var(--gold-muted); }
+        .kl-table td { padding: 10px 14px; color: var(--ink); vertical-align: middle; }
     </style>
 </head>
+
 <body class="min-h-screen">
-    <header id="kingdom-navbar" data-scrolled="false" class="fixed top-0 inset-x-0 z-50 border-b transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div class="flex items-center justify-between rounded-2xl px-4 py-3 border border-white/15 bg-black/20 backdrop-blur-md">
-                <a href="{{ route('attendance.index') }}" class="brand-font text-xl sm:text-2xl text-white tracking-wide">
-                    Kingdom Ledger
+    <header id="kingdom-navbar" data-scrolled="false"
+        class="fixed top-0 inset-x-0 z-50 border-b transition-all duration-300">
+
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+
+            <!-- Logo -->
+            <a href="{{ route('attendance.index') }}" class="brand-font text-xl tracking-wider text-white">
+                Kingdom Ledger
+            </a>
+
+            <!-- Navigation -->
+            <nav class="flex items-center gap-6 text-sm font-medium">
+
+                <a href="{{ route('attendance.index') }}"
+                    class="nav-link {{ request()->routeIs('attendance.index') ? 'active-link' : '' }}">
+                    <i class='bx bx-check-shield text-base'></i>
+                    Attendance
                 </a>
 
-                <nav class="flex items-center gap-1 sm:gap-2 text-sm">
-                    <a href="{{ route('attendance.index') }}"
-                       class="px-3 py-2 rounded-lg transition {{ request()->routeIs('attendance.index') ? 'text-[#111111] gold-gradient font-semibold' : 'text-white hover:bg-white/10' }}">
-                        Attendance
-                    </a>
-                    <a href="{{ route('attendance.records') }}"
-                       class="px-3 py-2 rounded-lg transition {{ request()->routeIs('attendance.records') ? 'text-[#111111] gold-gradient font-semibold' : 'text-white hover:bg-white/10' }}">
-                        Records
-                    </a>
-                    <a href="{{ route('people.index') }}"
-                       class="px-3 py-2 rounded-lg transition {{ request()->routeIs('people.index') ? 'text-[#111111] gold-gradient font-semibold' : 'text-white hover:bg-white/10' }}">
-                        People
-                    </a>
-                    <a href="{{ route('families.index') }}"
-                       class="px-3 py-2 rounded-lg transition {{ request()->routeIs('families.index') ? 'text-[#111111] gold-gradient font-semibold' : 'text-white hover:bg-white/10' }}">
-                        Families
-                    </a>
-                </nav>
-            </div>
+                <a href="{{ route('attendance.records') }}"
+                    class="nav-link {{ request()->routeIs('attendance.records') ? 'active-link' : '' }}">
+                    <i class='bx bx-folder-open text-base'></i>
+                    Records
+                </a>
+
+                <a href="{{ route('people.index') }}"
+                    class="nav-link {{ request()->routeIs('people.index') ? 'active-link' : '' }}">
+                    <i class='bx bx-group text-base'></i>
+                    People
+                </a>
+
+                <a href="{{ route('families.index') }}"
+                    class="nav-link {{ request()->routeIs('families.index') ? 'active-link' : '' }}">
+                    <i class='bx bx-home-heart text-base'></i>
+                    Families
+                </a>
+
+            </nav>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8">
-        <div class="kingdom-shell rounded-2xl p-4 sm:p-6 lg:p-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-10">
+        <div class="kingdom-shell rounded-xl p-4 sm:p-6 lg:p-8">
             @yield('content')
         </div>
     </main>
 
+    @stack('modals')
+
     <script>
-        (function () {
+        (function() {
             const navbar = document.getElementById('kingdom-navbar');
             if (!navbar) return;
 
@@ -100,10 +362,13 @@
             };
 
             updateNavbar();
-            window.addEventListener('scroll', updateNavbar, { passive: true });
+            window.addEventListener('scroll', updateNavbar, {
+                passive: true
+            });
         })();
     </script>
 
     @livewireScripts
 </body>
+
 </html>

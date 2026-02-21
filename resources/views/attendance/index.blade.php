@@ -4,25 +4,34 @@
     <div class="space-y-8">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
-                <h2 class="brand-font text-3xl text-[#6B0F1A]">Attendance Dashboard</h2>
-                <p class="text-sm text-slate-600 mt-1">Track services, review records, and manage congregation attendance.</p>
+                <h2 class="page-title text-3xl text-[#6B0F1A] flex items-center gap-2">
+                    <i class='bx bx-line-chart text-[#C9A84C]'></i>
+                    Attendance Dashboard
+                </h2>
+                <p class="dm-sans text-sm mt-1" style="color:var(--ink-muted)">Track services, review records, and manage congregation attendance.</p>
             </div>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('attendance.records') }}" class="px-4 py-2 rounded-lg border border-[#D4AF37]/40 text-[#6B0F1A] hover:bg-[#D4AF37]/10 transition">
+                <a href="{{ route('attendance.records') }}" class="ui-btn ui-btn-ghost">
+                    <i class='bx bx-spreadsheet text-base'></i>
                     View Records
                 </a>
-                <a href="{{ route('people.index') }}" class="px-4 py-2 rounded-lg text-[#111111] gold-gradient font-semibold shadow-md">
+                <a href="{{ route('people.index') }}" class="ui-btn ui-btn-primary">
+                    <i class='bx bx-group text-base'></i>
                     Manage People
                 </a>
                 <button onclick="document.getElementById('type-modal').classList.remove('hidden')"
-                        class="px-4 py-2 rounded-lg bg-[#6B0F1A] text-white hover:bg-[#560b15] transition shadow-md">
-                    + Add Event/Service
+                        class="ui-btn ui-btn-maroon">
+                    <i class='bx bx-calendar-plus text-base'></i>
+                    Add Event/Service
                 </button>
             </div>
         </div>
 
+        <hr class="ui-divider">
+
         @if (session()->has('success'))
-            <div class="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-emerald-800">
+            <div class="toast-success flex items-center gap-2">
+                <i class='bx bx-check-circle'></i>
                 {{ session('success') }}
             </div>
         @endif
@@ -32,51 +41,64 @@
                 @php
                     $latestSession = $type->sessions->first();
                 @endphp
-                <div class="rounded-2xl border border-[#D4AF37]/25 bg-white p-5 shadow-sm hover:shadow-lg transition">
+                <div class="ui-card-soft p-5 transition">
                     <div class="flex items-start justify-between gap-3 mb-3">
-                        <h3 class="brand-font text-xl text-[#111111]">{{ $type->name }}</h3>
-                        <span class="text-xs font-medium px-2 py-1 rounded-full bg-[#111111] text-[#F5D76E]">
-                            @if ($latestSession)
-                                {{ $latestSession->date->format('M d, Y') }}
-                            @else
-                                No sessions
-                            @endif
-                        </span>
+                        <h3 class="page-title text-xl text-[#111111] flex items-center gap-2">
+                            <i class='bx bx-calendar-event text-[#6B0F1A]'></i>
+                            {{ $type->name }}
+                        </h3>
+                        @if ($latestSession)
+                            <span class="badge badge-gold">{{ $latestSession->date->format('M d, Y') }}</span>
+                        @else
+                            <span class="badge" style="background:var(--surface-soft);color:var(--ink-faint)">No sessions</span>
+                        @endif
                     </div>
 
-                    <p class="text-sm text-slate-600">{{ $type->day_of_week ?? 'Flexible Schedule' }}</p>
+                    <p class="text-sm dm-sans mt-1" style="color:var(--ink-muted)">{{ $type->day_of_week ?? 'Flexible Schedule' }}</p>
                     @if ($latestSession && $latestSession->service_name)
-                        <p class="text-xs text-[#6B0F1A] mt-2 font-medium">Latest: {{ $latestSession->service_name }}</p>
+                        <p class="text-xs mt-2 font-medium" style="color:var(--maroon)">Latest: {{ $latestSession->service_name }}</p>
                     @endif
 
-                    <div class="mt-4 flex items-center justify-between">
-                        <a href="{{ route('attendance.show', $type) }}" class="text-sm font-semibold text-[#6B0F1A] hover:underline">
+                    <hr class="ui-divider my-4">
+
+                    <div class="flex items-center justify-between">
+                        <a href="{{ route('attendance.show', $type) }}" class="ui-btn ui-btn-ghost text-sm py-2 px-3">
+                            <i class='bx bx-log-in-circle'></i>
                             Open Check-in
                         </a>
                         <form method="POST" action="{{ route('attendance-types.destroy', $type) }}"
                               onsubmit="return confirm('Delete this event/service and all its records?');" class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+                            <button type="submit" class="ui-btn ui-btn-delete text-sm py-2 px-3">
+                                <i class='bx bx-trash'></i>
+                                Delete
+                            </button>
                         </form>
                     </div>
                 </div>
             @endforeach
         </div>
+    </div>
+@endsection
 
-        <div id="type-modal" class="hidden fixed inset-0 bg-black/50 z-50 p-4" onclick="if(event.target === this) this.classList.add('hidden')">
-            <div class="max-w-lg mx-auto mt-24 rounded-2xl border border-[#D4AF37]/40 bg-white p-7 shadow-2xl" onclick="event.stopPropagation()">
-                <h3 class="brand-font text-2xl text-[#6B0F1A] mb-5">Add Event / Service</h3>
+@push('modals')
+    <div id="type-modal" class="hidden fixed inset-0 bg-black/50 z-50 p-4" onclick="if(event.target === this) this.classList.add('hidden')">
+            <div class="max-w-lg mx-auto mt-24 ui-card-soft p-7 shadow-xl" onclick="event.stopPropagation()">
+                <h3 class="page-title text-2xl text-[#6B0F1A] mb-5 flex items-center gap-2">
+                    <i class='bx bx-calendar-plus text-[#D4AF37]'></i>
+                    Add Event / Service
+                </h3>
                 <form method="POST" action="{{ route('attendance-types.store') }}" class="space-y-4">
                     @csrf
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Event / Service Name *</label>
+                        <label class="form-label">Event / Service Name *</label>
                         <input type="text" name="name" required placeholder="e.g., Sunday Service"
-                               class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                               class="ui-input">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Day of Week</label>
-                        <select name="day_of_week" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]">
+                        <label class="form-label">Day of Week</label>
+                        <select name="day_of_week" class="ui-input">
                             <option value="">Flexible Schedule</option>
                             <option>Sunday</option>
                             <option>Monday</option>
@@ -89,15 +111,16 @@
                     </div>
                     <div class="flex justify-end gap-3 pt-2">
                         <button type="button" onclick="document.getElementById('type-modal').classList.add('hidden')"
-                                class="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50">
+                                class="ui-btn ui-btn-ghost">
+                            <i class='bx bx-x'></i>
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 rounded-lg text-[#111111] gold-gradient font-semibold">
+                        <button type="submit" class="ui-btn ui-btn-primary">
+                            <i class='bx bx-save'></i>
                             Save
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-    </div>
-@endsection
+@endpush

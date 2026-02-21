@@ -2,9 +2,12 @@
     @if($upcomingBirthdays->count() > 0)
         <div class="space-y-3">
             @foreach($upcomingBirthdays as $person)
-                <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D4AF37]/25 bg-white p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 ui-card p-4">
                     <div>
-                        <div class="font-semibold text-[#111111]">{{ $person->full_name }}</div>
+                        <div class="font-semibold text-[#111111] flex items-center gap-2">
+                            <i class='bx bx-cake text-[#6B0F1A]'></i>
+                            {{ $person->full_name }}
+                        </div>
                         <div class="text-sm text-slate-600 mt-1">
                             {{ $person->next_birthday->format('M d, Y') }} ({{ $person->age_on_birthday }} years old)
                             @if($person->family)

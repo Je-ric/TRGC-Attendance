@@ -3,10 +3,12 @@
 @section('content')
     <div class="space-y-6">
         <div>
-            <a href="{{ route('attendance.index') }}" class="text-sm font-medium text-[#6B0F1A] hover:underline">
-                &larr; Back to Attendance
+            <a href="{{ route('attendance.index') }}" class="ui-btn ui-btn-ghost text-sm py-2 px-3">
+                <i class='bx bx-left-arrow-alt'></i>
+                Back to Attendance
             </a>
-            <h2 class="brand-font text-3xl text-[#6B0F1A] mt-2">
+            <h2 class="page-title text-3xl text-[#6B0F1A] mt-3 flex items-center gap-2">
+                <i class='bx bx-check-shield text-[#D4AF37]'></i>
                 {{ isset($type) && is_object($type) ? $type->name : 'Attendance' }}
             </h2>
             @if(isset($type) && is_object($type) && isset($type->day_of_week) && $type->day_of_week)
@@ -14,8 +16,10 @@
             @endif
         </div>
 
+        <hr class="ui-divider">
+
         @if(isset($type) && is_object($type))
-            <div class="rounded-2xl border border-[#D4AF37]/30 bg-white p-6 shadow-sm">
+            <div class="ui-card p-6">
                 <livewire:attendance-checkin :attendanceType="$type" />
             </div>
         @endif

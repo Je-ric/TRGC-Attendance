@@ -73,16 +73,57 @@ class AttendanceCheckin extends Component
         }
     }
 
+    protected function getOrCreateSession(): AttendanceSession
+    {
+        $session = AttendanceSession::where('attendance_type_id', $this->attendanceType->id)
+            ->where('date', $this->date)
+            ->when(
+                $this->service_name,
+                fn($q) => $q->where('service_name', $this->service_name),
+                fn($q) => $q->whereNull('service_name')
+            )
+            ->first();
+
+        if (!$session) {
+            $session = AttendanceSession::create([
+                'attendance_type_id' => $this->attendanceType->id,
+                'date' => $this->date,
+                'service_name' => $this->service_name ?: null,
+            ]);
+        }
+
+        return $session;
+    }
+
     #[On('togglePerson')]
     public function togglePerson($personId)
     {
         $this->checked[$personId] = !($this->checked[$personId] ?? false);
+
+        $session = $this->getOrCreateSession();
+
+        if ($this->checked[$personId]) {
+            AttendanceRecord::updateOrCreate(
+                ['attendance_session_id' => $session->id, 'person_id' => $personId],
+                ['status' => 'present']
+            );
+        } else {
+            AttendanceRecord::where('attendance_session_id', $session->id)
+                ->where('person_id', $personId)
+                ->delete();
+        }
     }
 
     #[On('personCreated')]
     public function addNewPerson($personId)
     {
         $this->checked[$personId] = true;
+
+        $session = $this->getOrCreateSession();
+        AttendanceRecord::updateOrCreate(
+            ['attendance_session_id' => $session->id, 'person_id' => $personId],
+            ['status' => 'present']
+        );
     }
 
     public function setViewMode($mode)
@@ -97,21 +138,22 @@ class AttendanceCheckin extends Component
             'date' => 'required|date|before_or_equal:today',
         ]);
 
-        $sessionData = [
-            'attendance_type_id' => $this->attendanceType->id,
-            'date' => $this->date,
-        ];
+        $session = AttendanceSession::where('attendance_type_id', $this->attendanceType->id)
+            ->where('date', $this->date)
+            ->when(
+                $this->service_name,
+                fn($q) => $q->where('service_name', $this->service_name),
+                fn($q) => $q->whereNull('service_name')
+            )
+            ->first();
 
-        if ($this->service_name) {
-            $sessionData['service_name'] = $this->service_name;
-        }
-
-        $session = AttendanceSession::updateOrCreate(
-            $sessionData,
-            [
+        if (!$session) {
+            $session = AttendanceSession::create([
+                'attendance_type_id' => $this->attendanceType->id,
+                'date' => $this->date,
                 'service_name' => $this->service_name ?: null,
-            ]
-        );
+            ]);
+        }
 
         // Remove all existing records for this session
         AttendanceRecord::where('attendance_session_id', $session->id)->delete();
