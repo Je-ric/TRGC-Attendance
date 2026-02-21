@@ -15,6 +15,16 @@
     @livewireStyles
 
     <style>
+        #kingdom-navbar .brand-font {
+            color: #1A1A2E;
+            transition: color 0.3s;
+        }
+        #kingdom-navbar[data-scrolled="true"] .brand-font {
+            color: #FFF5D6;
+        }
+        #kingdom-navbar .brand-font.active-link {
+            color: #C9A84C;
+        }
         :root {
             --maroon:         #6B0F1A;
             --maroon-light:   #8B2635;
@@ -66,22 +76,73 @@
 
         /* ── Shell ── */
         .kingdom-shell {
-            background: var(--surface-card);
+            background: rgba(255, 255, 255, 0.88);
             border: 1px solid var(--gold-border);
             box-shadow: var(--shadow-card);
+            backdrop-filter: blur(2px);
         }
 
         /* ── Navbar ── */
-        #kingdom-navbar[data-scrolled="false"] {
-            background: rgba(107, 15, 26, 0.78);
-            backdrop-filter: blur(10px);
-            border-color: rgba(201, 168, 76, 0.18);
-        }
-        #kingdom-navbar[data-scrolled="true"] {
-            background: rgba(107, 15, 26, 0.94);
-            backdrop-filter: blur(12px);
-            border-color: rgba(201, 168, 76, 0.30);
-        }
+        /* ===== Gradient Glass Navbar ===== */
+
+#kingdom-navbar {
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+    transition: all 0.35s ease;
+}
+
+/* Top state (light glass) */
+#kingdom-navbar[data-scrolled="false"] {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(107, 15, 26, 0.55),
+            rgba(139, 38, 53, 0.55)
+        );
+}
+
+/* Scrolled state (deeper royal glass) */
+#kingdom-navbar[data-scrolled="true"] {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(107, 15, 26, 0.88),
+            rgba(139, 38, 53, 0.92)
+        );
+    border-bottom: 1px solid rgba(212, 175, 55, 0.28);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+}
+
+    #kingdom-navbar {
+        transition: all 0.35s cubic-bezier(.4,0,.2,1);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+        backdrop-filter: blur(14px) saturate(140%);
+        -webkit-backdrop-filter: blur(14px) saturate(140%);
+    }
+
+    #kingdom-navbar[data-scrolled="false"] {
+        background: rgba(255,255,255,0.18);
+        color: #1A1A2E;
+        box-shadow: 0 2px 12px 0 rgba(0,0,0,0.07);
+    }
+
+    #kingdom-navbar[data-scrolled="true"] {
+        background: linear-gradient(90deg, #6B0F1A 0%, #8B2635 100%);
+        color: #FFF5D6;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.28);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    #kingdom-navbar .nav-link {
+        color: #1A1A2E;
+    }
+    #kingdom-navbar[data-scrolled="true"] .nav-link {
+        color: #FFF5D6;
+    }
+    #kingdom-navbar .nav-link.active-link {
+        color: #C9A84C;
+    }
 
         .nav-link {
             display: flex;
@@ -309,8 +370,8 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
             <!-- Logo -->
-            <a href="{{ route('attendance.index') }}" class="brand-font text-xl tracking-wider text-white">
-                Kingdom Ledger
+            <a href="{{ route('attendance.index') }}" class="brand-font text-xl tracking-wider">
+                TRGC Attendance
             </a>
 
             <!-- Navigation -->
@@ -344,11 +405,13 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-10">
+    <div style="background-image: url('/BG2.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <main class="mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-10">
         <div class="kingdom-shell rounded-xl p-4 sm:p-6 lg:p-8">
             @yield('content')
         </div>
     </main>
+    </div>
 
     @stack('modals')
 
