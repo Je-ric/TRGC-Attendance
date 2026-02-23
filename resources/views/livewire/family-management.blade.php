@@ -1,29 +1,31 @@
 <div class="space-y-6">
     <!-- Header with Add Button -->
-    <x-card-with-header title="Family Management"
+    <x-title-with-header title="Family Management"
         description="Manage family groups, categories, and member associations.">
         <button wire:click="open" class="ui-btn ui-btn-primary">
             <i class='bx bx-plus-circle'></i>
             Add Family
         </button>
-    </x-card-with-header>
+    </x-title-with-header>
 
 
-    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <x-statistic-card 
+                    gradientVariant="deep-rose" 
+                    icon="bx-users" 
+                    title="Total Families" 
+                    value="{{ $families->count() }}">
 
-    <!-- Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <div class="ui-card-soft p-4">
-            <div class="stat-label">Total Families</div>
-            <div class="stat-value">{{ $families->count() }}</div>
+            </x-statistic-card>
+            @foreach($categories as $cat)
+                <x-statistic-card 
+                    icon="bx-user"
+                    :title="$cat"
+                    :value="$categoryCounts[$cat] ?? 0"
+                    gradientVariant="sunset"
+                />
+            @endforeach
         </div>
-        @foreach ($categories as $cat)
-            <div class="ui-card p-4">
-                <div class="stat-label">{{ $cat }}</div>
-                <div class="stat-value" style="color:var(--maroon)">{{ $categoryCounts[$cat] ?? 0 }}</div>
-            </div>
-        @endforeach
-    </div>
 
     <!-- Family List -->
     <div class="columns-1 md:columns-2 gap-4 space-y-4">

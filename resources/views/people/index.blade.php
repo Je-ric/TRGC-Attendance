@@ -3,22 +3,25 @@
 @section('content')
     <div class="space-y-6">
 
-        <x-card-with-header title="Management" description="Manage individuals, family links, and category distribution.">
+        <x-title-with-header title="Management" description="Manage individuals, family links, and category distribution.">
             <livewire:person-create />
-        </x-card-with-header>
-
-        <hr class="ui-divider">
-
+        </x-title-with-header>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <div class="ui-card-soft p-4">
-                <div class="stat-label">Total People</div>
-                <div class="stat-value">{{ $totalPeople }}</div>
-            </div>
+            <x-statistic-card 
+                    gradientVariant="deep-rose" 
+                    icon="bx-users" 
+                    title="Total People" 
+                    value="{{ $totalPeople }}">
+
+            </x-statistic-card>
             @foreach($categories as $cat)
-                <div class="ui-card p-4">
-                    <div class="stat-label">{{ $cat }}</div>
-                    <div class="stat-value" style="color:var(--maroon)">{{ $categoryCounts[$cat] ?? 0 }}</div>
-                </div>
+                <x-statistic-card 
+                    icon="bx-user"
+                    :title="$cat"
+                    :value="$categoryCounts[$cat] ?? 0"
+                    gradientVariant="sunset"
+                />
             @endforeach
         </div>
 
