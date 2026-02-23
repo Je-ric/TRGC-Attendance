@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Kingdom Ledger' }}</title>
+    <title>{{ $title ?? 'TRGC Attendance' }}</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Oswald:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
         rel="stylesheet">
@@ -13,7 +13,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-
     <style>
         #kingdom-navbar .brand-font {
             color: #1A1A2E;
@@ -328,14 +327,7 @@
         .checkin-row:not(.is-checked) { border-left: 3px solid transparent; }
 
         /* ── Page eyebrow ── */
-        .page-eyebrow {
-            font-size: 10.5px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--gold);
-            margin-bottom: 2px;
-        }
+
 
         /* ── Table ── */
         .kl-table-wrap {
@@ -364,74 +356,127 @@
 </head>
 
 <body class="min-h-screen">
-    <header id="kingdom-navbar" data-scrolled="false"
-        class="fixed top-0 inset-x-0 z-50 border-b transition-all duration-300">
 
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
-            <!-- Logo -->
-            <a href="{{ route('attendance.index') }}" class="brand-font text-xl tracking-wider">
-                TRGC Attendance
-            </a>
+    <div class="min-h-screen">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-green-900/50 backdrop-blur-sm z-30 hidden lg:hidden"></div>
 
-            <!-- Navigation -->
-            <nav class="flex items-center gap-6 text-sm font-medium">
+        <aside id="app-sidebar"
+                class="fixed inset-y-0 left-0 z-40 w-72
+                    bg-white shadow-2xl border-r border-slate-200
+                    transform -translate-x-full lg:translate-x-0
+                    transition-transform duration-300 ease-out
+                    h-full overflow-y-auto no-scrollbar">
+            <div class="sticky top-0 z-20 px-6 py-6 border-b border-slate-200 bg-white text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] font-semibold text-amber-400">TRGC</p>
+                        <h1 class="brand-title text-2xl mt-1 text-green-700">Attendance</h1>
+                    </div>
+                    <button id="sidebar-close" class="lg:hidden text-white/80 hover:text-white transition">
+                        <i class="bx bx-x text-2xl"></i>
+                    </button>
+                </div>
+            </div>
 
-                <a href="{{ route('attendance.index') }}"
-                    class="nav-link {{ request()->routeIs('attendance.index') ? 'active-link' : '' }}">
-                    <i class='bx bx-check-shield text-base'></i>
-                    Attendance
-                </a>
+            <div class="pl-5 py-6 space-y-6">
 
-                <a href="{{ route('attendance.records') }}"
-                    class="nav-link {{ request()->routeIs('attendance.records') ? 'active-link' : '' }}">
-                    <i class='bx bx-folder-open text-base'></i>
-                    Records
-                </a>
+                <nav class="space-y-2 text-sm">
+                        <a href="{{ route('attendance.index') }}"
+                            class="nav-link {{ request()->routeIs('attendance.index') ? 'active-link' : '' }}">
+                            <i class='bx bx-check-shield text-base'></i>
+                            Attendance
+                        </a>
 
-                <a href="{{ route('people.index') }}"
-                    class="nav-link {{ request()->routeIs('people.index') ? 'active-link' : '' }}">
-                    <i class='bx bx-group text-base'></i>
-                    People
-                </a>
+                        <a href="{{ route('attendance.records') }}"
+                            class="nav-link {{ request()->routeIs('attendance.records') ? 'active-link' : '' }}">
+                            <i class='bx bx-folder-open text-base'></i>
+                            Records
+                        </a>
 
-                <a href="{{ route('families.index') }}"
-                    class="nav-link {{ request()->routeIs('families.index') ? 'active-link' : '' }}">
-                    <i class='bx bx-home-heart text-base'></i>
-                    Families
-                </a>
+                        <a href="{{ route('people.index') }}"
+                            class="nav-link {{ request()->routeIs('people.index') ? 'active-link' : '' }}">
+                            <i class='bx bx-group text-base'></i>
+                            People
+                        </a>
 
-            </nav>
+                        <a href="{{ route('families.index') }}"
+                            class="nav-link {{ request()->routeIs('families.index') ? 'active-link' : '' }}">
+                            <i class='bx bx-home-heart text-base'></i>
+                            Families
+                        </a>
+                </nav>
+
+
+            </div>
+        </aside>
+
+        <div class="flex flex-col min-h-screen lg:ml-72">
+            <header class="sticky top-0 z-20 bg-red-900 backdrop-blur border-b border-slate-200">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="sidebar-open" class="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-100 transition">
+                            <i class="bx bx-menu text-2xl"></i>
+                        </button>
+                        <div>
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.3em] font-semibold text-amber-400">Management System</p>
+                                <h1 class="brand-title text-2xl mt-1 text-white">Workspace</h1>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <main class="flex-1 mx-auto w-full px-4 py-4 overflow-y-auto">
+                <div class="bg-white shadow-lg rounded-xl border border-slate-100 p-6 sm:p-8">
+                    @yield('content')
+                </div>
+            </main>
         </div>
-    </header>
-
-    <div style="background-image: url('/BG2.png'); background-size: cover; background-position: center; background-attachment: fixed;">
-    <main class="mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-10">
-        <div class="kingdom-shell rounded-xl p-4 sm:p-6 lg:p-8">
-            @yield('content')
-        </div>
-    </main>
     </div>
 
-    @stack('modals')
-
-    <script>
-        (function() {
-            const navbar = document.getElementById('kingdom-navbar');
-            if (!navbar) return;
-
-            const updateNavbar = () => {
-                navbar.setAttribute('data-scrolled', window.scrollY > 12 ? 'true' : 'false');
-            };
-
-            updateNavbar();
-            window.addEventListener('scroll', updateNavbar, {
-                passive: true
-            });
-        })();
-    </script>
-
     @livewireScripts
+    @stack('scripts')
+    <script>
+        const sidebar = document.getElementById('app-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const openBtn = document.getElementById('sidebar-open');
+        const closeBtn = document.getElementById('sidebar-close');
+
+        const openSidebar = () => {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+        };
+
+        const closeSidebar = () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        };
+
+        if (openBtn) {
+            openBtn.addEventListener('click', openSidebar);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeSidebar);
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', closeSidebar);
+        }
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                overlay.classList.add('hidden');
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+
+    </script>
 </body>
 
 </html>

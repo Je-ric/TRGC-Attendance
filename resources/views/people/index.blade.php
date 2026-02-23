@@ -2,17 +2,10 @@
 
 @section('content')
     <div class="space-y-6">
-        <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
-                <div class="page-eyebrow">People</div>
-                <h2 class="page-title text-3xl text-[#6B0F1A] flex items-center gap-2">
-                    <i class='bx bx-user-voice text-[#C9A84C]'></i>
-                    Management
-                </h2>
-                <p class="dm-sans text-sm mt-1" style="color:var(--ink-muted)">Manage individuals, family links, and category distribution.</p>
-            </div>
+
+        <x-card-with-header title="Management" description="Manage individuals, family links, and category distribution.">
             <livewire:person-create />
-        </div>
+        </x-card-with-header>
 
         <hr class="ui-divider">
 
