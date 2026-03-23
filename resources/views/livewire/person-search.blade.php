@@ -1,28 +1,22 @@
-<div class="space-y-2">
-    <input type="text" wire:model.debounce.300ms="search" placeholder="Search by name or contact number..." class="ui-input">
+<div style="display:flex;flex-direction:column;gap:8px">
+    <input type="text" wire:model.debounce.300ms="search" placeholder="Search by name or contact…" class="ui-input">
 
-    <div class="border border-[#D4AF37]/25 rounded bg-white max-h-64 overflow-y-auto">
+    <div style="border:1px solid var(--border);border-radius:8px;background:#fff;max-height:260px;overflow-y:auto">
         @forelse($results as $person)
-            <label class="flex items-center p-2 border-b border-slate-200 cursor-pointer hover:bg-[#D4AF37]/10 transition-colors">
-                <input type="checkbox"
-                       wire:click="toggle({{ $person->id }})"
-                       class="mr-3 w-4 h-4 text-[#6B0F1A] border-gray-300 rounded focus:ring-[#D4AF37]">
-                <div class="flex-1">
-                    <div class="font-semibold text-gray-900">{{ $person->full_name }}</div>
-                    <div class="text-xs text-gray-500">
-                        {{ $person->category ?? 'N/A' }} | {{ $person->age ?? 'N/A' }} yrs
-                        @if($person->family)
-                            | Family: {{ $person->family->family_name }}
-                        @endif
+            <label style="display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background 0.1s"
+                   onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''">
+                <input type="checkbox" wire:click="toggle({{ $person->id }})"
+                       style="margin-right:10px;width:15px;height:15px;accent-color:var(--red)">
+                <div>
+                    <div style="font-size:13.5px;font-weight:600;color:var(--ink)">{{ $person->full_name }}</div>
+                    <div style="font-size:11.5px;color:var(--ink-faint)">
+                        {{ $person->category ?? 'N/A' }} · {{ $person->age ?? 'N/A' }} yrs
+                        @if($person->family) · {{ $person->family->family_name }} @endif
                     </div>
                 </div>
             </label>
         @empty
-            <p class="p-4 text-gray-500 text-sm text-center">No results found. Try a different search term.</p>
+            <p style="padding:16px;font-size:13px;color:var(--ink-faint);text-align:center;margin:0">No results found.</p>
         @endforelse
     </div>
-
-    @if($search && $results->count() === 0)
-        <p class="text-sm text-gray-500 mt-2">No people match your search.</p>
-    @endif
 </div>

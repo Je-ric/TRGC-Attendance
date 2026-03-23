@@ -1,126 +1,125 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="space-y-8">
-        <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
-                <h2 class="page-title text-3xl text-[#6B0F1A] flex items-center gap-2">
-                    <i class='bx bx-line-chart text-[#C9A84C]'></i>
-                    Attendance Dashboard
-                </h2>
-                <p class="dm-sans text-sm mt-1" style="color:var(--ink-muted)">Track services, review records, and manage congregation attendance.</p>
-            </div>
-            <div class="flex flex-wrap gap-3">
-                <a href="{{ route('attendance.records') }}" class="ui-btn ui-btn-ghost">
-                    <i class='bx bx-spreadsheet text-base'></i>
-                    View Records
-                </a>
-                <a href="{{ route('people.index') }}" class="ui-btn ui-btn-primary">
-                    <i class='bx bx-group text-base'></i>
-                    Manage People
-                </a>
-                <button onclick="document.getElementById('type-modal').classList.remove('hidden')"
-                        class="ui-btn ui-btn-maroon">
-                    <i class='bx bx-calendar-plus text-base'></i>
-                    Add Event/Service
-                </button>
-            </div>
+<div style="display:flex;flex-direction:column;gap:24px">
+
+    {{-- Header --}}
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div>
+            <div class="page-eyebrow">Dashboard</div>
+            <h1 class="page-title" style="font-size:26px;margin:4px 0 6px">Attendance</h1>
+            <p style="font-size:13px;color:var(--ink-faint);margin:0">Track services and manage congregation attendance.</p>
         </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a href="{{ route('attendance.records') }}" class="btn btn-ghost">
+                <i class='bx bx-folder-open'></i> Records
+            </a>
+            <a href="{{ route('people.index') }}" class="btn btn-ghost">
+                <i class='bx bx-group'></i> People
+            </a>
+            <button onclick="document.getElementById('type-modal').classList.remove('hidden')" class="btn btn-primary">
+                <i class='bx bx-plus'></i> Add Service
+            </button>
+        </div>
+    </div>
 
-        <hr class="ui-divider">
+    @if(session()->has('success'))
+        <div class="toast-success" style="display:flex;align-items:center;gap:8px">
+            <i class='bx bx-check-circle'></i> {{ session('success') }}
+        </div>
+    @endif
 
-        @if (session()->has('success'))
-            <div class="toast-success flex items-center gap-2">
-                <i class='bx bx-check-circle'></i>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            @foreach ($types as $type)
-                @php
-                    $latestSession = $type->sessions->first();
-                @endphp
-                <div class="ui-card-soft p-5 transition">
-                    <div class="flex items-start justify-between gap-3 mb-3">
-                        <h3 class="page-title text-xl text-[#111111] flex items-center gap-2">
-                            <i class='bx bx-calendar-event text-[#6B0F1A]'></i>
-                            {{ $type->name }}
-                        </h3>
-                        @if ($latestSession)
-                            <span class="badge badge-gold">{{ $latestSession->date->format('M d, Y') }}</span>
-                        @else
-                            <span class="badge" style="background:var(--surface-soft);color:var(--ink-faint)">No sessions</span>
+    {{-- Service Cards --}}
+    @if($types->isEmpty())
+        <div class="card" style="padding:48px;text-align:center">
+            <i class='bx bx-calendar-x' style="font-size:40px;color:var(--muted);display:block;margin-bottom:12px"></i>
+            <p style="font-size:15px;font-weight:600;color:var(--ink-muted);margin:0 0 4px">No services yet</p>
+            <p style="font-size:13px;color:var(--ink-faint);margin:0">Click "Add Service" to create your first one.</p>
+        </div>
+    @else
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+            @foreach($types as $type)
+                @php $latestSession = $type->sessions->first(); @endphp
+                <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+                        <div>
+                            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--red);margin-bottom:4px">Service</div>
+                            <h3 style="font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin:0">{{ $type->name }}</h3>
+                            <p style="font-size:12px;color:var(--ink-faint);margin:3px 0 0">{{ $type->day_of_week ?? 'Flexible Schedule' }}</p>
+                        </div>
+                        @if($latestSession)
+                            <span class="badge badge-muted">{{ $latestSession->date->format('M d') }}</span>
                         @endif
                     </div>
 
-                    <p class="text-sm dm-sans mt-1" style="color:var(--ink-muted)">{{ $type->day_of_week ?? 'Flexible Schedule' }}</p>
-                    @if ($latestSession && $latestSession->service_name)
-                        <p class="text-xs mt-2 font-medium" style="color:var(--maroon)">Latest: {{ $latestSession->service_name }}</p>
+                    @if($latestSession?->service_name)
+                        <div style="font-size:12px;color:var(--ink-muted);background:var(--surface);border-radius:6px;padding:6px 10px">
+                            Latest: {{ $latestSession->service_name }}
+                        </div>
                     @endif
 
-                    <hr class="ui-divider my-4">
+                    <hr class="ui-divider">
 
-                    <div class="flex items-center justify-between">
-                        <a href="{{ route('attendance.show', $type) }}" class="ui-btn ui-btn-ghost text-sm py-2 px-3">
-                            <i class='bx bx-log-in-circle'></i>
-                            Open Check-in
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                        <a href="{{ route('attendance.show', $type) }}" class="btn btn-primary" style="font-size:12px;padding:7px 12px">
+                            <i class='bx bx-log-in-circle'></i> Check-in
                         </a>
                         <form method="POST" action="{{ route('attendance-types.destroy', $type) }}"
-                              onsubmit="return confirm('Delete this event/service and all its records?');" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="ui-btn ui-btn-delete text-sm py-2 px-3">
+                              onsubmit="return confirm('Delete this service and all its records?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn btn-danger" style="font-size:12px;padding:7px 12px">
                                 <i class='bx bx-trash'></i>
-                                Delete
                             </button>
                         </form>
                     </div>
                 </div>
             @endforeach
         </div>
-    </div>
+    @endif
+</div>
 @endsection
 
 @push('modals')
-    <div id="type-modal" class="hidden fixed inset-0 bg-black/50 z-50 p-4" onclick="if(event.target === this) this.classList.add('hidden')">
-            <div class="max-w-lg mx-auto mt-24 ui-card-soft p-7 shadow-xl" onclick="event.stopPropagation()">
-                <h3 class="page-title text-2xl text-[#6B0F1A] mb-5 flex items-center gap-2">
-                    <i class='bx bx-calendar-plus text-[#D4AF37]'></i>
-                    Add Event / Service
-                </h3>
-                <form method="POST" action="{{ route('attendance-types.store') }}" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label class="form-label">Event / Service Name *</label>
-                        <input type="text" name="name" required placeholder="e.g., Sunday Service"
-                               class="ui-input">
-                    </div>
-                    <div>
-                        <label class="form-label">Day of Week</label>
-                        <select name="day_of_week" class="ui-input">
-                            <option value="">Flexible Schedule</option>
-                            <option>Sunday</option>
-                            <option>Monday</option>
-                            <option>Tuesday</option>
-                            <option>Wednesday</option>
-                            <option>Thursday</option>
-                            <option>Friday</option>
-                            <option>Saturday</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end gap-3 pt-2">
-                        <button type="button" onclick="document.getElementById('type-modal').classList.add('hidden')"
-                                class="ui-btn ui-btn-ghost">
-                            <i class='bx bx-x'></i>
-                            Cancel
-                        </button>
-                        <button type="submit" class="ui-btn ui-btn-primary">
-                            <i class='bx bx-save'></i>
-                            Save
-                        </button>
-                    </div>
-                </form>
+<div id="type-modal" class="hidden" style="position:fixed;inset:0;background:rgba(28,28,30,0.45);backdrop-filter:blur(3px);z-index:50;display:none;align-items:center;justify-content:center;padding:16px"
+     onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <h3 class="page-title" style="font-size:20px;margin:0 0 4px">Add Service</h3>
+        <p style="font-size:13px;color:var(--ink-faint);margin:0 0 20px">Create a new attendance service or event.</p>
+        <hr class="ui-divider" style="margin-bottom:20px">
+        <form method="POST" action="{{ route('attendance-types.store') }}" style="display:flex;flex-direction:column;gap:14px">
+            @csrf
+            <div>
+                <label class="form-label">Service Name *</label>
+                <input type="text" name="name" required placeholder="e.g., Sunday Service" class="ui-input">
             </div>
-        </div>
+            <div>
+                <label class="form-label">Day of Week</label>
+                <select name="day_of_week" class="ui-input">
+                    <option value="">Flexible Schedule</option>
+                    @foreach(['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $day)
+                        <option>{{ $day }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:4px">
+                <button type="button" onclick="document.getElementById('type-modal').style.display='none'" class="btn btn-ghost">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class='bx bx-save'></i> Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.getElementById('type-modal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.add('hidden');
+    });
+    document.querySelector('[onclick*="type-modal"]')?.addEventListener('click', function() {
+        const m = document.getElementById('type-modal');
+        m.classList.remove('hidden');
+        m.style.display = 'flex';
+    });
+</script>
 @endpush

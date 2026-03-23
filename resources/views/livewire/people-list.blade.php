@@ -1,36 +1,22 @@
 <div>
-
-    {{-- ── Toolbar ── --}}
-    <div class="ui-card p-4 mb-4">
-        <div class="flex flex-wrap justify-between items-center gap-3">
-
-            {{-- View mode tabs --}}
-            <div class="flex gap-1.5">
-                <button wire:click="setViewMode('flat')" type="button"
-                        class="ui-btn text-sm py-1.5 px-3 {{ $viewMode === 'flat' ? 'ui-btn-maroon' : 'ui-btn-ghost' }}">
-                    <i class='bx bx-list-ul'></i> Flat
-                </button>
-                <button wire:click="setViewMode('family')" type="button"
-                        class="ui-btn text-sm py-1.5 px-3 {{ $viewMode === 'family' ? 'ui-btn-maroon' : 'ui-btn-ghost' }}">
-                    <i class='bx bx-home-heart'></i> By Family
-                </button>
-                <button wire:click="setViewMode('category')" type="button"
-                        class="ui-btn text-sm py-1.5 px-3 {{ $viewMode === 'category' ? 'ui-btn-maroon' : 'ui-btn-ghost' }}">
-                    <i class='bx bx-category'></i> By Category
-                </button>
+    {{-- Toolbar --}}
+    <div class="card" style="padding:14px 16px;margin-bottom:14px">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px">
+            <div style="display:flex;gap:6px">
+                @foreach([['flat','bx-list-ul','Flat'],['family','bx-home-heart','Family'],['category','bx-category','Category']] as [$mode,$icon,$label])
+                    <button wire:click="setViewMode('{{ $mode }}')" type="button"
+                            class="btn {{ $viewMode === $mode ? 'btn-secondary' : 'btn-ghost' }}"
+                            style="font-size:12px;padding:6px 10px">
+                        <i class='bx {{ $icon }}'></i> {{ $label }}
+                    </button>
+                @endforeach
             </div>
-
-            {{-- Server-side filters --}}
-            <div class="flex gap-2 flex-wrap">
-                <input type="text" wire:model.live="search"
-                       placeholder="Search name or contact…"
-                       class="ui-input" style="width:auto;min-width:180px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <input type="text" wire:model.live="search" placeholder="Search…" class="ui-input" style="width:auto;min-width:180px">
                 <select wire:model.live="filterFamily" class="ui-input" style="width:auto;min-width:140px">
                     <option value="">All Families</option>
                     @foreach($families as $family)
-                        <option value="{{ $family->id }}">
-                            {{ $family->family_name }} ({{ $family->people_count }})
-                        </option>
+                        <option value="{{ $family->id }}">{{ $family->family_name }} ({{ $family->people_count }})</option>
                     @endforeach
                 </select>
                 <select wire:model.live="filterCategory" class="ui-input" style="width:auto;min-width:130px">
@@ -43,151 +29,100 @@
         </div>
     </div>
 
-    {{-- ══ FLAT VIEW ══ --}}
+    {{-- Flat --}}
     @if($viewMode === 'flat')
         @forelse($people as $person)
-            <div class="ui-card p-4 mb-2">
-                <div class="flex justify-between items-start gap-3">
-                    <div class="min-w-0">
-                        <div class="font-semibold flex items-center gap-1.5" style="color:var(--ink)">
-                            <i class='bx bx-user text-[#6B0F1A]'></i>
-                            {{ $person->full_name }}
-                        </div>
-                        <div class="dm-sans text-sm mt-0.5" style="color:var(--ink-muted)">
-                            <span class="badge badge-gold mr-1">{{ $person->effective_category }}</span>
-                            {{ $person->family->family_name ?? 'No family' }}
+            <div class="card" style="padding:14px 16px;margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    <div style="min-width:0">
+                        <div style="font-size:14px;font-weight:600;color:var(--ink)">{{ $person->full_name }}</div>
+                        <div style="font-size:12px;color:var(--ink-faint);margin-top:2px">
+                            <span class="badge badge-red">{{ $person->effective_category }}</span>
+                            <span style="margin-left:6px">{{ $person->family->family_name ?? 'No family' }}</span>
                             @if($person->age) · {{ $person->age }} yrs @endif
                         </div>
                         @if($person->birthdate)
-                            <div class="dm-sans text-xs mt-1" style="color:var(--ink-faint)">
-                                🎂 {{ $person->birthdate->format('M d, Y') }}
-                            </div>
+                            <div style="font-size:11.5px;color:var(--ink-faint);margin-top:2px">🎂 {{ $person->birthdate->format('M d, Y') }}</div>
                         @endif
                     </div>
-                    <div class="flex gap-2 flex-shrink-0">
-                        <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })"
-                                class="ui-btn ui-btn-edit text-sm py-1.5 px-3">
+                    <div style="display:flex;gap:6px;flex-shrink:0">
+                        <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="btn btn-edit" style="font-size:12px;padding:6px 10px">
                             <i class='bx bx-edit-alt'></i> Edit
                         </button>
                         <button wire:click="deletePerson({{ $person->id }})"
                                 onclick="return confirm('Delete {{ addslashes($person->full_name) }}?')"
-                                class="ui-btn ui-btn-delete text-sm py-1.5 px-3">
-                            <i class='bx bx-trash'></i> Delete
+                                class="btn btn-danger" style="font-size:12px;padding:6px 10px">
+                            <i class='bx bx-trash'></i>
                         </button>
                     </div>
                 </div>
             </div>
         @empty
-            <div class="ui-card-soft p-6 text-center dm-sans" style="color:var(--ink-muted)">No people match the current filters.</div>
+            <div class="card-soft" style="padding:32px;text-align:center;font-size:13px;color:var(--ink-faint)">No people match the current filters.</div>
         @endforelse
 
-    {{-- ══ FAMILY VIEW ══ --}}
+    {{-- Family --}}
     @elseif($viewMode === 'family')
-        @php
-            $peopleByFamily = $people->groupBy(fn($p) => $p->family_id ?: 'no-family');
-        @endphp
+        @php $peopleByFamily = $people->groupBy(fn($p) => $p->family_id ?: 'no-family'); @endphp
         @forelse($peopleByFamily as $familyKey => $familyPeople)
-            <div class="ui-card p-4 mb-4">
-                {{-- Family header --}}
-                <div class="flex justify-between items-start mb-3">
+            <div class="card" style="padding:16px;margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
                     <div>
-                        <h3 class="font-bold text-lg flex items-center gap-1.5" style="color:var(--ink)">
-                            @if($familyKey === 'no-family')
-                                <i class='bx bx-user-x text-[#6B0F1A]'></i>No Family
-                            @else
-                                @php $fam = $familyPeople->first()->family; @endphp
-                                <i class='bx bx-buildings text-[#6B0F1A]'></i>
-                                {{ $fam?->family_name ?? 'Unknown Family' }}
+                        <h3 style="font-size:15px;font-weight:700;color:var(--ink);margin:0;display:flex;align-items:center;gap:6px">
+                            <i class='bx {{ $familyKey === "no-family" ? "bx-user-x" : "bx-buildings" }}' style="color:var(--red)"></i>
+                            @if($familyKey === 'no-family') No Family
+                            @else {{ $familyPeople->first()->family?->family_name ?? 'Unknown' }}
                             @endif
                         </h3>
-                        @if(isset($fam) && $fam?->address)
-                            <p class="dm-sans text-xs mt-0.5" style="color:var(--ink-muted)">{{ $fam->address }}</p>
+                        @if($familyKey !== 'no-family' && $familyPeople->first()->family?->address)
+                            <p style="font-size:12px;color:var(--ink-faint);margin:2px 0 0">{{ $familyPeople->first()->family->address }}</p>
                         @endif
                     </div>
-                    <span class="badge badge-gold">
-                        {{ $familyPeople->count() }} {{ Str::plural('person', $familyPeople->count()) }}
-                    </span>
+                    <span class="badge badge-red">{{ $familyPeople->count() }} {{ Str::plural('person', $familyPeople->count()) }}</span>
                 </div>
-                <hr class="ui-divider mb-3">
-
-                {{-- Two-column person grid --}}
-                <ul class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+                <hr class="ui-divider" style="margin-bottom:10px">
+                <ul style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px;list-style:none;margin:0;padding:0">
                     @foreach($familyPeople as $person)
-                        <li class="flex justify-between items-center py-2 px-1 rounded hover:bg-[var(--surface-soft)] transition-colors"
-                            style="border-bottom:1px solid var(--border)">
-                            <div class="min-w-0">
-                                <div class="font-medium text-sm" style="color:var(--ink)">{{ $person->full_name }}</div>
-                                <div class="dm-sans text-xs" style="color:var(--ink-faint)">
-                                    {{ $person->effective_category }}
-                                    @if($person->age) · {{ $person->age }} yrs @endif
-                                </div>
-                                @if($person->birthdate)
-                                    <div class="dm-sans text-xs" style="color:var(--ink-faint)">
-                                        🎂 {{ $person->birthdate->format('M d, Y') }}
-                                    </div>
-                                @endif
+                        <li style="display:flex;justify-content:space-between;align-items:center;padding:8px 6px;border-radius:6px;border-bottom:1px solid var(--border-soft)">
+                            <div style="min-width:0">
+                                <div style="font-size:13px;font-weight:500;color:var(--ink)">{{ $person->full_name }}</div>
+                                <div style="font-size:11.5px;color:var(--ink-faint)">{{ $person->effective_category }}@if($person->age) · {{ $person->age }} yrs @endif</div>
                             </div>
-                            <div class="flex gap-1.5 flex-shrink-0 ml-2">
-                                <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })"
-                                        class="ui-btn ui-btn-edit text-xs py-1 px-2">
-                                    <i class='bx bx-edit-alt'></i>
-                                </button>
-                                <button wire:click="deletePerson({{ $person->id }})"
-                                        onclick="return confirm('Delete {{ addslashes($person->full_name) }}?')"
-                                        class="ui-btn ui-btn-delete text-xs py-1 px-2">
-                                    <i class='bx bx-trash'></i>
-                                </button>
+                            <div style="display:flex;gap:4px;flex-shrink:0;margin-left:8px">
+                                <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="btn btn-edit" style="font-size:11px;padding:4px 8px"><i class='bx bx-edit-alt'></i></button>
+                                <button wire:click="deletePerson({{ $person->id }})" onclick="return confirm('Delete {{ addslashes($person->full_name) }}?')" class="btn btn-danger" style="font-size:11px;padding:4px 8px"><i class='bx bx-trash'></i></button>
                             </div>
                         </li>
                     @endforeach
                 </ul>
             </div>
         @empty
-            <div class="ui-card-soft p-6 text-center dm-sans" style="color:var(--ink-muted)">No family groups match the current filters.</div>
+            <div class="card-soft" style="padding:32px;text-align:center;font-size:13px;color:var(--ink-faint)">No family groups match the current filters.</div>
         @endforelse
 
-    {{-- ══ CATEGORY VIEW ══ --}}
+    {{-- Category --}}
     @elseif($viewMode === 'category')
-        @php
-            $displayCategories = array_merge($categories, ['Unknown']);
-        @endphp
-        @foreach($displayCategories as $cat)
+        @foreach(array_merge($categories, ['Unknown']) as $cat)
             @php $catPeople = $people->filter(fn($p) => $p->effective_category === $cat); @endphp
             @if($catPeople->count() > 0)
-                <div class="mb-5">
-                    <div class="flex items-center gap-2 mb-2 px-1">
-                        <i class='bx bx-category-alt text-[#6B0F1A] text-lg'></i>
-                        <span class="font-bold" style="color:var(--ink)">{{ $cat }}</span>
-                        <span class="badge badge-gold">{{ $catPeople->count() }}</span>
+                <div style="margin-bottom:20px">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:0 2px">
+                        <span style="font-size:13px;font-weight:700;color:var(--ink)">{{ $cat }}</span>
+                        <span class="badge badge-red">{{ $catPeople->count() }}</span>
                     </div>
                     @foreach($catPeople as $person)
-                        <div class="ui-card p-4 mb-2">
-                            <div class="flex justify-between items-start gap-3">
-                                <div class="min-w-0">
-                                    <div class="font-semibold flex items-center gap-1.5" style="color:var(--ink)">
-                                        <i class='bx bx-user text-[#6B0F1A]'></i>
-                                        {{ $person->full_name }}
-                                    </div>
-                                    <div class="dm-sans text-sm mt-0.5" style="color:var(--ink-muted)">
+                        <div class="card" style="padding:14px 16px;margin-bottom:6px">
+                            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                                <div style="min-width:0">
+                                    <div style="font-size:14px;font-weight:600;color:var(--ink)">{{ $person->full_name }}</div>
+                                    <div style="font-size:12px;color:var(--ink-faint);margin-top:2px">
                                         {{ $person->family->family_name ?? 'No family' }}
                                         @if($person->age) · {{ $person->age }} yrs @endif
                                     </div>
-                                    @if($person->birthdate)
-                                        <div class="dm-sans text-xs mt-1" style="color:var(--ink-faint)">
-                                            🎂 {{ $person->birthdate->format('M d, Y') }}
-                                        </div>
-                                    @endif
                                 </div>
-                                <div class="flex gap-2 flex-shrink-0">
-                                    <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })"
-                                            class="ui-btn ui-btn-edit text-sm py-1.5 px-3">
-                                        <i class='bx bx-edit-alt'></i> Edit
-                                    </button>
-                                    <button wire:click="deletePerson({{ $person->id }})"
-                                            onclick="return confirm('Delete {{ addslashes($person->full_name) }}?')"
-                                            class="ui-btn ui-btn-delete text-sm py-1.5 px-3">
-                                        <i class='bx bx-trash'></i> Delete
-                                    </button>
+                                <div style="display:flex;gap:6px;flex-shrink:0">
+                                    <button wire:click="$dispatch('editPerson', { id: {{ $person->id }} })" class="btn btn-edit" style="font-size:12px;padding:6px 10px"><i class='bx bx-edit-alt'></i> Edit</button>
+                                    <button wire:click="deletePerson({{ $person->id }})" onclick="return confirm('Delete {{ addslashes($person->full_name) }}?')" class="btn btn-danger" style="font-size:12px;padding:6px 10px"><i class='bx bx-trash'></i></button>
                                 </div>
                             </div>
                         </div>
@@ -196,6 +131,4 @@
             @endif
         @endforeach
     @endif
-
 </div>
-

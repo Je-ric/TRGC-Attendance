@@ -1,104 +1,84 @@
-<div class="space-y-5">
+<div style="display:flex;flex-direction:column;gap:16px">
 
-    {{-- ── Flash ── --}}
     @if(session()->has('success'))
-        <div class="toast-success flex items-center gap-2">
-            <i class='bx bx-check-circle text-base'></i>
-            <span>{{ session('success') }}</span>
+        <div class="toast-success" style="display:flex;align-items:center;gap:8px">
+            <i class='bx bx-check-circle'></i> {{ session('success') }}
         </div>
     @endif
 
-    {{-- ── Session Header Card ── --}}
-    <div class="ui-card p-5">
-        <div class="flex flex-wrap justify-between items-start gap-4 mb-4">
+    {{-- Session config --}}
+    <div class="card" style="padding:20px">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px">
             <div>
                 <div class="page-eyebrow">Check-in</div>
-                <h3 class="page-title text-2xl text-[#6B0F1A] flex items-center gap-2">
-                    <i class='bx bx-calendar-check text-[#C9A84C]'></i>
-                    {{ $attendanceType->name }}
-                </h3>
-                <p class="text-sm dm-sans mt-0.5" style="color:var(--ink-muted)">
-                    {{ $attendanceType->day_of_week ?? 'Flexible Schedule' }}
-                </p>
+                <h3 class="page-title" style="font-size:20px;margin:4px 0 2px">{{ $attendanceType->name }}</h3>
+                <p style="font-size:12px;color:var(--ink-faint);margin:0">{{ $attendanceType->day_of_week ?? 'Flexible Schedule' }}</p>
             </div>
             @if($latestSession)
-                <div class="text-right">
-                    <div class="text-xs" style="color:var(--ink-faint)">Latest Session</div>
-                    <div class="text-sm font-semibold" style="color:var(--ink)">{{ $latestSession->date->format('M d, Y') }}</div>
+                <div style="text-align:right">
+                    <div style="font-size:10.5px;color:var(--ink-faint);margin-bottom:2px">Latest Session</div>
+                    <div style="font-size:13px;font-weight:600;color:var(--ink)">{{ $latestSession->date->format('M d, Y') }}</div>
                     @if($latestSession->service_name)
-                        <span class="badge badge-gold mt-1">{{ $latestSession->service_name }}</span>
+                        <span class="badge badge-red" style="margin-top:4px">{{ $latestSession->service_name }}</span>
                     @endif
                 </div>
             @endif
         </div>
 
-        <hr class="ui-divider mb-4">
+        <hr class="ui-divider" style="margin-bottom:16px">
 
-        <div class="flex flex-wrap gap-4">
-            <div class="flex-1 min-w-[140px]">
+        <div style="display:flex;flex-wrap:wrap;gap:12px">
+            <div style="flex:1;min-width:140px">
                 <label class="form-label">Date</label>
                 <input type="date" wire:model.live="date" max="{{ now()->toDateString() }}" class="ui-input">
             </div>
-            <div class="flex-1 min-w-[200px]">
-                <label class="form-label">
-                    Service Name
-                    <span style="color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:0">(optional)</span>
-                </label>
+            <div style="flex:2;min-width:200px">
+                <label class="form-label">Service Name <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-faint)">(optional)</span></label>
                 @if($currentSession && $currentSession->service_name)
-                    <div class="flex items-center gap-2">
-                        <span class="flex-1 ui-input" style="color:var(--ink-muted)">{{ $currentSession->service_name }}</span>
-                        <button type="button" wire:click="$set('service_name', '')"
-                                class="ui-btn ui-btn-edit" style="white-space:nowrap">
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <span class="ui-input" style="color:var(--ink-muted);display:block">{{ $currentSession->service_name }}</span>
+                        <button type="button" wire:click="$set('service_name', '')" class="btn btn-ghost" style="white-space:nowrap;font-size:12px">
                             <i class='bx bx-edit-alt'></i> Edit
                         </button>
                     </div>
                 @else
-                    <input type="text" wire:model.live="service_name"
-                           placeholder="e.g., Morning Service"
-                           class="ui-input">
+                    <input type="text" wire:model.live="service_name" placeholder="e.g., Morning Service" class="ui-input">
                 @endif
             </div>
         </div>
     </div>
 
-    {{-- ── Stats Row ── --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-        <div class="ui-card-soft p-4">
+    {{-- Stats --}}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px">
+        <div class="card" style="padding:14px 16px">
             <div class="stat-label">Total</div>
             <div class="stat-value">{{ $totalCount }}</div>
         </div>
-        <div class="p-4 rounded-[10px]" style="background:#F0FDF4;border:1px solid #86EFAC;">
-            <div class="stat-label" style="color:#15803D">Present</div>
-            <div class="stat-value" style="color:#15803D">{{ $presentCount }}</div>
+        <div style="padding:14px 16px;border-radius:12px;background:#f0fdf4;border:1px solid #86efac">
+            <div class="stat-label" style="color:#15803d">Present</div>
+            <div class="stat-value" style="color:#15803d">{{ $presentCount }}</div>
         </div>
         @foreach($categories as $cat)
-            <div class="ui-card p-4">
+            <div class="card" style="padding:14px 16px">
                 <div class="stat-label">{{ $cat }}</div>
-                <div class="stat-value" style="color:var(--maroon)">{{ $categoryCounts[$cat] ?? 0 }}</div>
+                <div class="stat-value" style="color:var(--red-dark)">{{ $categoryCounts[$cat] ?? 0 }}</div>
             </div>
         @endforeach
     </div>
 
-    {{-- ── Attendee Selector ── --}}
-    <div class="ui-card p-5">
-
-        {{-- View mode + Filters --}}
-        <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
-            <div class="flex gap-1.5">
-                <button wire:click="setViewMode('flat')"
-                        class="ui-btn text-xs py-1.5 px-3 {{ $viewMode === 'flat' ? 'ui-btn-maroon' : 'ui-btn-ghost' }}">
-                    <i class='bx bx-list-ul'></i> Flat
-                </button>
-                <button wire:click="setViewMode('family')"
-                        class="ui-btn text-xs py-1.5 px-3 {{ $viewMode === 'family' ? 'ui-btn-maroon' : 'ui-btn-ghost' }}">
-                    <i class='bx bx-home-heart'></i> Family
-                </button>
-                <button wire:click="setViewMode('category')"
-                        class="ui-btn text-xs py-1.5 px-3 {{ $viewMode === 'category' ? 'ui-btn-maroon' : 'ui-btn-ghost' }}">
-                    <i class='bx bx-category'></i> Category
-                </button>
+    {{-- Attendee selector --}}
+    <div class="card" style="padding:20px">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px">
+            <div style="display:flex;gap:6px">
+                @foreach([['flat','bx-list-ul','Flat'],['family','bx-home-heart','Family'],['category','bx-category','Category']] as [$mode,$icon,$label])
+                    <button wire:click="setViewMode('{{ $mode }}')"
+                            class="btn {{ $viewMode === $mode ? 'btn-secondary' : 'btn-ghost' }}"
+                            style="font-size:12px;padding:6px 10px">
+                        <i class='bx {{ $icon }}'></i> {{ $label }}
+                    </button>
+                @endforeach
             </div>
-            <div class="flex gap-2 flex-wrap">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <select wire:model.live="filterFamily" class="ui-input" style="width:auto;min-width:130px">
                     <option value="">All Families</option>
                     @foreach($families as $family)
@@ -114,119 +94,93 @@
             </div>
         </div>
 
-        {{-- Add person + search --}}
-        <div class="flex items-center justify-between gap-3 mb-3">
-            <label class="form-label mb-0">Select Attendees</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
+            <label class="form-label" style="margin:0">Attendees</label>
             <livewire:person-create />
         </div>
 
-        <input type="text"
-               wire:model.debounce.300ms="search"
-               placeholder="Search name or contact…"
-               class="ui-input mb-3">
+        <input type="text" wire:model.debounce.300ms="search" placeholder="Search name or contact…" class="ui-input" style="margin-bottom:10px">
 
-        <hr class="ui-divider mb-0">
-
-        {{-- Scrollable list --}}
-        <div class="rounded-[8px] border border-[var(--border)] bg-white max-h-[420px] overflow-y-auto">
+        <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:420px;overflow-y:auto">
             @if($viewMode === 'flat')
                 @forelse($allPeople as $person)
                     @php $isChecked = isset($checked[$person->id]) && $checked[$person->id]; @endphp
                     <label class="checkin-row {{ $isChecked ? 'is-checked' : '' }}">
-                        <input type="checkbox"
-                               wire:click="togglePerson({{ $person->id }})"
-                               @checked($isChecked)
-                               class="mr-3 w-4 h-4 flex-shrink-0" style="accent-color:var(--maroon)">
-                        <div class="flex-1 min-w-0">
-                            <div class="font-medium text-sm" style="color:var(--ink)">{{ $person->full_name }}</div>
-                            <div class="text-xs" style="color:var(--ink-faint)">
+                        <input type="checkbox" wire:click="togglePerson({{ $person->id }})" @checked($isChecked)
+                               style="margin-right:10px;width:15px;height:15px;accent-color:var(--red);flex-shrink:0">
+                        <div style="flex:1;min-width:0">
+                            <div style="font-size:13.5px;font-weight:500;color:var(--ink)">{{ $person->full_name }}</div>
+                            <div style="font-size:11.5px;color:var(--ink-faint)">
                                 {{ $person->effective_category }}
                                 @if($person->age) · {{ $person->age }} yrs @endif
                                 @if($person->family) · {{ $person->family->family_name }} @endif
                             </div>
                         </div>
                         @if($isChecked)
-                            <span class="badge badge-present ml-2">Present</span>
+                            <span class="badge badge-present" style="margin-left:8px">Present</span>
                         @endif
                     </label>
                 @empty
-                    <div class="p-5 text-sm text-center" style="color:var(--ink-muted)">No people match the current filters.</div>
+                    <div style="padding:24px;text-align:center;font-size:13px;color:var(--ink-faint)">No people match the current filters.</div>
                 @endforelse
 
             @elseif($viewMode === 'family')
-                @php
-                    $peopleByFamily = $allPeople->groupBy(fn($p) => $p->family_id ?: 'no-family');
-                @endphp
+                @php $peopleByFamily = $allPeople->groupBy(fn($p) => $p->family_id ?: 'no-family'); @endphp
                 @foreach($peopleByFamily as $familyId => $people)
-                    <div>
-                        <div class="px-3 py-2 text-xs font-semibold uppercase tracking-wide"
-                             style="background:var(--surface-soft);color:var(--ink-muted);border-bottom:1px solid var(--border)">
-                            @if($familyId !== 'no-family')
-                                @php $fam = $people->first()->family; @endphp
-                                <i class='bx bx-buildings mr-1'></i>{{ $fam?->family_name ?? 'Unknown Family' }}
-                                <span style="font-weight:400">({{ $people->count() }})</span>
-                            @else
-                                <i class='bx bx-user mr-1'></i>No Family ({{ $people->count() }})
-                            @endif
-                        </div>
-                        @foreach($people as $person)
-                            @php $isChecked = isset($checked[$person->id]) && $checked[$person->id]; @endphp
-                            <label class="checkin-row {{ $isChecked ? 'is-checked' : '' }}">
-                                <input type="checkbox"
-                                       wire:click="togglePerson({{ $person->id }})"
-                                       @checked($isChecked)
-                                       class="mr-3 w-4 h-4 flex-shrink-0" style="accent-color:var(--maroon)">
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-medium text-sm" style="color:var(--ink)">{{ $person->full_name }}</div>
-                                    <div class="text-xs" style="color:var(--ink-faint)">{{ $person->effective_category }}</div>
-                                </div>
-                                @if($isChecked) <span class="badge badge-present ml-2">Present</span> @endif
-                            </label>
-                        @endforeach
+                    <div style="background:var(--surface);padding:7px 14px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ink-muted);border-bottom:1px solid var(--border)">
+                        @if($familyId !== 'no-family')
+                            {{ $people->first()->family?->family_name ?? 'Unknown' }} ({{ $people->count() }})
+                        @else
+                            No Family ({{ $people->count() }})
+                        @endif
                     </div>
+                    @foreach($people as $person)
+                        @php $isChecked = isset($checked[$person->id]) && $checked[$person->id]; @endphp
+                        <label class="checkin-row {{ $isChecked ? 'is-checked' : '' }}">
+                            <input type="checkbox" wire:click="togglePerson({{ $person->id }})" @checked($isChecked)
+                                   style="margin-right:10px;width:15px;height:15px;accent-color:var(--red);flex-shrink:0">
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:13.5px;font-weight:500;color:var(--ink)">{{ $person->full_name }}</div>
+                                <div style="font-size:11.5px;color:var(--ink-faint)">{{ $person->effective_category }}</div>
+                            </div>
+                            @if($isChecked) <span class="badge badge-present" style="margin-left:8px">Present</span> @endif
+                        </label>
+                    @endforeach
                 @endforeach
 
             @elseif($viewMode === 'category')
                 @php $peopleByCategory = $allPeople->groupBy('effective_category'); @endphp
                 @foreach($peopleByCategory as $category => $people)
-                    <div>
-                        <div class="px-3 py-2 text-xs font-semibold uppercase tracking-wide"
-                             style="background:var(--surface-soft);color:var(--ink-muted);border-bottom:1px solid var(--border)">
-                            <i class='bx bx-category-alt mr-1'></i>{{ $category }}
-                            <span style="font-weight:400">({{ $people->count() }})</span>
-                        </div>
-                        @foreach($people as $person)
-                            @php $isChecked = isset($checked[$person->id]) && $checked[$person->id]; @endphp
-                            <label class="checkin-row {{ $isChecked ? 'is-checked' : '' }}">
-                                <input type="checkbox"
-                                       wire:click="togglePerson({{ $person->id }})"
-                                       @checked($isChecked)
-                                       class="mr-3 w-4 h-4 flex-shrink-0" style="accent-color:var(--maroon)">
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-medium text-sm" style="color:var(--ink)">{{ $person->full_name }}</div>
-                                    @if($person->family)
-                                        <div class="text-xs" style="color:var(--ink-faint)">{{ $person->family->family_name }}</div>
-                                    @endif
-                                </div>
-                                @if($isChecked) <span class="badge badge-present ml-2">Present</span> @endif
-                            </label>
-                        @endforeach
+                    <div style="background:var(--surface);padding:7px 14px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--ink-muted);border-bottom:1px solid var(--border)">
+                        {{ $category }} ({{ $people->count() }})
                     </div>
+                    @foreach($people as $person)
+                        @php $isChecked = isset($checked[$person->id]) && $checked[$person->id]; @endphp
+                        <label class="checkin-row {{ $isChecked ? 'is-checked' : '' }}">
+                            <input type="checkbox" wire:click="togglePerson({{ $person->id }})" @checked($isChecked)
+                                   style="margin-right:10px;width:15px;height:15px;accent-color:var(--red);flex-shrink:0">
+                            <div style="flex:1;min-width:0">
+                                <div style="font-size:13.5px;font-weight:500;color:var(--ink)">{{ $person->full_name }}</div>
+                                @if($person->family)
+                                    <div style="font-size:11.5px;color:var(--ink-faint)">{{ $person->family->family_name }}</div>
+                                @endif
+                            </div>
+                            @if($isChecked) <span class="badge badge-present" style="margin-left:8px">Present</span> @endif
+                        </label>
+                    @endforeach
                 @endforeach
             @endif
         </div>
     </div>
 
-    {{-- ── Save Bar ── --}}
-    <div class="ui-card p-4 flex items-center justify-between gap-4">
-        <div class="dm-sans text-sm" style="color:var(--ink-muted)">
-            <span class="font-semibold" style="color:var(--ink)">{{ $presentCount }}</span>
+    {{-- Save bar --}}
+    <div class="card" style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="font-size:13px;color:var(--ink-muted)">
+            <span style="font-weight:700;color:var(--ink)">{{ $presentCount }}</span>
             {{ Str::plural('person', $presentCount) }} selected
         </div>
-        <button wire:click="save" class="ui-btn ui-btn-primary">
-            <i class='bx bx-save'></i>
-            Save Attendance
+        <button wire:click="save" class="btn btn-primary">
+            <i class='bx bx-save'></i> Save Attendance
         </button>
     </div>
-
 </div>

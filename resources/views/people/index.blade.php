@@ -1,59 +1,53 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="space-y-6">
+<div style="display:flex;flex-direction:column;gap:24px">
 
-        <x-title-with-header title="Management" description="Manage individuals, family links, and category distribution.">
-            <livewire:person-create />
-        </x-title-with-header>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <x-statistic-card 
-                    gradientVariant="deep-rose" 
-                    icon="bx-users" 
-                    title="Total People" 
-                    value="{{ $totalPeople }}">
-
-            </x-statistic-card>
-            @foreach($categories as $cat)
-                <x-statistic-card 
-                    icon="bx-user"
-                    :title="$cat"
-                    :value="$categoryCounts[$cat] ?? 0"
-                    gradientVariant="sunset"
-                />
-            @endforeach
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px">
+        <div>
+            <div class="page-eyebrow">Directory</div>
+            <h1 class="page-title" style="font-size:26px;margin:4px 0 6px">People</h1>
+            <p style="font-size:13px;color:var(--ink-faint);margin:0">Manage individuals, family links, and categories.</p>
         </div>
-
-        @if($familyCounts->count() > 0)
-            <section class="ui-card p-4">
-                <h3 class="page-title text-xl text-[#111111] mb-3 flex items-center gap-2">
-                    <i class='bx bx-network-chart text-[#6B0F1A]'></i>
-                    People Per Family
-                </h3>
-                <hr class="ui-divider mb-3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-                    @foreach($familyCounts as $family)
-                        <div class="rounded-[10px] p-3" style="border:1px solid var(--border);background:var(--surface-card)">
-                            <div class="font-semibold text-sm" style="color:var(--ink)">{{ $family->family_name }}</div>
-                            <div class="text-xs dm-sans" style="color:var(--ink-faint)">
-                                {{ $family->people_count }} {{ Str::plural('person', $family->people_count) }}
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
-        <livewire:people-list />
-
-        <section class="ui-card p-4">
-            <h3 class="page-title text-xl text-[#111111] mb-4 flex items-center gap-2">
-                <i class='bx bx-cake text-[#6B0F1A]'></i>
-                Upcoming Birthdays
-            </h3>
-            <hr class="ui-divider mb-4">
-            <livewire:birthday-reminders />
-        </section>
+        <livewire:person-create />
     </div>
+
+    {{-- Stats --}}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+        <x-statistic-card variant="primary" icon="bx-users" title="Total People" value="{{ $totalPeople }}" />
+        @foreach($categories as $cat)
+            <x-statistic-card variant="muted" icon="bx-user" :title="$cat" :value="$categoryCounts[$cat] ?? 0" />
+        @endforeach
+    </div>
+
+    {{-- Family distribution --}}
+    @if($familyCounts->count() > 0)
+        <div class="card" style="padding:20px">
+            <h3 class="page-title" style="font-size:15px;margin:0 0 14px;display:flex;align-items:center;gap:6px">
+                <i class='bx bx-network-chart' style="color:var(--red)"></i> People Per Family
+            </h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
+                @foreach($familyCounts as $family)
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+                        <div style="font-size:13px;font-weight:600;color:var(--ink)">{{ $family->family_name }}</div>
+                        <div style="font-size:11.5px;color:var(--ink-faint);margin-top:2px">
+                            {{ $family->people_count }} {{ Str::plural('person', $family->people_count) }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <livewire:people-list />
+
+    {{-- Birthdays --}}
+    <div class="card" style="padding:20px">
+        <h3 class="page-title" style="font-size:15px;margin:0 0 14px;display:flex;align-items:center;gap:6px">
+            <i class='bx bx-cake' style="color:var(--red)"></i> Upcoming Birthdays
+        </h3>
+        <hr class="ui-divider" style="margin-bottom:14px">
+        <livewire:birthday-reminders />
+    </div>
+</div>
 @endsection
