@@ -1,125 +1,156 @@
 @extends('layouts.app')
 
 @section('content')
-<div style="display:flex;flex-direction:column;gap:24px">
+<div class="flex flex-col gap-6">
 
-    {{-- Header --}}
-    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px">
-        <div>
-            <div class="page-eyebrow">Dashboard</div>
-            <h1 class="page-title" style="font-size:26px;margin:4px 0 6px">Attendance</h1>
-            <p style="font-size:13px;color:var(--ink-faint);margin:0">Track services and manage congregation attendance.</p>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <a href="{{ route('attendance.records') }}" class="btn btn-ghost">
-                <i class='bx bx-folder-open'></i> Records
-            </a>
-            <a href="{{ route('people.index') }}" class="btn btn-ghost">
-                <i class='bx bx-group'></i> People
-            </a>
-            <button onclick="document.getElementById('type-modal').classList.remove('hidden')" class="btn btn-primary">
-                <i class='bx bx-plus'></i> Add Service
-            </button>
-        </div>
-    </div>
+    <x-page-header icon="bx-check-shield" title="Attendance" desc="Track services and manage congregation attendance.">
+        <x-button href="{{ route('attendance.records') }}" variant="ghost">
+            <i class='bx bx-folder-open'></i> Records
+        </x-button>
+        <x-button href="{{ route('people.index') }}" variant="ghost">
+            <i class='bx bx-group'></i> People
+        </x-button>
+        <x-button variant="primary" onclick="document.getElementById('add-service-modal').showModal()">
+            <i class='bx bx-plus'></i> Add Service
+        </x-button>
+    </x-page-header>
 
-    @if(session()->has('success'))
-        <div class="toast-success" style="display:flex;align-items:center;gap:8px">
-            <i class='bx bx-check-circle'></i> {{ session('success') }}
-        </div>
-    @endif
-
-    {{-- Service Cards --}}
     @if($types->isEmpty())
-        <div class="card" style="padding:48px;text-align:center">
-            <i class='bx bx-calendar-x' style="font-size:40px;color:var(--muted);display:block;margin-bottom:12px"></i>
-            <p style="font-size:15px;font-weight:600;color:var(--ink-muted);margin:0 0 4px">No services yet</p>
-            <p style="font-size:13px;color:var(--ink-faint);margin:0">Click "Add Service" to create your first one.</p>
-        </div>
+        <x-empty-state icon="bx bx-calendar-x" title="No services yet" message='Click "Add Service" to create your first one.'>
+            <x-button variant="primary" onclick="document.getElementById('add-service-modal').showModal()">
+                <i class='bx bx-plus'></i> Add Service
+            </x-button>
+        </x-empty-state>
     @else
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+        <div class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
             @foreach($types as $type)
                 @php $latestSession = $type->sessions->first(); @endphp
-                <div class="card" style="padding:20px;display:flex;flex-direction:column;gap:14px">
-                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+                <x-card :padding="false">
+                    <div class="px-4 py-3 border-b border-[#e4e0e2] bg-[#f5f4f6] flex items-start justify-between gap-3">
                         <div>
-                            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--red);margin-bottom:4px">Service</div>
-                            <h3 style="font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:var(--ink);margin:0">{{ $type->name }}</h3>
-                            <p style="font-size:12px;color:var(--ink-faint);margin:3px 0 0">{{ $type->day_of_week ?? 'Flexible Schedule' }}</p>
+                            <div class="page-eyebrow mb-1">Service</div>
+                            <h3 class="page-title text-[17px]">{{ $type->name }}</h3>
+                            <p class="text-[12px] text-[#a09aa4] mt-0.5">{{ $type->day_of_week ?? 'Flexible Schedule' }}</p>
                         </div>
                         @if($latestSession)
-                            <span class="badge badge-muted">{{ $latestSession->date->format('M d') }}</span>
+                            <x-feedback-status.status-indicator variant="slate">
+                                {{ $latestSession->date->format('M d') }}
+                            </x-feedback-status.status-indicator>
                         @endif
                     </div>
-
-                    @if($latestSession?->service_name)
-                        <div style="font-size:12px;color:var(--ink-muted);background:var(--surface);border-radius:6px;padding:6px 10px">
-                            Latest: {{ $latestSession->service_name }}
-                        </div>
-                    @endif
-
-                    <hr class="ui-divider">
-
-                    <div style="display:flex;align-items:center;justify-content:space-between">
-                        <a href="{{ route('attendance.show', $type) }}" class="btn btn-primary" style="font-size:12px;padding:7px 12px">
-                            <i class='bx bx-log-in-circle'></i> Check-in
-                        </a>
-                        <form method="POST" action="{{ route('attendance-types.destroy', $type) }}"
-                              onsubmit="return confirm('Delete this service and all its records?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-danger" style="font-size:12px;padding:7px 12px">
+                    <div class="p-4 flex flex-col gap-3">
+                        @if($latestSession?->service_name)
+                            <div class="text-[12px] text-[#6b6570] bg-[#f5f4f6] rounded-lg px-3 py-2 border border-[#e4e0e2]">
+                                <span class="text-[11px] font-bold uppercase tracking-[0.1em] text-[#a09aa4] block mb-0.5">Latest</span>
+                                {{ $latestSession->service_name }}
+                            </div>
+                        @endif
+                        <div class="flex items-center justify-between mt-auto pt-1">
+                            <x-button href="{{ route('attendance.show', $type) }}" variant="sm-primary">
+                                <i class='bx bx-log-in-circle'></i> Check-in
+                            </x-button>
+                            <x-button variant="table-danger"
+                                      onclick="document.getElementById('delete-service-{{ $type->id }}').showModal()">
                                 <i class='bx bx-trash'></i>
-                            </button>
-                        </form>
+                            </x-button>
+                        </div>
                     </div>
-                </div>
+                </x-card>
             @endforeach
         </div>
     @endif
+
 </div>
 @endsection
 
 @push('modals')
-<div id="type-modal" class="hidden" style="position:fixed;inset:0;background:rgba(28,28,30,0.45);backdrop-filter:blur(3px);z-index:50;display:none;align-items:center;justify-content:center;padding:16px"
-     onclick="if(event.target===this)this.style.display='none'">
-    <div class="modal-box" onclick="event.stopPropagation()">
-        <h3 class="page-title" style="font-size:20px;margin:0 0 4px">Add Service</h3>
-        <p style="font-size:13px;color:var(--ink-faint);margin:0 0 20px">Create a new attendance service or event.</p>
-        <hr class="ui-divider" style="margin-bottom:20px">
-        <form method="POST" action="{{ route('attendance-types.store') }}" style="display:flex;flex-direction:column;gap:14px">
-            @csrf
-            <div>
-                <label class="form-label">Service Name *</label>
-                <input type="text" name="name" required placeholder="e.g., Sunday Service" class="ui-input">
-            </div>
-            <div>
-                <label class="form-label">Day of Week</label>
-                <select name="day_of_week" class="ui-input">
+
+{{-- ── Add Service Modal ──────────────────────────────────────────── --}}
+<x-modal.dialog id="add-service-modal" maxWidth="max-w-md">
+    <x-modal.header modalId="add-service-modal">
+        <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#fff0f0] text-[#ed213a] shrink-0">
+                <i class="bx bx-calendar-plus text-base leading-none"></i>
+            </span>
+            Add Service
+        </div>
+    </x-modal.header>
+    <form method="POST" action="{{ route('attendance-types.store') }}">
+        @csrf
+        <x-modal.body class="flex flex-col gap-4">
+            <p class="text-[13px] text-[#6b6570]">Create a new attendance service or event.</p>
+            <x-form.field label="Service Name" :isRequired="true" error="name">
+                <x-form.input name="name" placeholder="e.g., Sunday Service" value="{{ old('name') }}" />
+            </x-form.field>
+            <x-form.field label="Day of Week">
+                <x-form.select name="day_of_week">
                     <option value="">Flexible Schedule</option>
                     @foreach(['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] as $day)
-                        <option>{{ $day }}</option>
+                        <option {{ old('day_of_week') === $day ? 'selected' : '' }}>{{ $day }}</option>
                     @endforeach
-                </select>
+                </x-form.select>
+            </x-form.field>
+        </x-modal.body>
+        <x-modal.footer>
+            <x-modal.close-button modalId="add-service-modal" text="Cancel" />
+            <x-button type="submit" variant="primary">
+                <i class='bx bx-save'></i> Save
+            </x-button>
+        </x-modal.footer>
+    </form>
+</x-modal.dialog>
+
+{{-- ── Delete Service Modals (one per service) ───────────────────── --}}
+@foreach($types as $type)
+    <x-modal.dialog id="delete-service-{{ $type->id }}" maxWidth="max-w-md">
+        <x-modal.header modalId="delete-service-{{ $type->id }}">
+            <div class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#ffe4e6] text-[#e11d48] shrink-0">
+                    <i class="bx bx-trash text-base leading-none"></i>
+                </span>
+                <span class="text-[#9f1239]">Delete Service</span>
             </div>
-            <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:4px">
-                <button type="button" onclick="document.getElementById('type-modal').style.display='none'" class="btn btn-ghost">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-primary">
-                    <i class='bx bx-save'></i> Save
-                </button>
+        </x-modal.header>
+        <x-modal.body class="space-y-4">
+            <p class="text-[13px] text-[#6b6570]">Are you sure you want to delete this service?</p>
+            <div class="rounded-xl border border-[#e4e0e2] bg-[#f5f4f6] p-4 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#a09aa4]">Service</span>
+                    <span class="text-[13px] font-semibold text-[#1c1c1e]">{{ $type->name }}</span>
+                </div>
+                @if($type->day_of_week)
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#a09aa4]">Schedule</span>
+                        <span class="text-[13px] text-[#6b6570]">{{ $type->day_of_week }}</span>
+                    </div>
+                @endif
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#a09aa4]">Sessions</span>
+                    <span class="text-[13px] font-semibold text-[#ed213a]">{{ $type->sessions->count() }}</span>
+                </div>
             </div>
-        </form>
-    </div>
-</div>
-<script>
-    document.getElementById('type-modal').addEventListener('click', function(e) {
-        if (e.target === this) this.classList.add('hidden');
-    });
-    document.querySelector('[onclick*="type-modal"]')?.addEventListener('click', function() {
-        const m = document.getElementById('type-modal');
-        m.classList.remove('hidden');
-        m.style.display = 'flex';
-    });
-</script>
+            <x-feedback-status.alert type="error" :showTitle="false">
+                This will permanently delete the service and all its attendance sessions and records.
+            </x-feedback-status.alert>
+        </x-modal.body>
+        <x-modal.footer>
+            <x-modal.close-button modalId="delete-service-{{ $type->id }}" text="Cancel" />
+            <form method="POST" action="{{ route('attendance-types.destroy', $type) }}">
+                @csrf @method('DELETE')
+                <x-button type="submit" variant="danger">
+                    <i class='bx bx-trash'></i> Delete
+                </x-button>
+            </form>
+        </x-modal.footer>
+    </x-modal.dialog>
+@endforeach
+
+@if($errors->any())
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('add-service-modal').showModal();
+        });
+    </script>
+@endif
+
 @endpush

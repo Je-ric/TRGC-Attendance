@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "system": "CLSU Green",
+    "inspired_by": "Hostinger UI",
+    "font_family": "Plus Jakarta Sans",
+    "version": "1.0.0"
+  },
+  "colors": {
+    "brand": {
+      "50":  "#f0fdf4",  // surface.subtle, hover bg
+      "100": "#dcfce7",  // tag bg, light fill
+      "200": "#bbf7d0",  // border.emphasis
+      "300": "#86efac",  // ring-1 on active badge
+      "400": "#4ade80",
+      "500": "#22c55e",  // gradient end
+      "600": "#16a34a",  // PRIMARY — buttons, ring-1
+      "700": "#15803d",  // gradient start, text on tint
+      "800": "#166534",  // badge text.active
+      "900": "#14532d",  // hero dark
+      "950": "#052e16"   // footer, deepest dark
+    },
+    "gold": {
+      "bright": "#ffd700",
+      "base":   "#e0a70d", // secondary btn end
+      "dark":   "#854f0b"
+    },
+    "neutral": {
+      "white":  "#ffffff",
+      "50":    "#f8fafc",  // striped row even
+      "100":   "#f1f5f9",  // row divider
+      "200":   "#e2e8f0",  // border.default
+      "400":   "#94a3b8",  // text.muted
+      "600":   "#475569",  // text.secondary
+      "800":   "#1e293b",  // text.primary
+      "950":   "#020617"   // footer bg
+    }
+  },
+  "gradients": {
+    "primary_cta":  "90deg, #003a10 0%, #009639 100%",
+    "save_action":  "90deg, #009639 0%, #92d12c 100%",
+    "hero_dark":    "135deg, #052e16 0%, #166534 60%, #15803d 100%",
+    "secondary_gold":"90deg, #ffd700 0%, #e0a70d 100%"
+  },
+  "typography": {
+    "family": "'Plus Jakarta Sans', sans-serif",
+    "scale": {
+      "hero":       { "size": "32–48px", "weight": "800", "lh": "1.15" },
+      "h2":         { "size": "24px",    "weight": "700", "lh": "1.25" },
+      "h3":         { "size": "18px",    "weight": "700", "lh": "1.35" },
+      "table_head": { "size": "11px",    "weight": "700", "transform": "uppercase", "tracking": "0.18em" },
+      "body":       { "size": "15px",    "weight": "400", "lh": "1.6"  },
+      "table_cell": { "size": "13px",    "weight": "400–500" },
+      "badge":      { "size": "11px",    "weight": "600"  },
+      "overline":   { "size": "11px",    "weight": "700", "transform": "uppercase", "tracking": "0.1em", "color": "brand.600" }
+    }
+  },
+  "spacing": { "1":"4px", "2":"8px", "3":"12px", "4":"16px", "5":"20px", "6":"24px", "8":"32px" },
+  "radius": { "sm":"6px", "md":"8px", "lg":"12px", "xl":"16px", "2xl":"20px", "pill":"999px" },
+  "shadows": {
+    "card":     "0 2px 16px rgba(0,0,0,0.07)",
+    "elevated": "0 8px 32px rgba(22,163,74,0.13)",
+    "featured": "0 0 0 2.5px #16a34a, 0 20px 60px -10px rgba(22,163,74,0.22)",
+    "focus":    "0 0 0 3px rgba(22,163,74,0.25)"
+  },
+  "components": {
+    "table": {
+      "head_bg":       "#f0fdf4",
+      "head_border":   "1px solid #bbf7d0",
+      "head_text":     "#15803d",
+      "row_divider":   "0.5px solid #f1f5f9",
+      "row_hover":     "#f0fdf4",
+      "row_odd":       "#ffffff",
+      "row_even":      "#f8fafc",
+      "container":     "rounded-2xl border border-slate-200/80 shadow-sm"
+    },
+    "badge": {
+      "active":   { "bg": "#f0fdf4", "text": "#166534", "ring": "#86efac" },
+      "pending":  { "bg": "#fffbeb", "text": "#92400e", "ring": "#fcd34d" },
+      "rejected": { "bg": "#fff1f2", "text": "#9f1239", "ring": "#fda4af" },
+      "disabled": { "bg": "#f8fafc", "text": "#475569", "ring": "#cbd5e1" },
+      "admin":    { "bg": "#faf5ff", "text": "#581c87", "ring": "#d8b4fe" },
+      "dean":     { "bg": "#eef2ff", "text": "#3730a3", "ring": "#a5b4fc" },
+      "chair":    { "bg": "#eff6ff", "text": "#1e40af", "ring": "#93c5fd" },
+      "faculty":  { "bg": "#f0fdf4", "text": "#166534", "ring": "#86efac" }
+    },
+    "button": {
+      "primary":    "gradient(90deg, #003a10, #009639) · white text",
+      "save":       "gradient(90deg, #009639, #92d12c) · white text",
+      "secondary":  "gradient(90deg, #ffd700, #e0a70d) · #1a5f30 text",
+      "outline":    "white bg · 2px border #1a5f30 · #1a5f30 text",
+      "radius":     "8px",
+      "focus_ring": "0 0 0 3px rgba(22,163,74,0.25)"
+    }
+  }
+}

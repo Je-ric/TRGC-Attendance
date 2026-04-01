@@ -1,34 +1,30 @@
 <div>
     @if($upcomingBirthdays->count() > 0)
-        <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="flex flex-col gap-2">
             @foreach($upcomingBirthdays as $person)
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border-soft)">
+                <div class="flex items-center justify-between gap-3 px-3 py-2.5 bg-[#f5f4f6] rounded-lg border border-[#ede9eb]">
                     <div>
-                        <div style="font-size:13.5px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px">
-                            <i class='bx bx-cake' style="color:var(--red)"></i>
+                        <div class="text-[13px] font-semibold text-[#1c1c1e] flex items-center gap-1.5">
+                            <i class='bx bx-cake text-[#ed213a]'></i>
                             {{ $person->full_name }}
                         </div>
-                        <div style="font-size:12px;color:var(--ink-faint);margin-top:3px">
+                        <div class="text-[11px] text-[#a09aa4] mt-0.5">
                             {{ $person->next_birthday->format('M d, Y') }} · {{ $person->age_on_birthday }} yrs old
-                            @if($person->family)
-                                · {{ $person->family->family_name }}
-                            @endif
+                            @if($person->family) · {{ $person->family->family_name }} @endif
                         </div>
                     </div>
-                    <div>
-                        @if($person->days_until == 0)
-                            <span class="badge badge-red" style="background:var(--red);color:#fff;border-color:var(--red-dark)">Today 🎉</span>
-                        @elseif($person->days_until == 1)
-                            <span class="badge badge-red">Tomorrow</span>
-                        @else
-                            <span style="font-size:12px;font-weight:600;color:var(--ink-muted)">{{ $person->days_until }}d</span>
-                        @endif
-                    </div>
+                    @if($person->days_until == 0)
+                        <x-feedback-status.status-indicator status="today">Today 🎉</x-feedback-status.status-indicator>
+                    @elseif($person->days_until == 1)
+                        <x-feedback-status.status-indicator status="tomorrow">Tomorrow</x-feedback-status.status-indicator>
+                    @else
+                        <span class="text-[12px] font-semibold text-[#6b6570]">{{ $person->days_until }}d</span>
+                    @endif
                 </div>
             @endforeach
         </div>
     @else
-        <p style="font-size:13px;color:var(--ink-faint);font-style:italic;margin:0">
+        <p class="text-[13px] text-[#a09aa4] italic">
             No upcoming birthdays in the next {{ $daysAhead }} days.
         </p>
     @endif

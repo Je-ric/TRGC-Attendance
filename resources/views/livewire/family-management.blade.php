@@ -1,18 +1,13 @@
-<div style="display:flex;flex-direction:column;gap:24px">
+<div class="flex flex-col gap-6">
 
-    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px">
-        <div>
-            <div class="page-eyebrow">Directory</div>
-            <h1 class="page-title" style="font-size:26px;margin:4px 0 6px">Families</h1>
-            <p style="font-size:13px;color:var(--ink-faint);margin:0">Manage family groups and member associations.</p>
-        </div>
-        <button wire:click="open" class="btn btn-primary">
+    <x-page-header icon="bx-home-heart" title="Families" desc="Manage family groups and member associations.">
+        <x-button wire:click="open" variant="primary">
             <i class='bx bx-plus'></i> Add Family
-        </button>
-    </div>
+        </x-button>
+    </x-page-header>
 
     {{-- Stats --}}
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+    <div class="grid gap-3" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
         <x-statistic-card variant="primary" icon="bx-buildings" title="Total Families" value="{{ $families->count() }}" />
         @foreach($categories as $cat)
             <x-statistic-card variant="muted" icon="bx-user" :title="$cat" :value="$categoryCounts[$cat] ?? 0" />
@@ -21,91 +16,126 @@
 
     {{-- Family list --}}
     @if($families->isEmpty())
-        <div class="card" style="padding:48px;text-align:center">
-            <i class='bx bx-home-heart' style="font-size:40px;color:var(--muted);display:block;margin-bottom:12px"></i>
-            <p style="font-size:15px;font-weight:600;color:var(--ink-muted);margin:0 0 4px">No families yet</p>
-            <p style="font-size:13px;color:var(--ink-faint);margin:0">Click "Add Family" to create one.</p>
-        </div>
+        <x-empty-state icon="bx bx-home-heart" title="No families yet" message='Click "Add Family" to create one.' />
     @else
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+        <div class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
             @foreach($families as $family)
-                <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:12px">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-                        <div style="min-width:0">
-                            <h4 style="font-size:15px;font-weight:700;color:var(--ink);margin:0;display:flex;align-items:center;gap:6px">
-                                <i class='bx bx-buildings' style="color:var(--red);flex-shrink:0"></i>
+                <x-card :padding="false">
+                    <div class="px-4 py-3 border-b border-[#e4e0e2] flex justify-between items-start gap-3">
+                        <div class="min-w-0">
+                            <h4 class="page-title text-[15px] flex items-center gap-1.5">
+                                <i class='bx bx-buildings text-[#ed213a] shrink-0'></i>
                                 {{ $family->family_name }}
                             </h4>
                             @if($family->address)
-                                <p style="font-size:12px;color:var(--ink-faint);margin:3px 0 0">{{ $family->address }}</p>
+                                <p class="text-[12px] text-[#a09aa4] mt-0.5">{{ $family->address }}</p>
                             @endif
                             @if($family->contact_person)
-                                <p style="font-size:12px;color:var(--ink-faint);margin:2px 0 0">{{ $family->contact_person }}</p>
+                                <p class="text-[12px] text-[#a09aa4]">{{ $family->contact_person }}</p>
                             @endif
                         </div>
-                        <div style="display:flex;gap:6px;flex-shrink:0">
-                            <button wire:click="edit({{ $family->id }})" class="btn btn-edit" style="font-size:12px;padding:6px 10px">
+                        <div class="flex gap-1.5 shrink-0">
+                            <x-button wire:click="edit({{ $family->id }})" variant="table-edit">
                                 <i class='bx bx-edit-alt'></i>
-                            </button>
-                            <button wire:click="deleteFamily({{ $family->id }})"
-                                    onclick="return confirm('Remove family and unlink all members?')"
-                                    class="btn btn-danger" style="font-size:12px;padding:6px 10px">
+                            </x-button>
+                            <x-button wire:click="confirmDelete({{ $family->id }})" variant="table-danger">
                                 <i class='bx bx-trash'></i>
-                            </button>
+                            </x-button>
                         </div>
                     </div>
+                    <div class="p-4">
+                        <div class="text-[12px] text-[#a09aa4] mb-3">
+                            <strong class="text-[#1c1c1e]">{{ $family->people_count }}</strong>
+                            {{ Str::plural('person', $family->people_count) }}
+                        </div>
 
-                    <div style="font-size:12px;color:var(--ink-faint)">
-                        <strong style="color:var(--ink)">{{ $family->people_count }}</strong>
-                        {{ Str::plural('person', $family->people_count) }}
+                        @if($family->people->count() > 0)
+                            <div class="border-t border-[#e4e0e2] pt-3 flex flex-col gap-0.5">
+                                @foreach($family->people as $person)
+                                    <div class="flex justify-between items-center py-1.5 border-b border-[#ede9eb] last:border-0">
+                                        <span class="text-[12px] text-[#1c1c1e]">{{ $person->full_name }}</span>
+                                        <x-feedback-status.status-indicator variant="slate">
+                                            {{ $person->effective_category }}
+                                        </x-feedback-status.status-indicator>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
-
-                    @if($family->people->count() > 0)
-                        <hr class="ui-divider">
-                        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px">
-                            @foreach($family->people as $person)
-                                <li style="font-size:12.5px;color:var(--ink);padding:4px 0;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between">
-                                    {{ $person->full_name }}
-                                    <span style="color:var(--ink-faint);font-size:11px">{{ $person->effective_category }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
+                </x-card>
             @endforeach
         </div>
     @endif
 
-    {{-- Modal --}}
-    @if($show)
-        <div style="position:fixed;inset:0;background:rgba(28,28,30,0.45);backdrop-filter:blur(3px);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px"
-             wire:click="$set('show', false)">
-            <div style="background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(28,28,30,0.13);width:100%;max-width:460px;padding:28px"
-                 wire:click.stop>
-                <h2 class="page-title" style="font-size:20px;margin:0 0 4px">{{ $editing ? 'Edit Family' : 'Add Family' }}</h2>
-                <p style="font-size:13px;color:var(--ink-faint);margin:0 0 20px">{{ $editing ? 'Update family details.' : 'Create a new family group.' }}</p>
-                <hr class="ui-divider" style="margin-bottom:18px">
+    {{-- ── Add / Edit Modal ─────────────────────────────────────────── --}}
+    <x-modal.dialog id="family-form-modal" maxWidth="max-w-md">
+        <x-modal.header modalId="family-form-modal">
+            <div class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#fff0f0] text-[#ed213a] shrink-0">
+                    <i class="bx bx-buildings text-base leading-none"></i>
+                </span>
+                {{ $editing ? 'Edit Family' : 'Add Family' }}
+            </div>
+        </x-modal.header>
 
-                <div style="display:flex;flex-direction:column;gap:12px">
-                    <div>
-                        <label class="form-label">Family Name *</label>
-                        <input type="text" wire:model.defer="family_name" placeholder="e.g., Santos Family" class="ui-input">
-                        @error('family_name') <span style="font-size:12px;color:var(--red);margin-top:4px;display:block">{{ $message }}</span> @enderror
-                    </div>
-                    <div>
-                        <label class="form-label">Address</label>
-                        <input type="text" wire:model.defer="address" placeholder="Address" class="ui-input">
-                    </div>
-                    <div>
-                        <label class="form-label">Contact Person</label>
-                        <input type="text" wire:model.defer="contact_person" placeholder="Contact person name" class="ui-input">
-                    </div>
-                    <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:6px">
-                        <button wire:click="$set('show', false)" class="btn btn-ghost">Cancel</button>
-                        <button wire:click="save" class="btn btn-primary"><i class='bx bx-save'></i> Save</button>
-                    </div>
+        <x-modal.body class="flex flex-col gap-4">
+            <p class="text-[13px] text-[#6b6570]">
+                {{ $editing ? 'Update family details.' : 'Create a new family group.' }}
+            </p>
+
+            <x-form.field label="Family Name" :isRequired="true" error="family_name">
+                <x-form.input wire:model="family_name" placeholder="e.g., Santos Family" />
+            </x-form.field>
+
+            <x-form.field label="Address">
+                <x-form.input wire:model="address" placeholder="Address" />
+            </x-form.field>
+
+            <x-form.field label="Contact Person">
+                <x-form.input wire:model="contact_person" placeholder="Contact person name" />
+            </x-form.field>
+        </x-modal.body>
+
+        <x-modal.footer>
+            <x-modal.close-button modalId="family-form-modal" text="Cancel" />
+            <x-button wire:click="save" variant="primary" loading="Saving…">
+                <i class='bx bx-save'></i> Save
+            </x-button>
+        </x-modal.footer>
+    </x-modal.dialog>
+
+    {{-- ── Delete Confirmation Modal ────────────────────────────────── --}}
+    <x-modal.dialog id="family-delete-modal" maxWidth="max-w-md">
+        <x-modal.header modalId="family-delete-modal">
+            <div class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#ffe4e6] text-[#e11d48] shrink-0">
+                    <i class="bx bx-trash text-base leading-none"></i>
+                </span>
+                <span class="text-[#9f1239]">Delete Family</span>
+            </div>
+        </x-modal.header>
+
+        <x-modal.body class="space-y-4">
+            <p class="text-[13px] text-[#6b6570]">Are you sure you want to remove this family?</p>
+
+            <div class="rounded-xl border border-[#e4e0e2] bg-[#f5f4f6] p-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#a09aa4]">Family</span>
+                    <span class="text-[13px] font-semibold text-[#1c1c1e]">{{ $confirmDeleteName }}</span>
                 </div>
             </div>
-        </div>
-    @endif
+
+            <x-feedback-status.alert type="warning" :showTitle="false">
+                All members will be unlinked from this family. This cannot be undone.
+            </x-feedback-status.alert>
+        </x-modal.body>
+
+        <x-modal.footer>
+            <x-modal.close-button modalId="family-delete-modal" text="Cancel" />
+            <x-button wire:click="deleteFamily" variant="danger" loading="Deleting…">
+                <i class='bx bx-trash'></i> Delete
+            </x-button>
+        </x-modal.footer>
+    </x-modal.dialog>
+
 </div>

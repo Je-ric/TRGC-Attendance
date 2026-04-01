@@ -1,62 +1,74 @@
 @extends('layouts.app')
 
 @section('content')
-<div style="display:flex;flex-direction:column;gap:24px">
+<div class="flex flex-col gap-6">
 
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div>
-            <div class="page-eyebrow">Attendance</div>
-            <h1 class="page-title" style="font-size:26px;margin:4px 0 0">Records</h1>
-        </div>
-        <a href="{{ route('attendance.index') }}" class="btn btn-ghost">
-            <i class='bx bx-left-arrow-alt'></i> Dashboard
-        </a>
-    </div>
+    <x-page-header icon="bx-folder-open" title="Records" desc="All attendance sessions grouped by service.">
+        <x-button href="{{ route('attendance.index') }}" variant="back">
+            <i class='bx bx-arrow-left'></i> Dashboard
+        </x-button>
+    </x-page-header>
 
     @if(empty($typeSummaries))
-        <div class="card" style="padding:48px;text-align:center">
-            <i class='bx bx-folder-open' style="font-size:40px;color:var(--muted);display:block;margin-bottom:12px"></i>
-            <p style="font-size:15px;font-weight:600;color:var(--ink-muted);margin:0 0 4px">No records yet</p>
-            <p style="font-size:13px;color:var(--ink-faint);margin:0">Start by running a check-in from the dashboard.</p>
-        </div>
+        <x-empty-state icon="bx bx-folder-open" title="No records yet"
+            message="Start by running a check-in from the dashboard." />
     @endif
 
     @foreach($typeSummaries as $typeSummary)
-        <div class="card" style="overflow:hidden">
-            <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px">
-                <h3 class="page-title" style="font-size:17px;margin:0;color:var(--ink)">
-                    {{ $typeSummary['type']->name }}
-                </h3>
-                <div style="display:flex;gap:16px;font-size:12px;color:var(--ink-faint)">
-                    <span><strong style="color:var(--ink)">{{ $typeSummary['totalSessions'] }}</strong> sessions</span>
-                    <span><strong style="color:var(--ink)">{{ $typeSummary['totalAttendees'] }}</strong> total attendees</span>
-                </div>
-            </div>
+        <x-card :padding="false">
+            <x-slot:title>{{ $typeSummary['type']->name }}</x-slot:title>
+            <x-slot:action>
+                <span class="text-[12px] text-[#a09aa4]">
+                    <strong class="text-[#1c1c1e]">{{ $typeSummary['totalSessions'] }}</strong> sessions ·
+                    <strong class="text-[#1c1c1e]">{{ $typeSummary['totalAttendees'] }}</strong> total
+                </span>
+            </x-slot:action>
 
-            <div style="padding:12px 20px;display:flex;flex-direction:column;gap:8px">
-                @foreach($typeSummary['sessions'] as $s)
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:var(--surface);gap:12px;flex-wrap:wrap">
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
-                            <div>
-                                <div style="font-size:13.5px;font-weight:600;color:var(--ink)">
-                                    {{ $s['session']->date->format('M d, Y') }}
-                                </div>
-                                @if($s['session']->service_name)
-                                    <div style="font-size:11.5px;color:var(--ink-faint)">{{ $s['session']->service_name }}</div>
-                                @endif
-                            </div>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink-muted)">
-                            <span><strong style="color:var(--ink)">{{ $s['attendeeCount'] }}</strong> present</span>
-                            @foreach($s['categoryCounts'] as $cat => $count)
-                                <span class="badge badge-muted">{{ $cat }}: {{ $count }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
+            <x-table.container class="rounded-none border-0 shadow-none">
+                <x-table.table>
+                    <x-table.head>
+                        <tr>
+                            <x-table.th>Date</x-table.th>
+                            <x-table.th>Service</x-table.th>
+                            <x-table.th>Present</x-table.th>
+                            <x-table.th>Breakdown</x-table.th>
+                        </tr>
+                    </x-table.head>
+                    <x-table.body>
+                        @forelse($typeSummary['sessions'] as $s)
+                            <x-table.row :hover="true">
+                                <x-table.td>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-[#ed213a] shrink-0"></span>
+                                        <span class="font-semibold">{{ $s['session']->date->format('M d, Y') }}</span>
+                                    </div>
+                                </x-table.td>
+                                <x-table.td class="text-[#6b6570]">
+                                    {{ $s['session']->service_name ?? '—' }}
+                                </x-table.td>
+                                <x-table.td>
+                                    <x-feedback-status.status-indicator status="present">
+                                        {{ $s['attendeeCount'] }} present
+                                    </x-feedback-status.status-indicator>
+                                </x-table.td>
+                                <x-table.td>
+                                    <div class="flex gap-1.5 flex-wrap">
+                                        @foreach($s['categoryCounts'] as $cat => $count)
+                                            <x-feedback-status.status-indicator variant="slate">
+                                                {{ $cat }}: {{ $count }}
+                                            </x-feedback-status.status-indicator>
+                                        @endforeach
+                                    </div>
+                                </x-table.td>
+                            </x-table.row>
+                        @empty
+                            <x-table.empty colspan="4" message="No sessions recorded yet." />
+                        @endforelse
+                    </x-table.body>
+                </x-table.table>
+            </x-table.container>
+        </x-card>
     @endforeach
+
 </div>
 @endsection
