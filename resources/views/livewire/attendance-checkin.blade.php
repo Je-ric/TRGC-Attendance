@@ -6,7 +6,22 @@
             <div>
                 <div class="page-eyebrow mb-1">Check-in</div>
                 <h3 class="page-title text-[18px]">{{ $attendanceType->name }}</h3>
-                <p class="text-[12px] text-[#a09aa4] mt-0.5">{{ $attendanceType->day_of_week ?? 'Flexible Schedule' }}</p>
+                <div class="flex flex-wrap gap-x-3 mt-0.5">
+                    @if($attendanceType->day_of_week)
+                        <span class="text-[12px] text-[#a09aa4] flex items-center gap-1">
+                            <i class='bx bx-calendar text-[11px]'></i>
+                            {{ $attendanceType->day_of_week }}s
+                            @if($attendanceType->start_time) · {{ \Carbon\Carbon::parse($attendanceType->start_time)->format('g:i A') }} @endif
+                        </span>
+                    @else
+                        <span class="text-[12px] text-[#a09aa4]">Flexible Schedule</span>
+                    @endif
+                    @if($attendanceType->location)
+                        <span class="text-[12px] text-[#a09aa4] flex items-center gap-1">
+                            <i class='bx bx-map-pin text-[11px]'></i> {{ $attendanceType->location }}
+                        </span>
+                    @endif
+                </div>
             </div>
             @if($latestSession)
                 <div class="text-right">

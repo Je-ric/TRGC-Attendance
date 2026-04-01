@@ -4,65 +4,54 @@ namespace App\Http\Controllers;
 
 use App\Models\AttendanceType;
 use App\Models\AttendanceSession;
-use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
-    // Landing page: list of attendance types
     public function index()
     {
-        $types = AttendanceType::with(['sessions' => function ($q) {
-            $q->orderBy('date', 'desc')->orderBy('created_at', 'desc');
-        }])->orderBy('name')->get();
+        $types = AttendanceType::with(['sessions' => fn($q) =>
+            $q->orderByDesc('date')->orderByDesc('created_at')
+        ])->orderBy('name')->get();
 
         return view('attendance.index', compact('types'));
     }
 
-    // Show sessions of a type
     public function show(AttendanceType $type)
     {
         return view('attendance.show', compact('type'));
     }
 
-    // Show all sessions & their attendance records
     public function records()
     {
-        $sessions = AttendanceSession::with(['attendanceType', 'attendanceRecords.person.family'])
-            ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
+        $sessions = AttendanceSession::with(['attendanceType', 'attendanceRecords.person'])
+            ->orderByDesc('date')
+            ->orderByDesc('created_at')
             ->get();
 
-        $sessionsByType = $sessions->groupBy('attendance_type_id');
+        $typeSummaries = $sessions->groupBy('attendance_type_id')
+            ->map(function ($typeSessions) {
+                $type           = $typeSessions->first()->attendanceType;
+                $totalAttendees = $typeSessions->sum(fn($s) => $s->attendanceRecords->count());
+                $totalSessions  = $typeSessions->count();
 
-        // Calculate summaries for each type
-        $typeSummaries = [];
-        foreach ($sessionsByType as $typeId => $typeSessions) {
-            $type = $typeSessions->first()->attendanceType;
-            $totalAttendees = $typeSessions->sum(function ($session) {
-                return $session->attendanceRecords->count();
-            });
+                $sessionSummaries = $typeSessions->map(function ($session) {
+                    return [
+                        'session'        => $session,
+                        'attendeeCount'  => $session->attendanceRecords->count(),
+                        'categoryCounts' => $session->attendanceRecords
+                            ->groupBy(fn($r) => $r->person?->effective_category ?? 'Unknown')
+                            ->map->count(),
+                    ];
+                })->values()->all();
 
-            $sessionSummaries = [];
-            foreach ($typeSessions as $session) {
-                $attendeeCount = $session->attendanceRecords->count();
-                $categoryCounts = $session->attendanceRecords->groupBy(function ($record) {
-                    return $record->person?->effective_category ?? 'Unknown';
-                })->map->count();
-
-                $sessionSummaries[] = [
-                    'session' => $session,
-                    'attendeeCount' => $attendeeCount,
-                    'categoryCounts' => $categoryCounts,
+                return [
+                    'type'           => $type,
+                    'sessions'       => $sessionSummaries,
+                    'totalSessions'  => $totalSessions,
+                    'totalAttendees' => $totalAttendees,
+                    'avgAttendance'  => $totalSessions > 0 ? round($totalAttendees / $totalSessions) : 0,
                 ];
-            }
-
-            $typeSummaries[] = [
-                'type' => $type,
-                'sessions' => $sessionSummaries,
-                'totalSessions' => $typeSessions->count(),
-                'totalAttendees' => $totalAttendees,
-            ];
-        }
+            })->values()->all();
 
         return view('attendance.records', compact('typeSummaries'));
     }

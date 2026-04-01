@@ -6,85 +6,87 @@ use Illuminate\Database\Eloquent\Model;
 
 class Person extends Model
 {
-    public const CATEGORIES = [
-        'Kids',
-        'Youth',
-        'Adults',
-        'Seniors',
-        'Visitors',
-    ];
+    public const CATEGORIES = ['Kids', 'Youth', 'Adults', 'Seniors', 'Visitors'];
+
+    public const MEMBERSHIP_STATUSES = ['Member', 'Regular Attendee', 'Visitor', 'Inactive'];
+
+    public const GENDERS = ['Male', 'Female'];
+
+    public const CIVIL_STATUSES = ['Single', 'Married', 'Widowed', 'Separated'];
 
     protected $fillable = [
+        'family_id',
         'first_name',
         'last_name',
         'birthdate',
+        'gender',
+        'civil_status',
         'category',
+        'membership_status',
+        'joined_date',
+        'date_of_baptism',
         'address',
         'contact_number',
-        'family_id',
+        'email',
+        'notes',
     ];
 
     protected $casts = [
-        'birthdate' => 'date',
+        'birthdate'   => 'date',
+        'joined_date' => 'date',
+        'date_of_baptism' => 'date',
     ];
 
-    // Full name helper
-    public function getFullNameAttribute()
+    // ── Accessors ──────────────────────────────────────────────────────
+
+    public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
     }
 
-    // Compute age automatically
-    public function getAgeAttribute()
+    public function getAgeAttribute(): ?int
     {
-        if (!$this->birthdate) {
-            return null;
-        }
-
-        try {
-            return $this->birthdate->age;
-        } catch (\Exception $e) {
-            return null;
-        }
+        return $this->birthdate?->age;
     }
 
-    // Auto category based on age if not manually set
-    public function getAutoCategoryAttribute()
+    public function getAutoCategoryAttribute(): string
     {
-        if ($this->category) {
-            return $this->category;
-        }
+        if ($this->category) return $this->category;
 
         $age = $this->age;
-
-        if ($age === null) {
-            return 'Unknown';
-        }
-        if ($age <= 12) {
-            return 'Kids';
-        }
-        if ($age <= 18) {
-            return 'Youth';
-        }
-        if ($age <= 59) {
-            return 'Adults';
-        }
+        if ($age === null) return 'Unknown';
+        if ($age <= 12)    return 'Kids';
+        if ($age <= 18)    return 'Youth';
+        if ($age <= 59)    return 'Adults';
         return 'Seniors';
     }
 
-    public function getEffectiveCategoryAttribute()
+    public function getEffectiveCategoryAttribute(): string
     {
         return $this->category ?: $this->auto_category;
     }
+
+    // ── Static helpers ─────────────────────────────────────────────────
 
     public static function categories(): array
     {
         return self::CATEGORIES;
     }
 
-    // Relation to family
+    public static function membershipStatuses(): array
+    {
+        return self::MEMBERSHIP_STATUSES;
+    }
+
+    // ── Relations ──────────────────────────────────────────────────────
+
     public function family()
     {
         return $this->belongsTo(Family::class);
+    }
+
+    public function attendanceRecords()
+    {
+        return $this->hasMany(AttendanceRecord::class);
     }
 }

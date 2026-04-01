@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Person;
 use App\Models\Family;
 
@@ -10,27 +9,27 @@ class PersonController extends Controller
 {
     public function index()
     {
-        $categories = Person::categories();
+        $people     = Person::with('family')->get();
+        $categories = Person::CATEGORIES;
 
-        $categoryCounts = [];
-        foreach ($categories as $category) {
-            $categoryCounts[$category] = 0;
-        }
-
-        $people = Person::with('family')->get();
+        $categoryCounts = array_fill_keys($categories, 0);
         foreach ($people as $person) {
-            $category = $person->effective_category;
-            if (in_array($category, $categories, true)) {
-                $categoryCounts[$category] = ($categoryCounts[$category] ?? 0) + 1;
-            }
+            $cat = $person->effective_category;
+            if (isset($categoryCounts[$cat])) $categoryCounts[$cat]++;
         }
 
-        $familyCounts = Family::withCount('people')
-            ->orderBy('family_name')
-            ->get();
+        $membershipCounts = array_fill_keys(Person::MEMBERSHIP_STATUSES, 0);
+        foreach ($people as $person) {
+            $ms = $person->membership_status ?? 'Regular Attendee';
+            if (isset($membershipCounts[$ms])) $membershipCounts[$ms]++;
+        }
 
-        $totalPeople = $people->count();
+        $totalPeople  = $people->count();
+        $totalMembers = $membershipCounts['Member'] ?? 0;
 
-        return view('people.index', compact('categories', 'categoryCounts', 'familyCounts', 'totalPeople'));
+        return view('people.index', compact(
+            'categories', 'categoryCounts',
+            'membershipCounts', 'totalPeople', 'totalMembers'
+        ));
     }
 }

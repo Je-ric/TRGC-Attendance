@@ -1,23 +1,25 @@
 @props([
     'id',
-    'maxWidth' => 'max-w-lg',
+    'maxWidth' => 'max-w-xl',
     'width'    => 'w-11/12',
     'class'    => '',
 ])
 
 {{--
-    DaisyUI modal pattern — open via: document.getElementById('{{ $id }}').showModal()
-    Close via: document.getElementById('{{ $id }}').close()
-    Or place a <form method="dialog"> inside to close on submit.
---}}
+    DaisyUI v5 modal.
+    Open:  document.getElementById('{{ $id }}').showModal()
+    Close: document.getElementById('{{ $id }}').close()
+           OR clicking the modal-backdrop form below.
 
-<dialog id="{{ $id }}" class="modal backdrop-blur-sm" {{ $attributes }}>
-    <div class="modal-box {{ $width }} {{ $maxWidth }} max-h-[88vh] p-0 overflow-hidden rounded-xl bg-white flex flex-col {{ $class }}"
-         style="box-shadow: 0 8px 32px rgba(237,33,58,0.15);">
+    For Livewire: dispatch('open-modal', id: 'my-id') from PHP
+    The layout's Livewire.on('open-modal') bridge handles it.
+--}}
+<dialog id="{{ $id }}" class="modal" {{ $attributes }}>
+    <div class="modal-box {{ $width }} {{ $maxWidth }} max-h-[90vh] p-0 overflow-hidden rounded-2xl bg-white flex flex-col {{ $class }}"
+         style="box-shadow: 0 8px 40px rgba(0,0,0,0.18);">
         {{ $slot }}
     </div>
-    {{-- Click outside to close --}}
     <form method="dialog" class="modal-backdrop">
-        <button type="submit">close</button>
+        <button>close</button>
     </form>
 </dialog>
