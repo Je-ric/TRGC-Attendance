@@ -1,0 +1,74 @@
+@props([
+    'type'        => 'info',
+    'title'       => null,
+    'message'     => null,
+    'showTitle'   => true,
+    'dismissable' => false,
+    'class'       => '',
+])
+
+@php
+    $styles = [
+        'success' => [
+            'container' => 'border-[#86efac] bg-[#f0fdf4] text-[#166534]',
+            'iconWrap'  => 'bg-[#dcfce7] text-[#16a34a]',
+            'icon'      => 'bx-check-circle',
+            'title'     => 'Success',
+        ],
+        'error' => [
+            'container' => 'border-[#ffd0d0] bg-[#fff0f0] text-[#93291e]',
+            'iconWrap'  => 'bg-[#ffe0e0] text-[#ed213a]',
+            'icon'      => 'bx-error-circle',
+            'title'     => 'Error',
+        ],
+        'warning' => [
+            'container' => 'border-[#fcd34d] bg-[#fffbeb] text-[#92400e]',
+            'iconWrap'  => 'bg-[#fef3c7] text-[#f59e0b]',
+            'icon'      => 'bx-error',
+            'title'     => 'Warning',
+        ],
+        'info' => [
+            'container' => 'border-[#e4e0e2] bg-[#f5f4f6] text-[#1c1c1e]',
+            'iconWrap'  => 'bg-[#e4e0e2] text-[#6b6570]',
+            'icon'      => 'bx-info-circle',
+            'title'     => 'Information',
+        ],
+    ];
+
+    $alert         = $styles[$type] ?? $styles['info'];
+    $resolvedTitle = $showTitle ? ($title ?: $alert['title']) : null;
+@endphp
+
+<div
+    @if ($dismissable) x-data="{ show: true }" x-show="show" @endif
+    {{ $attributes->class(['rounded-xl border p-4', $alert['container'], $class]) }}
+    role="alert">
+
+    <div class="flex items-start gap-3">
+        <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg {{ $alert['iconWrap'] }}">
+            <i class="bx {{ $alert['icon'] }} text-base leading-none"></i>
+        </span>
+
+        <div class="min-w-0 flex-1">
+            @if ($resolvedTitle)
+                <p class="text-[13px] font-semibold leading-5">{{ $resolvedTitle }}</p>
+            @endif
+
+            @if ($message)
+                <p class="mt-0.5 text-[13px] leading-relaxed">{{ $message }}</p>
+            @endif
+
+            @if ($slot->isNotEmpty())
+                <div class="mt-0.5 text-[13px] leading-relaxed">{{ $slot }}</div>
+            @endif
+        </div>
+
+        @if ($dismissable)
+            <button @click="show = false" type="button"
+                class="shrink-0 mt-0.5 p-0.5 rounded-md opacity-50 hover:opacity-100 transition-opacity focus:outline-none"
+                aria-label="Dismiss alert">
+                <i class="bx bx-x text-base" aria-hidden="true"></i>
+            </button>
+        @endif
+    </div>
+</div>

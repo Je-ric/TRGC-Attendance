@@ -1,0 +1,39 @@
+@props([
+    'for'        => null,
+    'icon'       => null,
+    'isRequired' => false,
+    'variant'    => null,
+])
+
+@php
+    $variantIcons = [
+        'title'    => 'bx-book',
+        'date'     => 'bx-calendar',
+        'email'    => 'bx-envelope',
+        'phone'    => 'bx-phone',
+        'user'     => 'bx-user',
+        'location' => 'bx-map-pin',
+    ];
+    if ($variant && isset($variantIcons[$variant])) {
+        $icon = $variantIcons[$variant];
+    }
+@endphp
+
+<label
+    @if($for) for="{{ $for }}" @endif
+    {{ $attributes->class([
+        'inline-flex items-center gap-1.5',
+        'text-[11px] font-bold uppercase tracking-[0.12em] text-[#6b6570]',
+        'mb-1 leading-none',
+    ]) }}
+>
+    @if($icon)
+        <i class="bx {{ $icon }} text-[#ed213a] text-sm leading-none shrink-0"></i>
+    @endif
+
+    {{ $slot }}
+
+    @if($isRequired)
+        <span class="text-[#ed213a] font-bold text-xs leading-none ml-0.5">*</span>
+    @endif
+</label>
