@@ -8,10 +8,14 @@ use App\Models\Family;
 
 class PeopleList extends Component
 {
-    public $viewMode = 'flat'; // 'flat', 'family', 'category'
+    public $viewMode       = 'flat';
     public $filterCategory = '';
-    public $filterFamily = null;
-    public $search = '';
+    public $filterFamily   = null;
+    public $search         = '';
+
+    // Delete confirmation
+    public $confirmDeleteId   = null;
+    public $confirmDeleteName = '';
 
     protected $listeners = [
         'personCreated' => '$refresh',
@@ -19,16 +23,31 @@ class PeopleList extends Component
         'personDeleted' => '$refresh',
     ];
 
-    public function deletePerson($id)
-    {
-        $person = Person::findOrFail($id);
-        $person->delete();
-
-        $this->dispatch('personDeleted');
-    }
     public function setViewMode($mode)
     {
         $this->viewMode = $mode;
+    }
+
+    public function confirmDelete($id)
+    {
+        $person = Person::findOrFail($id);
+        $this->confirmDeleteId   = $person->id;
+        $this->confirmDeleteName = $person->full_name;
+        $this->dispatch('open-modal', id: 'person-delete-modal');
+    }
+
+    public function deletePerson()
+    {
+        if (!$this->confirmDeleteId) return;
+
+        $person = Person::findOrFail($this->confirmDeleteId);
+        $name   = $person->full_name;
+        $person->delete();
+
+        $this->reset(['confirmDeleteId', 'confirmDeleteName']);
+        $this->dispatch('close-modal', id: 'person-delete-modal');
+        $this->dispatch('lw-toast', type: 'success', message: "$name removed.");
+        $this->dispatch('personDeleted');
     }
 
     public function render()
@@ -40,24 +59,23 @@ class PeopleList extends Component
         }
 
         if ($this->search) {
-            $query->where(function ($q) {
+            $query->where(fn($q) =>
                 $q->where('first_name', 'like', "%{$this->search}%")
                   ->orWhere('last_name', 'like', "%{$this->search}%")
-                  ->orWhere('contact_number', 'like', "%{$this->search}%");
-            });
+                  ->orWhere('contact_number', 'like', "%{$this->search}%")
+            );
         }
 
         $people = $query->get();
 
         if ($this->filterCategory) {
-            $people = $people->filter(function (Person $person) {
-                return $person->effective_category === $this->filterCategory;
-            })->values();
+            $people = $people->filter(fn(Person $p) => $p->effective_category === $this->filterCategory)->values();
         }
 
-        $families = Family::withCount('people')->orderBy('family_name')->get();
-        $categories = Person::categories();
-
-        return view('livewire.people-list', compact('people', 'families', 'categories'));
+        return view('livewire.people-list', [
+            'people'     => $people,
+            'families'   => Family::withCount('people')->orderBy('family_name')->get(),
+            'categories' => Person::categories(),
+        ]);
     }
 }
