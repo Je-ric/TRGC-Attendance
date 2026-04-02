@@ -44,15 +44,17 @@
                 <x-table.table>
                     <x-table.head>
                         <tr>
+                            <x-table.th>#</x-table.th>
                             <x-table.th>Date</x-table.th>
-                            <x-table.th>Service</x-table.th>
+                            <x-table.th>Sermon / Occasion</x-table.th>
                             <x-table.th>Present</x-table.th>
                             <x-table.th>Breakdown</x-table.th>
                         </tr>
                     </x-table.head>
                     <x-table.body>
-                        @forelse($typeSummary['sessions'] as $s)
+                        @forelse($typeSummary['sessions'] as $idx => $s)
                             <x-table.row :hover="true">
+                                <x-table.td class="text-[#a09aa4]">{{ $idx + 1 }}</x-table.td>
                                 <x-table.td>
                                     <div class="flex items-center gap-2">
                                         <span class="w-2 h-2 rounded-full bg-[#ed213a] shrink-0"></span>
