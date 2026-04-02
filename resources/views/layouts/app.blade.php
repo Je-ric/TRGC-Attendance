@@ -6,216 +6,70 @@
     <title>{{ $title ?? 'TRGC Attendance' }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
     <style>
-        :root {
-            --red:         #ed213a;
-            --red-dark:    #93291e;
-            --surface:     #f5f4f6;
-            --white:       #ffffff;
-            --ink:         #1c1c1e;
-            --ink-muted:   #6b6570;
-            --ink-faint:   #a09aa4;
-            --border:      #e4e0e2;
-            --border-soft: #ede9eb;
-            --shadow-card: 0 2px 16px rgba(0,0,0,.07);
-            --shadow-lg:   0 8px 32px rgba(237,33,58,0.15);
-            --focus-ring:  0 0 0 3px rgba(237,33,58,0.2);
-            --sidebar-w:   240px;
-        }
+        /* Only things Tailwind cannot express */
 
-        *, *::before, *::after { box-sizing: border-box; }
-        html, body { height: 100%; }
+        /* Sidebar width token used by both sidebar and content offset */
+        :root { --sidebar-w: 240px; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--surface);
-            color: var(--ink);
-            margin: 0;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
+        /* Sidebar off-canvas toggle (driven by JS) */
+        #app-sidebar { transform: translateX(-100%); transition: transform 0.25s cubic-bezier(.4,0,.2,1); }
+        @media (min-width: 1024px) { #app-sidebar { transform: translateX(0); } }
+        #app-content { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1); }
+        @media (min-width: 1024px) { #app-content { margin-left: var(--sidebar-w); } }
 
-        .font-display { font-family: 'Oswald', sans-serif; }
-
-        .page-title {
-            font-family: 'Oswald', sans-serif;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            color: var(--ink);
-        }
-
-        .page-eyebrow {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--red);
-        }
-
-        /* ── Sidebar ── */
-        #app-sidebar {
-            position: fixed;
-            top: 0; bottom: 0; left: 0;
-            width: var(--sidebar-w);
-            height: 100vh;
-            background: linear-gradient(180deg, #1a0a08 0%, var(--red-dark) 100%);
-            display: flex;
-            flex-direction: column;
-            z-index: 40;
-            transform: translateX(-100%);
-            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
-            overflow-y: auto;
-        }
-
-        @media (min-width: 1024px) {
-            #app-sidebar { transform: translateX(0); }
-        }
-
-        .sidebar-brand {
-            padding: 20px 18px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .sidebar-brand-inner { display: flex; align-items: center; gap: 10px; }
-
-        .sidebar-logo {
-            width: 34px; height: 34px;
-            background: rgba(255,255,255,0.12);
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .sidebar-nav { padding: 12px 10px; flex: 1; }
-
-        .sidebar-section-label {
-            font-size: 9.5px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            color: rgba(255,255,255,0.28);
-            padding: 0 8px;
-            margin: 8px 0 4px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            padding: 9px 10px;
-            border-radius: 7px;
-            font-size: 13.5px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.55);
-            text-decoration: none;
-            transition: all 0.15s ease;
-            margin-bottom: 1px;
-            border-left: 3px solid transparent;
-        }
-
-        .nav-item:hover {
-            background: rgba(255,255,255,0.08);
-            color: rgba(255,255,255,0.9);
-        }
-
-        .nav-item.active {
-            background: rgba(237,33,58,0.25);
-            color: #fff;
-            font-weight: 600;
-            border-left-color: var(--red);
-        }
-
-        .nav-item i { font-size: 16px; flex-shrink: 0; }
-
-        /* ── Top bar ── */
-        #app-topbar {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-            box-shadow: var(--shadow-card);
-            padding: 0 24px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        /* ── Main layout ── */
-        #app-content {
-            margin-left: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: margin-left 0.25s cubic-bezier(.4,0,.2,1);
-        }
-
-        @media (min-width: 1024px) {
-            #app-content { margin-left: var(--sidebar-w); }
-        }
-
-        #app-main {
-            flex: 1;
-            padding: 24px;
-            max-width: 1280px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        /* ── Check-in row ── */
+        /* Check-in row — stateful, applied via PHP @class */
         .checkin-row {
-            display: flex;
-            align-items: center;
+            display: flex; align-items: center;
             padding: 10px 14px;
-            border-bottom: 1px solid var(--border-soft);
+            border-bottom: 1px solid #ede9eb;
             cursor: pointer;
             transition: background 0.1s;
             border-left: 3px solid transparent;
         }
-        .checkin-row:hover { background: var(--surface); }
-        .checkin-row.is-checked {
-            background: rgba(237,33,58,0.05);
-            border-left-color: var(--red);
-        }
+        .checkin-row:hover { background: #f5f4f6; }
+        .checkin-row.is-checked { background: rgba(237,33,58,0.05); border-left-color: #ed213a; }
 
-        /* ── Native dialog backdrop ── */
-        dialog::backdrop {
-            background: rgba(28,28,30,0.5);
-            backdrop-filter: blur(3px);
-        }
+        /* Native dialog backdrop — no Tailwind equivalent */
+        dialog::backdrop { background: rgba(28,28,30,0.5); backdrop-filter: blur(3px); }
 
         [x-cloak] { display: none !important; }
     </style>
 </head>
 
-<body>
+<body class="min-h-screen bg-[#f5f4f6] text-[#1c1c1e] font-['Inter'] antialiased">
+
+    {{-- Mobile sidebar overlay --}}
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-30 hidden lg:hidden"></div>
 
-    <aside id="app-sidebar">
-        <div class="sidebar-brand">
-            <div class="sidebar-brand-inner">
-                <div class="sidebar-logo">
+    {{-- ── Sidebar ──────────────────────────────────────────────────── --}}
+    <aside id="app-sidebar"
+           class="fixed inset-y-0 left-0 w-60 flex flex-col z-40 overflow-y-auto"
+           style="background: linear-gradient(180deg, #1a0a08 0%, #93291e 100%)">
+
+        {{-- Brand --}}
+        <div class="flex items-center justify-between px-4 py-5 border-b border-white/[0.08]">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-white/[0.12] flex items-center justify-center shrink-0">
                     <i class='bx bx-cross text-white text-lg'></i>
                 </div>
                 <div>
-                    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.16em;color:rgba(255,255,255,0.45)">TRGC</div>
-                    <div class="font-display" style="font-size:15px;font-weight:700;color:#fff;line-height:1.1">Attendance</div>
+                    <div class="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">TRGC</div>
+                    <div class="text-[15px] font-bold text-white leading-tight font-['Oswald']">Attendance</div>
                 </div>
             </div>
-            <button id="sidebar-close" class="lg:hidden" style="color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;padding:4px">
+            <button id="sidebar-close"
+                    class="lg:hidden text-white/50 hover:text-white/80 transition-colors p-1">
                 <i class="bx bx-x text-xl"></i>
             </button>
         </div>
 
-        <nav class="sidebar-nav">
-            <div class="sidebar-section-label">Menu</div>
+        {{-- Nav --}}
+        <nav class="flex-1 px-2.5 py-3 flex flex-col gap-0.5">
+            <p class="text-[9.5px] font-bold uppercase tracking-[0.14em] text-white/25 px-2 mb-1 mt-2">Menu</p>
+
             @php
                 $navItems = [
                     ['route' => 'dashboard',          'icon' => 'bx-home-alt-2',   'label' => 'Dashboard'],
@@ -225,41 +79,74 @@
                     ['route' => 'families.index',     'icon' => 'bx-home-heart',   'label' => 'Families'],
                 ];
             @endphp
+
             @foreach($navItems as $item)
+                @php $active = request()->routeIs($item['route']); @endphp
                 <a href="{{ route($item['route']) }}"
-                   class="nav-item {{ request()->routeIs($item['route']) ? 'active' : '' }}">
-                    <i class='bx {{ $item["icon"] }}'></i>
+                   class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13.5px] font-medium no-underline transition-all duration-150
+                          border-l-[3px]
+                          {{ $active
+                              ? 'bg-[#ed213a]/25 text-white font-semibold border-[#ed213a]'
+                              : 'text-white/55 border-transparent hover:bg-white/[0.08] hover:text-white/90' }}">
+                    <i class='bx {{ $item["icon"] }} text-base shrink-0'></i>
                     {{ $item['label'] }}
                 </a>
             @endforeach
         </nav>
 
-        <div style="padding:14px 18px;border-top:1px solid rgba(255,255,255,0.08)">
-            <div style="font-size:10px;color:rgba(255,255,255,0.25);font-weight:500">
-                {{ now()->format('l, F j') }}
-            </div>
+        {{-- Date footer --}}
+        <div class="px-4 py-3.5 border-t border-white/[0.08]">
+            <p class="text-[10px] font-medium text-white/25">{{ now()->format('l, F j') }}</p>
         </div>
     </aside>
 
-    <div id="app-content">
-        <header id="app-topbar">
-            <div style="display:flex;align-items:center;gap:12px">
-                <button id="sidebar-open" class="lg:hidden" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);padding:4px;display:flex;align-items:center">
+    {{-- ── Main content ─────────────────────────────────────────────── --}}
+    <div id="app-content" class="min-h-screen flex flex-col">
+
+        {{-- Topbar --}}
+        <header class="sticky top-0 z-20 bg-white border-b border-[#e4e0e2] h-14 flex items-center justify-between px-6"
+                style="box-shadow: 0 2px 16px rgba(0,0,0,.07)">
+
+            <div class="flex items-center gap-3">
+                <button id="sidebar-open"
+                        class="lg:hidden text-[#6b6570] hover:text-[#1c1c1e] transition-colors p-1 flex items-center">
                     <i class="bx bx-menu text-xl"></i>
                 </button>
                 <div>
-                    <div class="page-eyebrow">Management System</div>
-                    <div class="font-display" style="font-size:15px;font-weight:700;color:var(--ink);line-height:1.2">Workspace</div>
+                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed213a]">Management System</p>
+                    <p class="text-[15px] font-bold text-[#1c1c1e] leading-tight font-['Oswald']">Workspace</p>
                 </div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px">
-                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#93291e,#ed213a);display:flex;align-items:center;justify-content:center">
-                    <i class='bx bx-user text-white text-sm'></i>
+
+            <div class="flex items-center gap-3">
+                {{-- User info --}}
+                <div class="hidden sm:flex flex-col items-end">
+                    <span class="text-[13px] font-semibold text-[#1c1c1e] leading-tight">{{ Auth::user()->name }}</span>
+                    <span class="text-[11px] text-[#a09aa4] leading-tight">{{ Auth::user()->email }}</span>
                 </div>
+
+                {{-- Avatar --}}
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[13px] font-bold shrink-0"
+                     style="background: linear-gradient(135deg, #93291e, #ed213a)">
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                </div>
+
+                {{-- Logout --}}
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                            title="Sign out"
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e4e0e2] text-[#6b6570] text-[12px] font-medium
+                                   hover:bg-[#f5f4f6] hover:text-[#1c1c1e] hover:border-[#c9c4c6] transition-colors">
+                        <i class="bx bx-log-out text-base"></i>
+                        <span class="hidden sm:inline">Sign out</span>
+                    </button>
+                </form>
             </div>
         </header>
 
-        <main id="app-main">
+        {{-- Page content --}}
+        <main class="flex-1 p-6 w-full max-w-[1280px] mx-auto">
             @yield('content')
         </main>
     </div>
@@ -275,24 +162,22 @@
     @livewireScripts
     @stack('scripts')
     @stack('modals')
+
     <script>
-        const sidebar  = document.getElementById('app-sidebar');
-        const overlay  = document.getElementById('sidebar-overlay');
-        const openBtn  = document.getElementById('sidebar-open');
-        const closeBtn = document.getElementById('sidebar-close');
+        const sidebar   = document.getElementById('app-sidebar');
+        const overlay   = document.getElementById('sidebar-overlay');
+        const openBtn   = document.getElementById('sidebar-open');
+        const closeBtn  = document.getElementById('sidebar-close');
 
         const openSidebar  = () => { sidebar.style.transform = 'translateX(0)'; overlay.classList.remove('hidden'); };
-        const closeSidebar = () => { sidebar.style.transform = ''; overlay.classList.add('hidden'); };
+        const closeSidebar = () => { sidebar.style.transform = '';               overlay.classList.add('hidden'); };
 
         openBtn?.addEventListener('click', openSidebar);
         closeBtn?.addEventListener('click', closeSidebar);
         overlay?.addEventListener('click', closeSidebar);
+        window.addEventListener('resize', () => { if (window.innerWidth >= 1024) overlay.classList.add('hidden'); });
 
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 1024) overlay.classList.add('hidden');
-        });
-
-        // Livewire modal bridge — open-modal / close-modal events
+        // Livewire modal bridge
         document.addEventListener('livewire:initialized', () => {
             Livewire.on('open-modal',  ({ id }) => document.getElementById(id)?.showModal());
             Livewire.on('close-modal', ({ id }) => document.getElementById(id)?.close());
