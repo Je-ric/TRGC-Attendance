@@ -1,7 +1,6 @@
-{{-- Include in: livewire/people-list.blade.php --}}
-{{-- Open via: Livewire dispatch('open-modal', id: 'person-delete-modal') --}}
+{{-- Included in: livewire/people-list.blade.php --}}
 
-<x-modal.dialog id="person-delete-modal" maxWidth="max-w-md">
+<x-modal.dialog id="person-delete-modal" maxWidth="max-w-md" wire:ignore.self>
     <x-modal.header modalId="person-delete-modal">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-9 h-9 rounded-xl bg-[#ffe4e6] text-[#e11d48] shrink-0">
@@ -32,7 +31,7 @@
     <x-modal.footer>
         <x-modal.close-button modalId="person-delete-modal" text="Cancel" />
         <x-button wire:click="deletePerson" variant="danger">
-            <i class='bx bx-trash'></i> Delete
+            <i class='bx bx-trash'></i> Delete Person
         </x-button>
     </x-modal.footer>
 </x-modal.dialog>

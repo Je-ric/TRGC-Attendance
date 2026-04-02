@@ -1,7 +1,6 @@
-{{-- Include in: livewire/family-management.blade.php --}}
-{{-- Open via: Livewire dispatch('open-modal', id: 'family-form-modal') --}}
+{{-- Included in: livewire/family-management.blade.php --}}
 
-<x-modal.dialog id="family-form-modal" maxWidth="max-w-lg">
+<x-modal.dialog id="family-form-modal" maxWidth="max-w-lg" wire:ignore.self>
     <x-modal.header modalId="family-form-modal">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-9 h-9 rounded-xl shrink-0"
@@ -39,7 +38,8 @@
         </x-form.field>
 
         <x-form.field label="Notes">
-            <x-form.textarea wire:model="notes" rows="2" placeholder="Any additional notes…" />
+            <x-form.textarea wire:model="notes" rows="2"
+                placeholder="Any notes about this family (e.g., special needs, location details)…" />
         </x-form.field>
 
     </x-modal.body>
@@ -47,7 +47,7 @@
     <x-modal.footer>
         <x-modal.close-button modalId="family-form-modal" text="Cancel" />
         <x-button wire:click="save" variant="primary">
-            <i class='bx bx-save'></i> {{ $editing ? 'Update' : 'Save' }}
+            <i class='bx bx-save'></i> {{ $editing ? 'Update Family' : 'Save Family' }}
         </x-button>
     </x-modal.footer>
 </x-modal.dialog>

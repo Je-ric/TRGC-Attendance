@@ -1,7 +1,6 @@
-{{-- Include in: livewire/person-create.blade.php --}}
-{{-- Open via: Livewire dispatch('open-modal', id: 'person-modal') --}}
+{{-- Included in: livewire/person-create.blade.php --}}
 
-<x-modal.dialog id="person-modal" maxWidth="max-w-2xl">
+<x-modal.dialog id="person-modal" maxWidth="max-w-2xl" wire:ignore.self>
     <x-modal.header modalId="person-modal">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-9 h-9 rounded-xl shrink-0"
@@ -17,7 +16,7 @@
 
     <x-modal.body class="flex flex-col gap-5">
 
-        {{-- ── Basic Info ── --}}
+        {{-- Basic Info --}}
         <div>
             <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#a09aa4] mb-3">Basic Information</p>
             <div class="grid grid-cols-2 gap-3">
@@ -30,7 +29,7 @@
             </div>
         </div>
 
-        {{-- ── Personal Details ── --}}
+        {{-- Personal Details --}}
         <div>
             <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#a09aa4] mb-3">Personal Details</p>
             <div class="grid grid-cols-2 gap-3">
@@ -41,7 +40,7 @@
                     <x-form.select wire:model="gender">
                         <option value="">Not specified</option>
                         @foreach($genders as $g)
-                            <option value="{{ $g }}">{{ $g }}</option>
+                            <option value="{{ $g }}" @selected($gender === $g)>{{ $g }}</option>
                         @endforeach
                     </x-form.select>
                 </x-form.field>
@@ -49,7 +48,7 @@
                     <x-form.select wire:model="civil_status">
                         <option value="">Not specified</option>
                         @foreach($civilStatuses as $cs)
-                            <option value="{{ $cs }}">{{ $cs }}</option>
+                            <option value="{{ $cs }}" @selected($civil_status === $cs)>{{ $cs }}</option>
                         @endforeach
                     </x-form.select>
                 </x-form.field>
@@ -57,21 +56,21 @@
                     <x-form.select wire:model="category">
                         <option value="">Auto (by age)</option>
                         @foreach($categories as $cat)
-                            <option value="{{ $cat }}">{{ $cat }}</option>
+                            <option value="{{ $cat }}" @selected($category === $cat)>{{ $cat }}</option>
                         @endforeach
                     </x-form.select>
                 </x-form.field>
             </div>
         </div>
 
-        {{-- ── Church Info ── --}}
+        {{-- Church Info --}}
         <div>
             <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#a09aa4] mb-3">Church Information</p>
             <div class="grid grid-cols-2 gap-3">
                 <x-form.field label="Membership Status">
                     <x-form.select wire:model="membership_status">
                         @foreach($membershipStatuses as $ms)
-                            <option value="{{ $ms }}">{{ $ms }}</option>
+                            <option value="{{ $ms }}" @selected($membership_status === $ms)>{{ $ms }}</option>
                         @endforeach
                     </x-form.select>
                 </x-form.field>
@@ -79,7 +78,7 @@
                     <x-form.select wire:model="family_id">
                         <option value="">No family</option>
                         @foreach($families as $fam)
-                            <option value="{{ $fam->id }}">{{ $fam->family_name }}</option>
+                            <option value="{{ $fam->id }}" @selected((string)$family_id === (string)$fam->id)>{{ $fam->family_name }}</option>
                         @endforeach
                     </x-form.select>
                 </x-form.field>
@@ -92,7 +91,7 @@
             </div>
         </div>
 
-        {{-- ── Contact ── --}}
+        {{-- Contact --}}
         <div>
             <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#a09aa4] mb-3">Contact & Location</p>
             <div class="grid grid-cols-2 gap-3">
@@ -110,9 +109,9 @@
             </div>
         </div>
 
-        {{-- ── Notes ── --}}
+        {{-- Notes --}}
         <x-form.field label="Notes">
-            <x-form.textarea wire:model="notes" rows="2" placeholder="Any additional notes…" />
+            <x-form.textarea wire:model="notes" rows="2" placeholder="Any additional notes about this person…" />
         </x-form.field>
 
     </x-modal.body>
@@ -120,7 +119,7 @@
     <x-modal.footer>
         <x-modal.close-button modalId="person-modal" text="Cancel" />
         <x-button wire:click="save" variant="primary">
-            <i class='bx bx-save'></i> {{ $editing ? 'Update' : 'Save' }}
+            <i class='bx bx-save'></i> {{ $editing ? 'Update Person' : 'Save Person' }}
         </x-button>
     </x-modal.footer>
 </x-modal.dialog>

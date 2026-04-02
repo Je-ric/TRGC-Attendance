@@ -1,7 +1,6 @@
-{{-- Include in: livewire/family-management.blade.php --}}
-{{-- Open via: Livewire dispatch('open-modal', id: 'family-delete-modal') --}}
+{{-- Included in: livewire/family-management.blade.php --}}
 
-<x-modal.dialog id="family-delete-modal" maxWidth="max-w-md">
+<x-modal.dialog id="family-delete-modal" maxWidth="max-w-md" wire:ignore.self>
     <x-modal.header modalId="family-delete-modal">
         <div class="flex items-center gap-3">
             <span class="flex items-center justify-center w-9 h-9 rounded-xl bg-[#ffe4e6] text-[#e11d48] shrink-0">
@@ -25,14 +24,14 @@
         </div>
 
         <x-feedback-status.alert type="warning" :showTitle="false">
-            All members will be unlinked from this family. Their records will remain.
+            All members will be unlinked from this family. Their attendance records will remain.
         </x-feedback-status.alert>
     </x-modal.body>
 
     <x-modal.footer>
         <x-modal.close-button modalId="family-delete-modal" text="Cancel" />
         <x-button wire:click="deleteFamily" variant="danger">
-            <i class='bx bx-trash'></i> Delete
+            <i class='bx bx-trash'></i> Delete Family
         </x-button>
     </x-modal.footer>
 </x-modal.dialog>

@@ -38,12 +38,14 @@
         <div class="p-4">
             <div class="flex flex-wrap gap-3">
                 <div class="flex-1 min-w-[140px]">
-                    <x-form.field label="Date">
+                    <x-form.field label="Session Date">
                         <x-form.input type="date" wire:model.live="date" max="{{ now()->toDateString() }}" />
                     </x-form.field>
                 </div>
                 <div class="flex-[2] min-w-[200px]">
-                    <x-form.field label="Service Name">
+                    {{-- Renamed from "Service Name" to clarify it's NOT the service type name --}}
+                    <x-form.field label="Sermon / Occasion Title"
+                        hint="Optional. e.g., 'Baptism Sunday', 'Christmas Service', sermon topic. This is NOT the service name above.">
                         @if($currentSession && $currentSession->service_name)
                             <div class="flex gap-2 items-center">
                                 <span class="flex-1 px-3 py-2 text-[13px] text-[#6b6570] bg-[#f5f4f6] border border-[#e4e0e2] rounded-lg">
@@ -54,7 +56,8 @@
                                 </x-button>
                             </div>
                         @else
-                            <x-form.input wire:model.live="service_name" placeholder="e.g., Morning Service" />
+                            <x-form.input wire:model.live="service_name"
+                                placeholder="e.g., 'The Power of Faith' or 'Baptism Sunday'" />
                         @endif
                     </x-form.field>
                 </div>
@@ -64,7 +67,7 @@
 
     {{-- Stats --}}
     <div class="grid gap-3" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))">
-        <x-statistic-card variant="muted" icon="bx-group" title="Total" value="{{ $totalCount }}" />
+        <x-statistic-card variant="muted"   icon="bx-group"        title="Total"   value="{{ $totalCount }}" />
         <x-statistic-card variant="primary" icon="bx-check-circle" title="Present" value="{{ $presentCount }}" />
         @foreach($categories as $cat)
             <x-statistic-card variant="muted" icon="bx-user" :title="$cat" :value="$categoryCounts[$cat] ?? 0" />
@@ -100,7 +103,9 @@
 
         <div class="p-4 flex flex-col gap-3">
             <div class="flex items-center justify-between gap-3">
-                <x-form.label>Attendees</x-form.label>
+                <div class="text-[12px] text-[#a09aa4]">
+                    <strong class="text-[#1c1c1e]">{{ $totalCount }}</strong> people listed
+                </div>
                 <livewire:person-create />
             </div>
 
@@ -108,9 +113,10 @@
 
             <div class="border border-[#e4e0e2] rounded-lg overflow-hidden" style="max-height:420px;overflow-y:auto">
                 @if($viewMode === 'flat')
-                    @forelse($allPeople as $person)
+                    @forelse($allPeople as $i => $person)
                         @php $isChecked = isset($checked[$person->id]) && $checked[$person->id]; @endphp
                         <label class="checkin-row {{ $isChecked ? 'is-checked' : '' }}">
+                            <span class="text-[11px] text-[#a09aa4] w-6 shrink-0 text-right mr-2">{{ $i + 1 }}</span>
                             <input type="checkbox" wire:click="togglePerson({{ $person->id }})" @checked($isChecked)
                                    class="mr-2.5 w-4 h-4 shrink-0 accent-[#ed213a]">
                             <div class="flex-1 min-w-0">
@@ -122,7 +128,7 @@
                                 </div>
                             </div>
                             @if($isChecked)
-                                <x-feedback-status.status-indicator status="present" class="ml-2">Present</x-feedback-status.status-indicator>
+                                <x-feedback-status.status-indicator status="present" class="ml-2 shrink-0">Present</x-feedback-status.status-indicator>
                             @endif
                         </label>
                     @empty
@@ -132,9 +138,9 @@
                 @elseif($viewMode === 'family')
                     @php $peopleByFamily = $allPeople->groupBy(fn($p) => $p->family_id ?: 'no-family'); @endphp
                     @foreach($peopleByFamily as $familyId => $people)
-                        <div class="bg-[#f5f4f6] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b6570] border-b border-[#e4e0e2]">
-                            {{ $familyId !== 'no-family' ? ($people->first()->family?->family_name ?? 'Unknown') : 'No Family' }}
-                            ({{ $people->count() }})
+                        <div class="bg-[#f5f4f6] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b6570] border-b border-[#e4e0e2] flex justify-between">
+                            <span>{{ $familyId !== 'no-family' ? ($people->first()->family?->family_name ?? 'Unknown') : 'No Family' }}</span>
+                            <span>{{ $people->count() }}</span>
                         </div>
                         @foreach($people as $person)
                             @php $isChecked = isset($checked[$person->id]) && $checked[$person->id]; @endphp
@@ -146,7 +152,7 @@
                                     <div class="text-[11px] text-[#a09aa4]">{{ $person->effective_category }}</div>
                                 </div>
                                 @if($isChecked)
-                                    <x-feedback-status.status-indicator status="present" class="ml-2">Present</x-feedback-status.status-indicator>
+                                    <x-feedback-status.status-indicator status="present" class="ml-2 shrink-0">Present</x-feedback-status.status-indicator>
                                 @endif
                             </label>
                         @endforeach
@@ -155,8 +161,9 @@
                 @elseif($viewMode === 'category')
                     @php $peopleByCategory = $allPeople->groupBy('effective_category'); @endphp
                     @foreach($peopleByCategory as $category => $people)
-                        <div class="bg-[#f5f4f6] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b6570] border-b border-[#e4e0e2]">
-                            {{ $category }} ({{ $people->count() }})
+                        <div class="bg-[#f5f4f6] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#6b6570] border-b border-[#e4e0e2] flex justify-between">
+                            <span>{{ $category }}</span>
+                            <span>{{ $people->count() }}</span>
                         </div>
                         @foreach($people as $person)
                             @php $isChecked = isset($checked[$person->id]) && $checked[$person->id]; @endphp
@@ -170,7 +177,7 @@
                                     @endif
                                 </div>
                                 @if($isChecked)
-                                    <x-feedback-status.status-indicator status="present" class="ml-2">Present</x-feedback-status.status-indicator>
+                                    <x-feedback-status.status-indicator status="present" class="ml-2 shrink-0">Present</x-feedback-status.status-indicator>
                                 @endif
                             </label>
                         @endforeach
@@ -184,10 +191,10 @@
     <x-card>
         <div class="flex items-center justify-between gap-3">
             <div class="text-[13px] text-[#6b6570]">
-                <span class="font-bold text-[#1c1c1e]">{{ $presentCount }}</span>
-                {{ Str::plural('person', $presentCount) }} selected
+                <span class="font-bold text-[#1c1c1e] text-[18px]" style="font-family:'Oswald',sans-serif">{{ $presentCount }}</span>
+                / {{ $totalCount }} {{ Str::plural('person', $totalCount) }} present
             </div>
-            <x-button wire:click="save" variant="primary" loading="Saving…">
+            <x-button wire:click="save" variant="primary">
                 <i class='bx bx-save'></i> Save Attendance
             </x-button>
         </div>

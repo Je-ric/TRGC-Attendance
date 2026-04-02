@@ -6,13 +6,18 @@
 ])
 
 {{--
-    DaisyUI v5 modal.
-    Open:  document.getElementById('{{ $id }}').showModal()
-    Close: document.getElementById('{{ $id }}').close()
-           OR clicking the modal-backdrop form below.
+    DaisyUI v5 modal — fixed for Livewire re-render ghost overlay.
 
-    For Livewire: dispatch('open-modal', id: 'my-id') from PHP
-    The layout's Livewire.on('open-modal') bridge handles it.
+    The modal-backdrop <form method="dialog"> is kept OUTSIDE the modal-box
+    so Livewire re-renders don't leave a stale invisible overlay blocking clicks.
+
+    Open:  document.getElementById('id').showModal()
+    Close: document.getElementById('id').close()
+           OR clicking the backdrop area outside the box.
+
+    Livewire bridge in layout:
+      Livewire.on('open-modal',  ({ id }) => document.getElementById(id)?.showModal())
+      Livewire.on('close-modal', ({ id }) => document.getElementById(id)?.close())
 --}}
 <dialog id="{{ $id }}" class="modal" {{ $attributes }}>
     <div class="modal-box {{ $width }} {{ $maxWidth }} max-h-[90vh] p-0 overflow-hidden rounded-2xl bg-white flex flex-col {{ $class }}"
@@ -20,6 +25,6 @@
         {{ $slot }}
     </div>
     <form method="dialog" class="modal-backdrop">
-        <button>close</button>
+        <button type="submit">close</button>
     </form>
 </dialog>

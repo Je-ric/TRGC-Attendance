@@ -24,8 +24,8 @@
             </x-form.field>
 
             <x-form.field label="Description" error="description">
-                <x-form.textarea name="description" rows="2"
-                    placeholder="Brief description of this service…">{{ old('description') }}</x-form.textarea>
+                <x-form.textarea name="description" rows="3"
+                    placeholder="Describe this service. e.g., Weekly Sunday worship service for the whole congregation. Includes praise & worship, sermon, and announcements.">{{ old('description') }}</x-form.textarea>
             </x-form.field>
 
             <div class="grid grid-cols-2 gap-3">
