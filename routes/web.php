@@ -1,17 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceTypeController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\FamilyController;
 
-Route::get('/', fn() => redirect()->route('attendance.index'));
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 // Attendance
-Route::get('/attendance',          [AttendanceController::class, 'index'])->name('attendance.index');
-Route::get('/attendance/{type}',   [AttendanceController::class, 'show'])->name('attendance.show');
-Route::get('/attendance-records',  [AttendanceController::class, 'records'])->name('attendance.records');
+Route::get('/attendance',         [AttendanceController::class, 'index'])->name('attendance.index');
+Route::get('/attendance/{type}',  [AttendanceController::class, 'show'])->name('attendance.show');
+Route::get('/attendance-records', [AttendanceController::class, 'records'])->name('attendance.records');
 
 // Attendance Types (Services)
 Route::post('/attendance-types',                    [AttendanceTypeController::class, 'store'])->name('attendance-types.store');

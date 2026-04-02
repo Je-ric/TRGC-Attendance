@@ -218,10 +218,11 @@
             <div class="sidebar-section-label">Menu</div>
             @php
                 $navItems = [
+                    ['route' => 'dashboard',          'icon' => 'bx-home-alt-2',   'label' => 'Dashboard'],
                     ['route' => 'attendance.index',   'icon' => 'bx-check-shield', 'label' => 'Attendance'],
                     ['route' => 'attendance.records', 'icon' => 'bx-folder-open',  'label' => 'Records'],
-                    ['route' => 'people.index',       'icon' => 'bx-group',         'label' => 'People'],
-                    ['route' => 'families.index',     'icon' => 'bx-home-heart',    'label' => 'Families'],
+                    ['route' => 'people.index',       'icon' => 'bx-group',        'label' => 'People'],
+                    ['route' => 'families.index',     'icon' => 'bx-home-heart',   'label' => 'Families'],
                 ];
             @endphp
             @foreach($navItems as $item)

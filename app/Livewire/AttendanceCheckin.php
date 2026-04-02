@@ -3,17 +3,18 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\{AttendanceType, AttendanceSession, AttendanceRecord, Person, Family};
-use Carbon\Carbon;
 use Livewire\Attributes\On;
+use App\Models\{AttendanceType, AttendanceSession, AttendanceRecord, Person, Family};
+use App\Services\AttendanceSummaryService;
+use Carbon\Carbon;
 
 class AttendanceCheckin extends Component
 {
     public AttendanceType $attendanceType;
     public $date;
-    public $service_name = '';
-    public $checked      = [];
-    public $viewMode     = 'flat';
+    public $service_name   = '';
+    public $checked        = [];
+    public $viewMode       = 'flat';
     public $filterCategory = '';
     public $filterFamily   = null;
     public $search         = '';
@@ -30,7 +31,7 @@ class AttendanceCheckin extends Component
         $this->loadExistingRecords();
     }
 
-    protected function loadExistingRecords()
+    protected function loadExistingRecords(): void
     {
         $this->checked = [];
 
@@ -53,19 +54,15 @@ class AttendanceCheckin extends Component
     protected function getOrCreateSession(): AttendanceSession
     {
         return AttendanceSession::firstOrCreate(
-            [
-                'attendance_type_id' => $this->attendanceType->id,
-                'date'               => $this->date,
-            ],
+            ['attendance_type_id' => $this->attendanceType->id, 'date' => $this->date],
             ['service_name' => $this->service_name ?: null]
         );
     }
 
     #[On('togglePerson')]
-    public function togglePerson($personId)
+    public function togglePerson($personId): void
     {
         $this->checked[$personId] = !($this->checked[$personId] ?? false);
-
         $session = $this->getOrCreateSession();
 
         if ($this->checked[$personId]) {
@@ -75,13 +72,12 @@ class AttendanceCheckin extends Component
             );
         } else {
             AttendanceRecord::where('attendance_session_id', $session->id)
-                ->where('person_id', $personId)
-                ->delete();
+                ->where('person_id', $personId)->delete();
         }
     }
 
     #[On('personCreated')]
-    public function addNewPerson($personId)
+    public function addNewPerson($personId): void
     {
         $this->checked[$personId] = true;
         $session = $this->getOrCreateSession();
@@ -91,35 +87,34 @@ class AttendanceCheckin extends Component
         );
     }
 
-    public function setViewMode($mode)
+    public function setViewMode($mode): void
     {
         $this->viewMode = $mode;
     }
 
-    public function save()
+    public function save(): void
     {
         $this->validate([
-            'service_name' => 'nullable|string',
+            'service_name' => 'nullable|string|max:255',
             'date'         => 'required|date|before_or_equal:today',
         ]);
 
+        // Upsert session
         $session = AttendanceSession::where('attendance_type_id', $this->attendanceType->id)
             ->where('date', $this->date)
             ->when($this->service_name,
                 fn($q) => $q->where('service_name', $this->service_name),
                 fn($q) => $q->whereNull('service_name')
-            )->first();
-
-        if (!$session) {
-            $session = AttendanceSession::create([
+            )->first()
+            ?? AttendanceSession::create([
                 'attendance_type_id' => $this->attendanceType->id,
                 'date'               => $this->date,
                 'service_name'       => $this->service_name ?: null,
             ]);
-        }
 
+        // Rebuild records
         AttendanceRecord::where('attendance_session_id', $session->id)->delete();
-
+        $presentIds = [];
         foreach ($this->checked as $personId => $present) {
             if ($present) {
                 AttendanceRecord::create([
@@ -127,11 +122,18 @@ class AttendanceCheckin extends Component
                     'person_id'             => $personId,
                     'status'                => 'present',
                 ]);
+                $presentIds[] = $personId;
             }
         }
 
-        $count = count(array_filter($this->checked));
-        $this->dispatch('lw-toast', type: 'success', message: "Attendance saved — $count present.");
+        // Recompute summaries for everyone who was checked in this session
+        $service = app(AttendanceSummaryService::class);
+        foreach ($presentIds as $personId) {
+            $service->recompute($personId);
+        }
+
+        $count = count($presentIds);
+        $this->dispatch('lw-toast', type: 'success', message: "Attendance saved — {$count} present.");
         $this->dispatch('attendanceSaved');
     }
 
@@ -139,22 +141,18 @@ class AttendanceCheckin extends Component
     {
         $query = Person::with('family')->orderBy('last_name')->orderBy('first_name');
 
-        if ($this->filterFamily) {
-            $query->where('family_id', $this->filterFamily);
-        }
-
+        if ($this->filterFamily)   $query->where('family_id', $this->filterFamily);
         if ($this->search) {
             $query->where(fn($q) =>
                 $q->where('first_name', 'like', "%{$this->search}%")
-                  ->orWhere('last_name', 'like', "%{$this->search}%")
+                  ->orWhere('last_name',  'like', "%{$this->search}%")
                   ->orWhere('contact_number', 'like', "%{$this->search}%")
             );
         }
 
         $allPeople = $query->get();
-
         if ($this->filterCategory) {
-            $allPeople = $allPeople->filter(fn(Person $p) => $p->effective_category === $this->filterCategory)->values();
+            $allPeople = $allPeople->filter(fn($p) => $p->effective_category === $this->filterCategory)->values();
         }
 
         $presentCount   = count(array_filter($this->checked));
@@ -187,7 +185,7 @@ class AttendanceCheckin extends Component
             'latestSession'  => $latestSession,
             'currentSession' => $currentSession,
             'families'       => Family::orderBy('family_name')->get(),
-            'categories'     => Person::categories(),
+            'categories'     => Person::CATEGORIES,
         ]);
     }
 }

@@ -58,7 +58,7 @@
                 <x-table.body>
                     @forelse($people as $person)
                         <x-table.row :hover="true">
-                            <x-table.td></x-table.td>
+                            <x-table.td>{{ $loop->iteration }}</x-table.td>
                             <x-table.td>
                                 <x-person.card :person="$person" :showFamily="false" :showActions="false" compact />
                             </x-table.td>

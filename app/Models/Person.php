@@ -7,37 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class Person extends Model
 {
     public const CATEGORIES = ['Kids', 'Youth', 'Adults', 'Seniors', 'Visitors'];
-
     public const MEMBERSHIP_STATUSES = ['Member', 'Regular Attendee', 'Visitor', 'Inactive'];
-
     public const GENDERS = ['Male', 'Female'];
-
     public const CIVIL_STATUSES = ['Single', 'Married', 'Widowed', 'Separated'];
 
     protected $fillable = [
-        'family_id',
-        'first_name',
-        'last_name',
-        'birthdate',
-        'gender',
-        'civil_status',
-        'category',
-        'membership_status',
-        'joined_date',
-        'date_of_baptism',
-        'address',
-        'contact_number',
-        'email',
-        'notes',
+        'family_id', 'first_name', 'last_name', 'birthdate',
+        'gender', 'civil_status', 'category', 'membership_status',
+        'joined_date', 'date_of_baptism', 'address', 'contact_number',
+        'email', 'notes',
     ];
 
     protected $casts = [
-        'birthdate'   => 'date',
-        'joined_date' => 'date',
+        'birthdate'       => 'date',
+        'joined_date'     => 'date',
         'date_of_baptism' => 'date',
     ];
-
-    // ── Accessors ──────────────────────────────────────────────────────
 
     public function getFullNameAttribute(): string
     {
@@ -52,7 +37,6 @@ class Person extends Model
     public function getAutoCategoryAttribute(): string
     {
         if ($this->category) return $this->category;
-
         $age = $this->age;
         if ($age === null) return 'Unknown';
         if ($age <= 12)    return 'Kids';
@@ -66,19 +50,8 @@ class Person extends Model
         return $this->category ?: $this->auto_category;
     }
 
-    // ── Static helpers ─────────────────────────────────────────────────
-
-    public static function categories(): array
-    {
-        return self::CATEGORIES;
-    }
-
-    public static function membershipStatuses(): array
-    {
-        return self::MEMBERSHIP_STATUSES;
-    }
-
-    // ── Relations ──────────────────────────────────────────────────────
+    public static function categories(): array   { return self::CATEGORIES; }
+    public static function membershipStatuses(): array { return self::MEMBERSHIP_STATUSES; }
 
     public function family()
     {
@@ -88,5 +61,10 @@ class Person extends Model
     public function attendanceRecords()
     {
         return $this->hasMany(AttendanceRecord::class);
+    }
+
+    public function attendanceSummary()
+    {
+        return $this->hasOne(AttendanceSummary::class);
     }
 }
