@@ -7,7 +7,7 @@
     </x-page-header>
 
     {{-- Stats --}}
-    <div class="grid gap-3" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
         <x-statistic-card variant="primary" icon="bx-buildings" title="Total Families" value="{{ $families->count() }}" />
         @foreach($categories as $cat)
             <x-statistic-card variant="muted" icon="bx-user" :title="$cat" :value="$categoryCounts[$cat] ?? 0" />
@@ -18,16 +18,19 @@
     @if($families->isEmpty())
         <x-empty-state icon="bx bx-home-heart" title="No families yet" message='Click "Add Family" to create one.' />
     @else
-        <div class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+        {{-- Bento grid: columns sized to content, not equal height --}}
+        <div class="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
             @foreach($families as $family)
-                <x-family.card :family="$family">
-                    <x-button wire:click="edit({{ $family->id }})" variant="table-edit">
-                        <i class='bx bx-edit-alt'></i>
-                    </x-button>
-                    <x-button wire:click="confirmDelete({{ $family->id }})" variant="table-danger">
-                        <i class='bx bx-trash'></i>
-                    </x-button>
-                </x-family.card>
+                <div class="break-inside-avoid">
+                    <x-family.card :family="$family">
+                        <x-button wire:click="edit({{ $family->id }})" variant="table-edit">
+                            <i class='bx bx-edit-alt'></i> Edit
+                        </x-button>
+                        <x-button wire:click="confirmDelete({{ $family->id }})" variant="table-danger">
+                            <i class='bx bx-trash'></i>
+                        </x-button>
+                    </x-family.card>
+                </div>
             @endforeach
         </div>
     @endif

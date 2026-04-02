@@ -9,3 +9,14 @@
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
+
+/* Reusable gradient — avoids inline style= on every avatar/icon */
+.bg-brand-gradient {
+    background: linear-gradient(135deg, #93291e, #ed213a);
+}
+
+/* Override DaisyUI modal backdrop */
+.modal::backdrop {
+    background: rgba(28, 28, 30, 0.5);
+    backdrop-filter: blur(3px);
+}

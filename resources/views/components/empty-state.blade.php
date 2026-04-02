@@ -9,7 +9,7 @@
         <i class="bx {{ $icon }} text-3xl leading-none"></i>
     </div>
 
-    <h3 class="text-[15px] font-bold text-[#1c1c1e]" style="font-family:'Oswald',sans-serif">{{ $title }}</h3>
+    <h3 class="font-['Oswald'] text-[15px] font-bold text-[#1c1c1e]">{{ $title }}</h3>
     <p class="mt-1.5 text-[13px] text-[#6b6570] max-w-sm mx-auto leading-relaxed">{{ $message }}</p>
 
     @if ($slot->isNotEmpty())
