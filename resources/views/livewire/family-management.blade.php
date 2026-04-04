@@ -10,7 +10,7 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
         <x-statistic-card variant="primary" icon="bx-buildings" title="Total Families" value="{{ $families->count() }}" />
         @foreach($categories as $cat)
-            <x-statistic-card variant="muted" icon="bx-user" :title="$cat" :value="$categoryCounts[$cat] ?? 0" />
+            <x-statistic-card variant="grad-aurora" icon="bx-user" :title="$cat" :value="$categoryCounts[$cat] ?? 0" />
         @endforeach
     </div>
 

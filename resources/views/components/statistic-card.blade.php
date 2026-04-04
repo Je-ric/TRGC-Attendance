@@ -3,39 +3,46 @@
 @php
     $variants = [
         'default' => [
-            'wrap'      => 'bg-white border-[#e4e0e2]',
+            'wrap'      => 'bg-white',
             'iconWrap'  => 'bg-[#f5f4f6]',
             'iconColor' => 'text-[#93291e]',
             'label'     => 'text-[#a09aa4]',
             'value'     => 'text-[#1c1c1e]',
         ],
         'primary' => [
-            'wrap'      => 'bg-[#ed213a] border-[#93291e]',
+            'wrap'      => 'bg-gradient-to-r from-[#333333] via-[#dd1818] to-[#f27121]',
             'iconWrap'  => 'bg-white/20',
             'iconColor' => 'text-white',
             'label'     => 'text-white/65',
             'value'     => 'text-white',
         ],
         'dark' => [
-            'wrap'      => 'bg-[#93291e] border-[#7a1f15]',
+            'wrap'      => 'bg-[#93291e]',
             'iconWrap'  => 'bg-white/15',
             'iconColor' => 'text-white',
             'label'     => 'text-white/65',
             'value'     => 'text-white',
         ],
         'muted' => [
-            'wrap'      => 'bg-[#f5f4f6] border-[#e4e0e2]',
+            'wrap'      => 'bg-[#f5f4f6]',
             'iconWrap'  => 'bg-white',
             'iconColor' => 'text-[#93291e]',
             'label'     => 'text-[#a09aa4]',
             'value'     => 'text-[#1c1c1e]',
+        ],
+        'grad-aurora' => [
+            'wrap'      => 'bg-gradient-to-r from-[#fc4a1a] to-[#f7b733]',
+            'iconWrap'  => 'bg-white/20',
+            'iconColor' => 'text-white',
+            'label'     => 'text-white/75',
+            'value'     => 'text-white',
         ],
     ];
     $v = $variants[$variant] ?? $variants['default'];
 @endphp
 
 <a href="{{ $href }}"
-   class="block rounded-xl border p-4 no-underline transition-all duration-150
+   class="block rounded-xl p-4 no-underline transition-all duration-150
           hover:-translate-y-px hover:shadow-lg
           {{ $v['wrap'] }}"
    style="box-shadow: 0 2px 16px rgba(0,0,0,.07)">
