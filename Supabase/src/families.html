@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Families — Church Attendance</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <p class="sidebar-brand-eyebrow">CLSU Church</p>
+      <h1 class="sidebar-brand-name">Attendance<span>.</span></h1>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html"      class="nav-link"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="events.html"     class="nav-link"><i class='bx bx-calendar-event'></i> Events &amp; Services</a>
+      <a href="attendance.html" class="nav-link"><i class='bx bx-check-square'></i> Attendance</a>
+      <a href="people.html"     class="nav-link"><i class='bx bx-group'></i> People</a>
+      <a href="families.html"   class="nav-link active"><i class='bx bx-home-heart'></i> Families</a>
+      <a href="reports.html"    class="nav-link"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+    </nav>
+    <div class="sidebar-footer">© 2026 Church Attendance</div>
+  </aside>
+
+  <div class="main-wrap">
+
+    <header class="topbar">
+      <span class="topbar-title">Families</span>
+      <button onclick="openAddModal()" class="btn btn-primary"><i class='bx bx-home-plus'></i> Add Family</button>
+    </header>
+
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class='bx bx-search'></i>
+        <input id="searchInput" type="text" placeholder="Search family name…" />
+      </div>
+      <span id="countLabel" style="margin-left:auto;font-size:0.6875rem;color:var(--grey);letter-spacing:0.06em;text-transform:uppercase;font-weight:700"></span>
+    </div>
+
+    <main class="page-content">
+      <div class="panel">
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Family Name</th>
+                <th>Contact Person</th>
+                <th>Contact Number</th>
+                <th>Barangay</th>
+                <th>Members</th>
+                <th style="width:90px"></th>
+              </tr>
+            </thead>
+            <tbody id="familiesBody">
+              <tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--grey)">
+                <i class='bx bx-loader-alt bx-spin' style="font-size:1.5rem"></i>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <dialog id="familyModal">
+    <div class="modal-header">
+      <span id="modalTitle" class="modal-title">Add Family</span>
+      <button onclick="closeModal('familyModal')" class="modal-close"><i class='bx bx-x'></i></button>
+    </div>
+    <form id="familyForm" onsubmit="saveFamily(event)">
+      <div class="modal-body">
+        <input type="hidden" id="familyId" />
+        <div class="space-y-3">
+          <div>
+            <label class="form-label">Family Name <span style="color:var(--red)">*</span></label>
+            <input id="fName" class="form-input" required placeholder="e.g. Santos Family" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">Contact Person</label>
+              <input id="fContactPerson" class="form-input" />
+            </div>
+            <div>
+              <label class="form-label">Contact Number</label>
+              <input id="fContactNumber" class="form-input" />
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Address</label>
+            <input id="fAddress" class="form-input" />
+          </div>
+          <div>
+            <label class="form-label">Barangay</label>
+            <input id="fBarangay" class="form-input" />
+          </div>
+          <div>
+            <label class="form-label">Notes</label>
+            <textarea id="fNotes" class="form-input" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('familyModal')" class="btn btn-ghost">Cancel</button>
+        <button id="saveBtn" type="submit" class="btn btn-primary"><i class='bx bx-save'></i> Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- View Modal -->
+  <dialog id="viewModal" style="max-width:580px">
+    <div class="modal-header">
+      <span id="viewTitle" class="modal-title">Family Details</span>
+      <button onclick="closeModal('viewModal')" class="modal-close"><i class='bx bx-x'></i></button>
+    </div>
+    <div id="viewBody" class="modal-body"></div>
+    <div class="modal-footer">
+      <button onclick="closeModal('viewModal')" class="btn btn-ghost">Close</button>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    const PAGE_SIZE = 15;
+    let currentPage = 1;
+    let allFamilies = [];
+
+    async function loadFamilies() {
+      const { data, error } = await db
+        .from('families')
+        .select('*, people(id, first_name, last_name, membership_status)')
+        .order('family_name');
+      if (error) { showToast('Failed to load families', 'error'); return; }
+      allFamilies = data || [];
+      renderTable();
+    }
+
+    function filtered() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      return allFamilies.filter(f => !q || f.family_name.toLowerCase().includes(q));
+    }
+
+    function renderTable() {
+      const data = filtered();
+      const totalPages = Math.max(1, Math.ceil(data.length / PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = 1;
+      const slice = data.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+      document.getElementById('countLabel').textContent = `${data.length} famil${data.length !== 1 ? 'ies' : 'y'}`;
+
+      const tbody = document.getElementById('familiesBody');
+      if (!slice.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--grey)">
+          <i class='bx bx-home-x' style="font-size:2rem;display:block;margin-bottom:0.5rem;color:var(--border)"></i>
+          No families found.
+        </td></tr>`;
+      } else {
+        tbody.innerHTML = slice.map(f => `<tr>
+          <td style="font-weight:600">${f.family_name}</td>
+          <td style="color:var(--grey)">${f.contact_person || '—'}</td>
+          <td style="color:var(--grey)">${f.contact_number || '—'}</td>
+          <td style="color:var(--grey)">${f.barangay || '—'}</td>
+          <td>
+            <span style="font-size:0.75rem;font-weight:700;color:var(--red)">${f.people?.length ?? 0}</span>
+            <span style="font-size:0.6875rem;color:var(--grey)"> member${(f.people?.length ?? 0) !== 1 ? 's' : ''}</span>
+          </td>
+          <td>
+            <div style="display:flex;gap:0.25rem;justify-content:flex-end">
+              <button onclick="viewFamily('${f.id}')" class="btn btn-ghost btn-sm" title="View"><i class='bx bx-show'></i></button>
+              <button onclick="editFamily('${f.id}')" class="btn btn-ghost btn-sm" title="Edit"><i class='bx bx-edit'></i></button>
+              <button onclick="deleteFamily('${f.id}', '${f.family_name.replace(/'/g, "\\'")}', ${f.people?.length ?? 0})" class="btn btn-sm" style="background:var(--light);border:1px solid var(--border);color:var(--red)" title="Delete"><i class='bx bx-trash'></i></button>
+            </div>
+          </td>
+        </tr>`).join('');
+      }
+      renderPagination(document.getElementById('pagination'), currentPage, totalPages, p => { currentPage = p; renderTable(); });
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add Family';
+      document.getElementById('familyForm').reset();
+      document.getElementById('familyId').value = '';
+      openModal('familyModal');
+    }
+
+    function editFamily(id) {
+      const f = allFamilies.find(x => x.id === id);
+      if (!f) return;
+      document.getElementById('modalTitle').textContent = 'Edit Family';
+      document.getElementById('familyId').value = f.id;
+      document.getElementById('fName').value = f.family_name;
+      document.getElementById('fContactPerson').value = f.contact_person || '';
+      document.getElementById('fContactNumber').value = f.contact_number || '';
+      document.getElementById('fAddress').value = f.address || '';
+      document.getElementById('fBarangay').value = f.barangay || '';
+      document.getElementById('fNotes').value = f.notes || '';
+      openModal('familyModal');
+    }
+
+    async function saveFamily(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true; btn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Saving…`;
+      const id = document.getElementById('familyId').value;
+      const payload = {
+        family_name:    document.getElementById('fName').value.trim(),
+        contact_person: document.getElementById('fContactPerson').value.trim() || null,
+        contact_number: document.getElementById('fContactNumber').value.trim() || null,
+        address:        document.getElementById('fAddress').value.trim() || null,
+        barangay:       document.getElementById('fBarangay').value.trim() || null,
+        notes:          document.getElementById('fNotes').value.trim() || null,
+      };
+      const { error } = id
+        ? await db.from('families').update(payload).eq('id', id)
+        : await db.from('families').insert(payload);
+      btn.disabled = false; btn.innerHTML = `<i class='bx bx-save'></i> Save`;
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast(id ? 'Family updated.' : 'Family added.');
+      closeModal('familyModal');
+      loadFamilies();
+    }
+
+    async function deleteFamily(id, name, memberCount) {
+      const msg = memberCount > 0
+        ? `Delete "${name}"? ${memberCount} member(s) will be unlinked from this family.`
+        : `Delete "${name}"?`;
+      if (!confirmDelete(msg)) return;
+      const { error } = await db.from('families').delete().eq('id', id);
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast('Family deleted.');
+      loadFamilies();
+    }
+
+    function viewFamily(id) {
+      const f = allFamilies.find(x => x.id === id);
+      if (!f) return;
+      document.getElementById('viewTitle').textContent = f.family_name;
+      document.getElementById('viewBody').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem">
+          ${infoRow('Contact Person', f.contact_person || '—')}
+          ${infoRow('Contact Number', f.contact_number || '—')}
+          ${infoRow('Barangay', f.barangay || '—')}
+          <div style="grid-column:1/-1">${infoRow('Address', f.address || '—')}</div>
+          ${f.notes ? `<div style="grid-column:1/-1">${infoRow('Notes', f.notes)}</div>` : ''}
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1rem">
+          <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--grey);margin-bottom:0.75rem">
+            Members (${f.people?.length ?? 0})
+          </p>
+          ${f.people?.length
+            ? `<div style="display:flex;flex-direction:column;gap:0">
+                ${f.people.map(p => `
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0;border-bottom:1px solid var(--light)">
+                    <div style="display:flex;align-items:center;gap:0.625rem">
+                      <div style="width:28px;height:28px;border-radius:50%;background:var(--light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <i class='bx bx-user' style="font-size:0.875rem;color:var(--grey)"></i>
+                      </div>
+                      <span style="font-size:0.8125rem;font-weight:600">${p.first_name} ${p.last_name}</span>
+                    </div>
+                    ${badge(p.membership_status, statusColors[p.membership_status] || '')}
+                  </div>`).join('')}
+              </div>`
+            : `<div class="empty-state" style="padding:1.5rem">
+                <i class='bx bx-user-x'></i>
+                <p>No members linked to this family.</p>
+              </div>`
+          }
+        </div>
+      `;
+      openModal('viewModal');
+    }
+
+    function infoRow(label, value) {
+      return `<div>
+        <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin-bottom:0.2rem">${label}</p>
+        <p style="font-size:0.8125rem;color:var(--black)">${value}</p>
+      </div>`;
+    }
+
+    document.getElementById('searchInput').addEventListener('input', debounce(() => { currentPage = 1; renderTable(); }));
+
+    if (new URLSearchParams(location.search).get('action') === 'create') {
+      window.addEventListener('load', openAddModal);
+    }
+
+    loadFamilies();
+  </script>
+</body>
+</html>

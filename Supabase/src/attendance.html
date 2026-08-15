@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attendance — Church Attendance</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <p class="sidebar-brand-eyebrow">CLSU Church</p>
+      <h1 class="sidebar-brand-name">Attendance<span>.</span></h1>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html"      class="nav-link"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="events.html"     class="nav-link"><i class='bx bx-calendar-event'></i> Events &amp; Services</a>
+      <a href="attendance.html" class="nav-link active"><i class='bx bx-check-square'></i> Attendance</a>
+      <a href="people.html"     class="nav-link"><i class='bx bx-group'></i> People</a>
+      <a href="families.html"   class="nav-link"><i class='bx bx-home-heart'></i> Families</a>
+      <a href="reports.html"    class="nav-link"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+    </nav>
+    <div class="sidebar-footer">© 2026 Church Attendance</div>
+  </aside>
+
+  <div class="main-wrap">
+
+    <header class="topbar">
+      <span class="topbar-title">Attendance</span>
+    </header>
+
+    <!-- Session selector bar -->
+    <div class="filter-bar" style="gap:0.75rem;align-items:flex-end">
+      <div>
+        <label class="form-label">Session</label>
+        <select id="sessionSelect" class="form-input" style="width:320px" onchange="loadSession()">
+          <option value="">— Select a session —</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Filter by Date</label>
+        <input id="dateFilter" type="date" class="form-input" style="width:160px" onchange="filterSessionList()" />
+      </div>
+      <a href="events.html" class="btn btn-outline" style="margin-bottom:1px"><i class='bx bx-plus'></i> New Session</a>
+    </div>
+
+    <!-- Session info bar (hidden until session selected) -->
+    <div id="sessionInfo" class="session-info-bar" style="display:none"></div>
+
+    <main class="page-content">
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state" style="flex:1">
+        <i class='bx bx-check-square'></i>
+        <p>Select a session above to take or view attendance.</p>
+      </div>
+
+      <!-- Attendance panel -->
+      <div id="attendancePanel" style="display:none" class="page-content" style="padding:0;gap:1.25rem">
+
+        <!-- Count cards -->
+        <div class="count-grid">
+          <div class="count-card">
+            <p class="count-label">Present</p>
+            <p id="countPresent" class="count-value red">0</p>
+          </div>
+          <div class="count-card">
+            <p class="count-label">Absent</p>
+            <p id="countAbsent" class="count-value grey">0</p>
+          </div>
+          <div class="count-card">
+            <p class="count-label">Not Marked</p>
+            <p id="countUnmarked" class="count-value" style="color:var(--border)">0</p>
+          </div>
+          <div class="count-card">
+            <p class="count-label">Total People</p>
+            <p id="countTotal" class="count-value black">0</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div style="display:flex;flex-wrap:wrap;gap:0.625rem;align-items:center">
+          <div class="search-wrap">
+            <i class='bx bx-search'></i>
+            <input id="peopleSearch" type="text" placeholder="Search person…" oninput="renderPeopleList()" />
+          </div>
+          <select id="filterCat" class="form-input" style="width:auto" onchange="renderPeopleList()">
+            <option value="">All Categories</option>
+            <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option><option>Visitors</option>
+          </select>
+          <button onclick="markAll('present')" class="btn btn-outline btn-sm"><i class='bx bx-check'></i> Mark All Present</button>
+          <button onclick="markAll('absent')"  class="btn btn-ghost btn-sm"><i class='bx bx-x'></i> Mark All Absent</button>
+          <button onclick="clearAll()" class="btn btn-ghost btn-sm" style="color:var(--grey)"><i class='bx bx-reset'></i> Clear All</button>
+          <button onclick="saveAttendance()" id="saveBtn" class="btn btn-primary" style="margin-left:auto">
+            <i class='bx bx-save'></i> Save Attendance
+          </button>
+        </div>
+
+        <!-- People table -->
+        <div class="panel">
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Membership</th>
+                  <th style="text-align:center;width:80px">
+                    <span style="color:var(--red)">Present</span>
+                  </th>
+                  <th style="text-align:center;width:80px">Absent</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="peopleBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    let allSessions = [];
+    let allPeople = [];
+    let existingRecords = {};
+    let attendance = {};
+    let currentSessionId = null;
+
+    async function init() {
+      const [{ data: sessions }, { data: people }] = await Promise.all([
+        db.from('attendance_sessions')
+          .select('id, date, service_name, attendance_types(name)')
+          .order('date', { ascending: false }),
+        db.from('people')
+          .select('id, first_name, last_name, birthdate, category, membership_status')
+          .order('last_name').order('first_name'),
+      ]);
+      allSessions = sessions || [];
+      allPeople = people || [];
+      populateSessionSelect();
+
+      const urlSession = new URLSearchParams(location.search).get('session');
+      if (urlSession) {
+        document.getElementById('sessionSelect').value = urlSession;
+        loadSession();
+      }
+    }
+
+    function populateSessionSelect(filtered = null) {
+      const sel = document.getElementById('sessionSelect');
+      const current = sel.value;
+      const list = filtered ?? allSessions;
+      sel.innerHTML = '<option value="">— Select a session —</option>';
+      list.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.id;
+        o.textContent = `${formatDate(s.date)} — ${s.attendance_types?.name ?? '?'}${s.service_name ? ' · ' + s.service_name : ''}`;
+        sel.appendChild(o);
+      });
+      if (current) sel.value = current;
+    }
+
+    function filterSessionList() {
+      const d = document.getElementById('dateFilter').value;
+      populateSessionSelect(d ? allSessions.filter(s => s.date === d) : allSessions);
+    }
+
+    async function loadSession() {
+      const id = document.getElementById('sessionSelect').value;
+      const emptyState = document.getElementById('emptyState');
+      const panel = document.getElementById('attendancePanel');
+      const infoBar = document.getElementById('sessionInfo');
+
+      if (!id) {
+        emptyState.style.display = 'flex';
+        panel.style.display = 'none';
+        infoBar.style.display = 'none';
+        return;
+      }
+
+      currentSessionId = id;
+      const session = allSessions.find(s => s.id === id);
+
+      infoBar.style.display = 'flex';
+      infoBar.innerHTML = `
+        <i class='bx bx-calendar-check'></i>
+        <strong>${session?.attendance_types?.name ?? '—'}</strong>
+        ${session?.service_name ? `<span class="sep">·</span> <span>${session.service_name}</span>` : ''}
+        <span class="sep">|</span>
+        <span>${formatDate(session?.date)} — ${dayOfWeek(session?.date)}</span>
+      `;
+
+      const { data: records } = await db
+        .from('attendance_records')
+        .select('id, person_id, status, remarks')
+        .eq('attendance_session_id', id);
+
+      existingRecords = {};
+      (records || []).forEach(r => { existingRecords[r.person_id] = r; });
+
+      attendance = {};
+      allPeople.forEach(p => {
+        const rec = existingRecords[p.id];
+        attendance[p.id] = { status: rec?.status ?? null, remarks: rec?.remarks ?? '' };
+      });
+
+      emptyState.style.display = 'none';
+      panel.style.display = 'flex';
+      panel.style.flexDirection = 'column';
+      panel.style.gap = '1.25rem';
+      renderPeopleList();
+    }
+
+    function filteredPeople() {
+      const q = document.getElementById('peopleSearch').value.toLowerCase();
+      const cat = document.getElementById('filterCat').value;
+      return allPeople.filter(p => {
+        const name = `${p.first_name} ${p.last_name}`.toLowerCase();
+        const ec = effectiveCategory(p);
+        return (!q || name.includes(q)) && (!cat || ec === cat);
+      });
+    }
+
+    function renderPeopleList() {
+      const people = filteredPeople();
+      const tbody = document.getElementById('peopleBody');
+
+      if (!people.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--grey)">No people found.</td></tr>`;
+        updateCounts();
+        return;
+      }
+
+      tbody.innerHTML = people.map(p => {
+        const ec = effectiveCategory(p);
+        const att = attendance[p.id] || { status: null, remarks: '' };
+        const rowStyle = att.status === 'present'
+          ? 'background:#fef9f9'
+          : att.status === 'absent'
+          ? 'background:#f9f9f9'
+          : '';
+
+        return `<tr id="row-${p.id}" style="${rowStyle}">
+          <td style="font-weight:600">${p.last_name}, ${p.first_name}</td>
+          <td>${badge(ec, categoryColors[ec] || '')}</td>
+          <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
+          <td style="text-align:center">
+            <label style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:28px;height:28px;border-radius:50%;transition:background 0.15s;${att.status === 'present' ? 'background:var(--red)' : 'background:var(--light)'}">
+              <input type="radio" name="att-${p.id}" value="present"
+                ${att.status === 'present' ? 'checked' : ''}
+                onchange="setStatus('${p.id}', 'present')"
+                style="position:absolute;opacity:0;width:0;height:0" />
+              <i class='bx bx-check' style="font-size:1rem;color:${att.status === 'present' ? '#fff' : 'var(--grey)'}"></i>
+            </label>
+          </td>
+          <td style="text-align:center">
+            <label style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:28px;height:28px;border-radius:50%;transition:background 0.15s;${att.status === 'absent' ? 'background:var(--black)' : 'background:var(--light)'}">
+              <input type="radio" name="att-${p.id}" value="absent"
+                ${att.status === 'absent' ? 'checked' : ''}
+                onchange="setStatus('${p.id}', 'absent')"
+                style="position:absolute;opacity:0;width:0;height:0" />
+              <i class='bx bx-x' style="font-size:1rem;color:${att.status === 'absent' ? '#fff' : 'var(--grey)'}"></i>
+            </label>
+          </td>
+          <td>
+            <input type="text" value="${att.remarks || ''}"
+              placeholder="optional note"
+              oninput="setRemarks('${p.id}', this.value)"
+              class="remarks-input" />
+          </td>
+        </tr>`;
+      }).join('');
+
+      updateCounts();
+    }
+
+    function setStatus(personId, status) {
+      if (!attendance[personId]) attendance[personId] = { status: null, remarks: '' };
+      attendance[personId].status = status;
+      updateCounts();
+      // Re-render just this row by re-rendering the full list (fast enough at typical church sizes)
+      renderPeopleList();
+    }
+
+    function setRemarks(personId, value) {
+      if (!attendance[personId]) attendance[personId] = { status: null, remarks: '' };
+      attendance[personId].remarks = value;
+    }
+
+    function markAll(status) {
+      filteredPeople().forEach(p => {
+        attendance[p.id] = { ...(attendance[p.id] || {}), status };
+      });
+      renderPeopleList();
+    }
+
+    function clearAll() {
+      filteredPeople().forEach(p => {
+        attendance[p.id] = { ...(attendance[p.id] || {}), status: null };
+      });
+      renderPeopleList();
+    }
+
+    function updateCounts() {
+      const vals = Object.values(attendance);
+      document.getElementById('countPresent').textContent  = vals.filter(a => a.status === 'present').length;
+      document.getElementById('countAbsent').textContent   = vals.filter(a => a.status === 'absent').length;
+      document.getElementById('countUnmarked').textContent = vals.filter(a => !a.status).length;
+      document.getElementById('countTotal').textContent    = allPeople.length;
+    }
+
+    async function saveAttendance() {
+      if (!currentSessionId) return;
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Saving…';
+
+      const toUpsert = [];
+      const toDelete = [];
+
+      allPeople.forEach(p => {
+        const att = attendance[p.id];
+        const existing = existingRecords[p.id];
+        if (att?.status) {
+          toUpsert.push({
+            ...(existing ? { id: existing.id } : {}),
+            attendance_session_id: currentSessionId,
+            person_id: p.id,
+            status: att.status,
+            remarks: att.remarks || null,
+          });
+        } else if (existing) {
+          toDelete.push(existing.id);
+        }
+      });
+
+      const ops = [];
+      if (toUpsert.length) ops.push(db.from('attendance_records').upsert(toUpsert, { onConflict: 'attendance_session_id,person_id' }));
+      if (toDelete.length) ops.push(db.from('attendance_records').delete().in('id', toDelete));
+
+      const results = await Promise.all(ops);
+      const err = results.find(r => r.error);
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class=\'bx bx-save\'></i> Save Attendance';
+
+      if (err) { showToast(err.error.message, 'error'); return; }
+      showToast('Attendance saved.');
+      loadSession();
+    }
+
+    init();
+  </script>
+</body>
+</html>

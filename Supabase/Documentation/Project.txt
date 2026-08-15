@@ -1,0 +1,338 @@
+# Church Attendance Management System
+
+A web-based **Church Attendance Management System** designed to record, organize, and manage attendance for church services, activities, and events. The system will use **HTML, CSS/JavaScript, Supabase, and Vercel**, with Supabase serving as the database and authentication backend.
+
+## 1. Attendance Records
+
+The system will allow administrators or authorized users to create attendance records for different church services, activities, and events.
+
+Each attendance record should contain:
+
+* **Date** – The date of the service or activity.
+* **Day** – Automatically determined from the date (Monday–Sunday).
+* **Event/Service Title** – Name of the service, activity, or event.
+* **Location** – Where the service or activity was held.
+* **Description** – Additional information about the service or event.
+* **Attendance List** – The people who attended that specific service or event.
+* **Attendance Status** – Such as Present, Absent, or other statuses as needed.
+* **Time In/Time Out** – Optional attendance time records.
+
+Each service, activity, or event must have its **own separate attendance list**. Attendance from one event should not be mixed with another.
+
+For example:
+
+```text
+Sunday Worship Service
+August 16, 2026 — Sunday
+Location: Church Main Hall
+
+Attendance:
+├── Juan Dela Cruz — Present
+├── Maria Santos — Present
+├── Pedro Reyes — Absent
+└── Ana Cruz — Present
+```
+
+Another event should have its own independent attendance record:
+
+```text
+Youth Fellowship
+August 16, 2026 — Sunday
+Location: Youth Hall
+
+Attendance:
+├── Juan Dela Cruz — Present
+├── Mark Santos — Present
+└── Ana Cruz — Present
+```
+
+The system should also allow users to view attendance history by **date, day, event/service, location, or person**.
+
+---
+
+# 2. People Management
+
+The system will have a dedicated **People Management** page where administrators can manage the church's list of people.
+
+The page should support full **CRUD functionality**:
+
+* Create/add a person
+* View people
+* Edit person information
+* Delete/deactivate a person
+* Search and filter people
+* View individual attendance history
+
+### Person Information
+
+| Field               | Type   | Description                                    |
+| ------------------- | ------ | ---------------------------------------------- |
+| `id`                | PK     | Unique person ID                               |
+| `family_id`         | FK     | Optional link to a family                      |
+| `first_name`        | string | First name                                     |
+| `last_name`         | string | Last name                                      |
+| `birthdate`         | date   | Used to automatically compute age and category |
+| `gender`            | enum   | Male / Female                                  |
+| `civil_status`      | enum   | Single / Married / Widowed / Separated         |
+| `category`          | enum   | Kids / Youth / Adults / Seniors / Visitors     |
+| `membership_status` | enum   | Member / Regular Attendee / Visitor / Inactive |
+| `joined_date`       | date   | Date when the person first joined the church   |
+| `date_of_baptism`   | date   | Baptism date, if applicable                    |
+| `address`           | string | Personal address                               |
+| `contact_number`    | string | Personal phone number                          |
+| `email`             | string | Personal email                                 |
+| `notes`             | text   | Internal notes                                 |
+
+### Automatic Age and Category
+
+The system should automatically calculate the person's **current age from their birthdate**.
+
+The category should also be automatically determined based on age when the `category` field is not manually specified.
+
+However, administrators should be able to manually override the automatically calculated category when necessary.
+
+For example:
+
+```text
+Birthdate: January 10, 2010
+Current Age: 16
+Automatic Category: Youth
+Manual Category: Adults
+```
+
+If a manual category is selected, the system should use the manual category instead of the automatically calculated one.
+
+---
+
+# 3. Family Management
+
+The system will have a dedicated **Family Management** page for organizing people into family groups.
+
+Families allow multiple people to be grouped together while still maintaining their individual information.
+
+The page should support:
+
+* Create family
+* View family
+* Edit family
+* Delete/deactivate family
+* Add people to a family
+* Remove people from a family
+* View all members of a family
+* View family attendance information
+
+### Family Information
+
+| Field            | Type   | Description            |
+| ---------------- | ------ | ---------------------- |
+| `id`             | PK     | Unique family ID       |
+| `family_name`    | string | Example: Santos Family |
+| `address`        | string | Street address         |
+| `barangay`       | string | Barangay/locality      |
+| `contact_person` | string | Primary family contact |
+| `contact_number` | string | Family contact number  |
+| `notes`          | text   | Internal notes         |
+
+A family can contain multiple people:
+
+```text
+Santos Family
+│
+├── Juan Santos — Father
+├── Maria Santos — Mother
+├── Mark Santos — Son
+└── Ana Santos — Daughter
+```
+
+The system should allow a person's `family_id` to be optional, since not every person needs to belong to a family group.
+
+---
+
+# 4. Services, Activities, and Events
+
+The system should treat every church service, activity, or event as a **separate attendance session**.
+
+Examples:
+
+* Sunday Worship Service
+* Sunday Afternoon Service
+* Youth Fellowship
+* Kids Ministry
+* Prayer Meeting
+* Bible Study
+* Church Anniversary
+* Outreach
+* Special Events
+* Ministry Activities
+
+Each event should have its own:
+
+```text
+Event
+├── Date
+├── Day
+├── Title
+├── Type
+├── Location
+├── Description
+└── Attendance List
+```
+
+For example:
+
+```text
+EVENT 001
+────────────────────────
+Title: Sunday Worship Service
+Date: August 16, 2026
+Day: Sunday
+Location: Main Church
+Description: Regular Sunday worship service
+
+Attendance
+────────────────────────
+Present: 85
+Absent: 12
+Visitors: 5
+Total Recorded: 102
+```
+
+And:
+
+```text
+EVENT 002
+────────────────────────
+Title: Youth Fellowship
+Date: August 16, 2026
+Day: Sunday
+Location: Youth Hall
+Description: Weekly youth fellowship
+
+Attendance
+────────────────────────
+Present: 32
+Absent: 4
+Visitors: 2
+Total Recorded: 38
+```
+
+These two attendance lists must remain **separate**, even though they occur on the same date.
+
+---
+
+# 5. Attendance History
+
+The system should maintain a complete attendance history.
+
+Administrators should be able to view:
+
+### By Event
+
+```text
+Sunday Worship Service
+August 16, 2026
+
+Present: 85
+Absent: 12
+Visitors: 5
+```
+
+### By Person
+
+```text
+Juan Dela Cruz
+
+August 2     Sunday Worship      Present
+August 9     Sunday Worship      Present
+August 16    Sunday Worship      Absent
+August 16    Youth Fellowship    Present
+```
+
+### By Date
+
+```text
+August 16, 2026 — Sunday
+
+Sunday Worship Service      102 records
+Youth Fellowship             38 records
+Prayer Meeting               24 records
+```
+
+This will make it possible to track both **overall event attendance** and an individual's **attendance history**.
+
+---
+
+# 6. Suggested Main Pages
+
+The system can have the following navigation:
+
+```text
+Dashboard
+│
+├── Attendance
+│   ├── All Attendance
+│   ├── Create Event/Service
+│   └── Attendance History
+│
+├── People
+│   ├── People List
+│   ├── Add Person
+│   └── Person Details
+│
+├── Families
+│   ├── Family List
+│   ├── Add Family
+│   └── Family Details
+│
+├── Events / Services
+│   ├── Events List
+│   ├── Create Event
+│   └── Event Details
+│
+└── Reports
+    ├── Attendance Reports
+    ├── People Reports
+    └── Family Reports
+```
+
+The **Dashboard** can provide a quick overview such as:
+
+```text
+Today's Events        3
+Total People        425
+Total Families      128
+Today's Attendance  187
+```
+
+---
+
+# 7. Core Database Relationship
+
+The main relationship should be:
+
+```text
+FAMILIES
+    │
+    │ 1
+    │
+    └──────────< PEOPLE
+                    │
+                    │
+                    │
+                    ▼
+                ATTENDANCE
+                    ▲
+                    │
+                    │
+                 EVENTS
+```
+
+In practical terms:
+
+* One **family** can have many people.
+* One **person** can belong to one family or no family.
+* One **event/service** can have many attendance records.
+* One **person** can have many attendance records.
+* Each attendance record connects **one person to one specific event/service**.
+
+This structure allows the system to keep every service, activity, and event's attendance **independent while still maintaining a complete attendance history for each person**.

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>People — Church Attendance</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <p class="sidebar-brand-eyebrow">CLSU Church</p>
+      <h1 class="sidebar-brand-name">Attendance<span>.</span></h1>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html"      class="nav-link"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="events.html"     class="nav-link"><i class='bx bx-calendar-event'></i> Events &amp; Services</a>
+      <a href="attendance.html" class="nav-link"><i class='bx bx-check-square'></i> Attendance</a>
+      <a href="people.html"     class="nav-link active"><i class='bx bx-group'></i> People</a>
+      <a href="families.html"   class="nav-link"><i class='bx bx-home-heart'></i> Families</a>
+      <a href="reports.html"    class="nav-link"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+    </nav>
+    <div class="sidebar-footer">© 2026 Church Attendance</div>
+  </aside>
+
+  <div class="main-wrap">
+
+    <header class="topbar">
+      <span class="topbar-title">People</span>
+      <button onclick="openAddModal()" class="btn btn-primary"><i class='bx bx-user-plus'></i> Add Person</button>
+    </header>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class='bx bx-search'></i>
+        <input id="searchInput" type="text" placeholder="Search name…" />
+      </div>
+      <select id="filterCategory" class="form-input" style="width:auto">
+        <option value="">All Categories</option>
+        <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option><option>Visitors</option>
+      </select>
+      <select id="filterStatus" class="form-input" style="width:auto">
+        <option value="">All Statuses</option>
+        <option>Member</option><option>Regular Attendee</option><option>Visitor</option><option>Inactive</option>
+      </select>
+      <span id="countLabel" style="margin-left:auto;font-size:0.6875rem;color:var(--grey);letter-spacing:0.06em;text-transform:uppercase;font-weight:700;"></span>
+    </div>
+
+    <main class="page-content">
+      <div class="panel">
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Membership</th>
+                <th>Age</th>
+                <th>Family</th>
+                <th>Contact</th>
+                <th style="width:100px"></th>
+              </tr>
+            </thead>
+            <tbody id="peopleBody">
+              <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--grey)">
+                <i class='bx bx-loader-alt bx-spin' style="font-size:1.5rem"></i>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <dialog id="personModal" style="max-width:560px">
+    <div class="modal-header">
+      <span id="modalTitle" class="modal-title">Add Person</span>
+      <button onclick="closeModal('personModal')" class="modal-close"><i class='bx bx-x'></i></button>
+    </div>
+    <form id="personForm" onsubmit="savePerson(event)">
+      <div class="modal-body">
+        <input type="hidden" id="personId" />
+        <div class="space-y-3">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">First Name <span style="color:var(--red)">*</span></label>
+              <input id="fFirstName" class="form-input" required />
+            </div>
+            <div>
+              <label class="form-label">Last Name <span style="color:var(--red)">*</span></label>
+              <input id="fLastName" class="form-input" required />
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">Birthdate</label>
+              <input id="fBirthdate" type="date" class="form-input" oninput="updateAutoCategory()" />
+            </div>
+            <div>
+              <label class="form-label">Gender</label>
+              <select id="fGender" class="form-input">
+                <option value="">—</option><option>Male</option><option>Female</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">Civil Status</label>
+              <select id="fCivilStatus" class="form-input">
+                <option value="">—</option><option>Single</option><option>Married</option><option>Widowed</option><option>Separated</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Category <span id="autoCatHint" style="font-size:0.625rem;color:var(--grey);font-weight:400;text-transform:none;letter-spacing:0"></span></label>
+              <select id="fCategory" class="form-input">
+                <option value="">Auto</option><option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option><option>Visitors</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">Membership Status</label>
+              <select id="fMembershipStatus" class="form-input">
+                <option>Visitor</option><option>Member</option><option>Regular Attendee</option><option>Inactive</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Family</label>
+              <select id="fFamilyId" class="form-input">
+                <option value="">— None —</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">Joined Date</label>
+              <input id="fJoinedDate" type="date" class="form-input" />
+            </div>
+            <div>
+              <label class="form-label">Date of Baptism</label>
+              <input id="fBaptismDate" type="date" class="form-input" />
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Address</label>
+            <input id="fAddress" class="form-input" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+            <div>
+              <label class="form-label">Contact Number</label>
+              <input id="fContact" class="form-input" />
+            </div>
+            <div>
+              <label class="form-label">Email</label>
+              <input id="fEmail" type="email" class="form-input" />
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Notes</label>
+            <textarea id="fNotes" class="form-input" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="closeModal('personModal')" class="btn btn-ghost">Cancel</button>
+        <button id="saveBtn" type="submit" class="btn btn-primary"><i class='bx bx-save'></i> Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- View Modal -->
+  <dialog id="viewModal" style="max-width:600px">
+    <div class="modal-header">
+      <span id="viewName" class="modal-title">Person Details</span>
+      <button onclick="closeModal('viewModal')" class="modal-close"><i class='bx bx-x'></i></button>
+    </div>
+    <div id="viewBody" class="modal-body"></div>
+    <div class="modal-footer">
+      <button onclick="closeModal('viewModal')" class="btn btn-ghost">Close</button>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    const PAGE_SIZE = 15;
+    let currentPage = 1;
+    let allPeople = [];
+    let families = [];
+
+    async function loadFamilies() {
+      const { data } = await db.from('families').select('id, family_name').order('family_name');
+      families = data || [];
+      const sel = document.getElementById('fFamilyId');
+      families.forEach(f => {
+        const o = document.createElement('option');
+        o.value = f.id; o.textContent = f.family_name;
+        sel.appendChild(o);
+      });
+    }
+
+    async function loadPeople() {
+      const { data, error } = await db
+        .from('people')
+        .select('*, families(family_name)')
+        .order('last_name').order('first_name');
+      if (error) { showToast('Failed to load people', 'error'); return; }
+      allPeople = data || [];
+      renderTable();
+    }
+
+    function filteredPeople() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const cat = document.getElementById('filterCategory').value;
+      const st = document.getElementById('filterStatus').value;
+      return allPeople.filter(p => {
+        const name = `${p.first_name} ${p.last_name}`.toLowerCase();
+        const ec = effectiveCategory(p);
+        return (!q || name.includes(q)) && (!cat || ec === cat) && (!st || p.membership_status === st);
+      });
+    }
+
+    function renderTable() {
+      const data = filteredPeople();
+      const totalPages = Math.max(1, Math.ceil(data.length / PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = 1;
+      const slice = data.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+      document.getElementById('countLabel').textContent = `${data.length} record${data.length !== 1 ? 's' : ''}`;
+
+      const tbody = document.getElementById('peopleBody');
+      if (!slice.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--grey)">
+          <i class='bx bx-user-x' style="font-size:2rem;display:block;margin-bottom:0.5rem;color:var(--border)"></i>
+          No people found.
+        </td></tr>`;
+      } else {
+        tbody.innerHTML = slice.map(p => {
+          const age = calcAge(p.birthdate);
+          const ec = effectiveCategory(p);
+          return `<tr>
+            <td style="font-weight:600">${p.last_name}, ${p.first_name}</td>
+            <td>${badge(ec, categoryColors[ec] || '')}</td>
+            <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
+            <td style="color:var(--grey)">${age !== null ? age : '—'}</td>
+            <td style="color:var(--grey)">${p.families?.family_name ?? '—'}</td>
+            <td style="color:var(--grey)">${p.contact_number || '—'}</td>
+            <td>
+              <div style="display:flex;gap:0.25rem;justify-content:flex-end">
+                <button onclick="viewPerson('${p.id}')" class="btn btn-ghost btn-sm" title="View"><i class='bx bx-show'></i></button>
+                <button onclick="editPerson('${p.id}')" class="btn btn-ghost btn-sm" title="Edit"><i class='bx bx-edit'></i></button>
+                <button onclick="deletePerson('${p.id}', '${p.first_name} ${p.last_name}')" class="btn btn-sm" style="background:var(--light);border:1px solid var(--border);color:var(--red)" title="Delete"><i class='bx bx-trash'></i></button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      }
+      renderPagination(document.getElementById('pagination'), currentPage, totalPages, p => { currentPage = p; renderTable(); });
+    }
+
+    function updateAutoCategory() {
+      const bd = document.getElementById('fBirthdate').value;
+      const age = calcAge(bd);
+      document.getElementById('autoCatHint').textContent = age !== null ? `(auto: ${autoCategory(age)}, age ${age})` : '';
+    }
+
+    function openAddModal() {
+      document.getElementById('modalTitle').textContent = 'Add Person';
+      document.getElementById('personForm').reset();
+      document.getElementById('personId').value = '';
+      document.getElementById('autoCatHint').textContent = '';
+      openModal('personModal');
+    }
+
+    function editPerson(id) {
+      const p = allPeople.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('modalTitle').textContent = 'Edit Person';
+      document.getElementById('personId').value = p.id;
+      document.getElementById('fFirstName').value = p.first_name;
+      document.getElementById('fLastName').value = p.last_name;
+      document.getElementById('fBirthdate').value = p.birthdate || '';
+      document.getElementById('fGender').value = p.gender || '';
+      document.getElementById('fCivilStatus').value = p.civil_status || '';
+      document.getElementById('fCategory').value = p.category || '';
+      document.getElementById('fMembershipStatus').value = p.membership_status;
+      document.getElementById('fFamilyId').value = p.family_id || '';
+      document.getElementById('fJoinedDate').value = p.joined_date || '';
+      document.getElementById('fBaptismDate').value = p.date_of_baptism || '';
+      document.getElementById('fAddress').value = p.address || '';
+      document.getElementById('fContact').value = p.contact_number || '';
+      document.getElementById('fEmail').value = p.email || '';
+      document.getElementById('fNotes').value = p.notes || '';
+      updateAutoCategory();
+      openModal('personModal');
+    }
+
+    async function savePerson(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true; btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Saving…';
+
+      const id = document.getElementById('personId').value;
+      const payload = {
+        first_name:        document.getElementById('fFirstName').value.trim(),
+        last_name:         document.getElementById('fLastName').value.trim(),
+        birthdate:         document.getElementById('fBirthdate').value || null,
+        gender:            document.getElementById('fGender').value || null,
+        civil_status:      document.getElementById('fCivilStatus').value || null,
+        category:          document.getElementById('fCategory').value || null,
+        membership_status: document.getElementById('fMembershipStatus').value,
+        family_id:         document.getElementById('fFamilyId').value || null,
+        joined_date:       document.getElementById('fJoinedDate').value || null,
+        date_of_baptism:   document.getElementById('fBaptismDate').value || null,
+        address:           document.getElementById('fAddress').value.trim() || null,
+        contact_number:    document.getElementById('fContact').value.trim() || null,
+        email:             document.getElementById('fEmail').value.trim() || null,
+        notes:             document.getElementById('fNotes').value.trim() || null,
+      };
+
+      const { error } = id
+        ? await db.from('people').update(payload).eq('id', id)
+        : await db.from('people').insert(payload);
+
+      btn.disabled = false; btn.innerHTML = '<i class=\'bx bx-save\'></i> Save';
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast(id ? 'Person updated.' : 'Person added.');
+      closeModal('personModal');
+      loadPeople();
+    }
+
+    async function deletePerson(id, name) {
+      if (!confirmDelete(`Delete ${name}? This will also remove their attendance records.`)) return;
+      const { error } = await db.from('people').delete().eq('id', id);
+      if (error) { showToast(error.message, 'error'); return; }
+      showToast('Person deleted.');
+      loadPeople();
+    }
+
+    async function viewPerson(id) {
+      const p = allPeople.find(x => x.id === id);
+      if (!p) return;
+      const age = calcAge(p.birthdate);
+      const ec = effectiveCategory(p);
+
+      const { data: records } = await db
+        .from('attendance_records')
+        .select('status, created_at, attendance_sessions(date, service_name, attendance_types(name))')
+        .eq('person_id', id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      document.getElementById('viewName').textContent = `${p.first_name} ${p.last_name}`;
+      document.getElementById('viewBody').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem">
+          ${infoRow('Age', age !== null ? age : '—')}
+          ${infoRow('Category', `${ec}${p.category ? ' <span style="color:var(--grey);font-size:0.625rem">(manual)</span>' : ' <span style="color:var(--grey);font-size:0.625rem">(auto)</span>'}`)}
+          ${infoRow('Membership', badge(p.membership_status, statusColors[p.membership_status] || ''))}
+          ${infoRow('Gender', p.gender || '—')}
+          ${infoRow('Contact', p.contact_number || '—')}
+          ${infoRow('Email', p.email || '—')}
+          <div style="grid-column:1/-1">${infoRow('Address', p.address || '—')}</div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:1rem">
+          <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--grey);margin-bottom:0.75rem">Recent Attendance</p>
+          ${records?.length ? `<table class="data-table">
+            <thead><tr><th>Date</th><th>Event</th><th>Status</th></tr></thead>
+            <tbody>${records.map(r => `<tr>
+              <td>${formatDate(r.attendance_sessions?.date)}</td>
+              <td>${r.attendance_sessions?.attendance_types?.name ?? '—'}${r.attendance_sessions?.service_name ? ' &middot; ' + r.attendance_sessions.service_name : ''}</td>
+              <td>${badge(r.status, r.status === 'present' ? 'background:#dcfce7;color:#166534' : 'background:#fee2e2;color:#991b1b')}</td>
+            </tr>`).join('')}</tbody>
+          </table>` : '<p style="color:var(--grey);font-size:0.8125rem">No attendance records yet.</p>'}
+        </div>
+      `;
+      openModal('viewModal');
+    }
+
+    function infoRow(label, value) {
+      return `<div>
+        <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin-bottom:0.2rem">${label}</p>
+        <p style="font-size:0.8125rem;color:var(--black)">${value}</p>
+      </div>`;
+    }
+
+    // Init
+    const debouncedRender = debounce(() => { currentPage = 1; renderTable(); });
+    document.getElementById('searchInput').addEventListener('input', debouncedRender);
+    document.getElementById('filterCategory').addEventListener('change', debouncedRender);
+    document.getElementById('filterStatus').addEventListener('change', debouncedRender);
+
+    if (new URLSearchParams(location.search).get('action') === 'create') {
+      window.addEventListener('load', openAddModal);
+    }
+
+    loadFamilies();
+    loadPeople();
+  </script>
+</body>
+</html>

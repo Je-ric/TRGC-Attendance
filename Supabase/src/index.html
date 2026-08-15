@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Church Attendance</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <p class="sidebar-brand-eyebrow">CLSU Church</p>
+      <h1 class="sidebar-brand-name">Attendance<span>.</span></h1>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html"      class="nav-link active"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="events.html"     class="nav-link"><i class='bx bx-calendar-event'></i> Events &amp; Services</a>
+      <a href="attendance.html" class="nav-link"><i class='bx bx-check-square'></i> Attendance</a>
+      <a href="people.html"     class="nav-link"><i class='bx bx-group'></i> People</a>
+      <a href="families.html"   class="nav-link"><i class='bx bx-home-heart'></i> Families</a>
+      <a href="reports.html"    class="nav-link"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+    </nav>
+    <div class="sidebar-footer">© 2026 Church Attendance</div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-wrap">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <span class="topbar-title">Dashboard</span>
+      <span id="todayLabel" class="topbar-meta"></span>
+    </header>
+
+    <!-- Content -->
+    <main class="page-content">
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <i class='bx bx-calendar-check stat-icon'></i>
+          <p class="stat-eyebrow">Today's Events</p>
+          <p id="statTodayEvents" class="stat-value">—</p>
+        </div>
+        <div class="stat-card blue">
+          <i class='bx bx-group stat-icon'></i>
+          <p class="stat-eyebrow">Total People</p>
+          <p id="statPeople" class="stat-value">—</p>
+        </div>
+        <div class="stat-card black">
+          <i class='bx bx-home-heart stat-icon'></i>
+          <p class="stat-eyebrow">Total Families</p>
+          <p id="statFamilies" class="stat-value">—</p>
+        </div>
+        <div class="stat-card grey">
+          <i class='bx bx-user-check stat-icon'></i>
+          <p class="stat-eyebrow">Today's Attendance</p>
+          <p id="statTodayAttendance" class="stat-value">—</p>
+        </div>
+      </div>
+
+      <!-- Two-column: recent sessions + quick actions -->
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:var(--gap);">
+
+        <!-- Recent sessions -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Recent Sessions</span>
+            <a href="events.html" class="panel-action">View all <i class='bx bx-right-arrow-alt' style="vertical-align:middle"></i></a>
+          </div>
+          <div id="recentSessions">
+            <div class="empty-state"><i class='bx bx-loader-alt bx-spin'></i><p>Loading…</p></div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div style="display:flex;flex-direction:column;gap:var(--gap);">
+          <div class="panel">
+            <div class="panel-header"><span class="panel-title">Quick Actions</span></div>
+            <div style="padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem;">
+              <a href="events.html?action=create" class="quick-card">
+                <i class='bx bx-plus-circle'></i>
+                <div><p class="quick-card-label">New Event</p><p class="quick-card-sub">Create a service or activity</p></div>
+              </a>
+              <a href="people.html?action=create" class="quick-card">
+                <i class='bx bx-user-plus'></i>
+                <div><p class="quick-card-label">Add Person</p><p class="quick-card-sub">Register a new member</p></div>
+              </a>
+              <a href="families.html?action=create" class="quick-card">
+                <i class='bx bx-home-plus'></i>
+                <div><p class="quick-card-label">Add Family</p><p class="quick-card-sub">Create a family group</p></div>
+              </a>
+              <a href="attendance.html" class="quick-card">
+                <i class='bx bx-check-double'></i>
+                <div><p class="quick-card-label">Take Attendance</p><p class="quick-card-sub">Mark a session now</p></div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/utils.js"></script>
+  <script>
+    document.getElementById('todayLabel').textContent = formatDate(todayISO()) + ' — ' + dayOfWeek(todayISO());
+
+    async function loadStats() {
+      const today = todayISO();
+      const [{ count: peopleCount }, { count: familyCount }, { data: todaySessions }] = await Promise.all([
+        db.from('people').select('*', { count: 'exact', head: true }),
+        db.from('families').select('*', { count: 'exact', head: true }),
+        db.from('attendance_sessions').select('id').eq('date', today),
+      ]);
+      document.getElementById('statPeople').textContent = peopleCount ?? 0;
+      document.getElementById('statFamilies').textContent = familyCount ?? 0;
+      document.getElementById('statTodayEvents').textContent = todaySessions?.length ?? 0;
+
+      if (todaySessions?.length) {
+        const sessionIds = todaySessions.map(s => s.id);
+        const { count: attCount } = await db
+          .from('attendance_records')
+          .select('*', { count: 'exact', head: true })
+          .in('attendance_session_id', sessionIds)
+          .eq('status', 'present');
+        document.getElementById('statTodayAttendance').textContent = attCount ?? 0;
+      } else {
+        document.getElementById('statTodayAttendance').textContent = 0;
+      }
+    }
+
+    async function loadRecentSessions() {
+      const { data, error } = await db
+        .from('attendance_sessions')
+        .select('id, date, service_name, attendance_types(name)')
+        .order('date', { ascending: false })
+        .limit(8);
+
+      const container = document.getElementById('recentSessions');
+      if (error || !data?.length) {
+        container.innerHTML = '<div class="empty-state"><i class=\'bx bx-calendar-x\'></i><p>No sessions yet.</p></div>';
+        return;
+      }
+      container.innerHTML = data.map(s => `
+        <a href="attendance.html?session=${s.id}" class="session-row">
+          <div>
+            <p class="session-row-name">${s.attendance_types?.name ?? '—'}</p>
+            <p class="session-row-meta">${s.service_name ? s.service_name + ' &middot; ' : ''}${formatDate(s.date)} &mdash; ${dayOfWeek(s.date)}</p>
+          </div>
+          <i class='bx bx-right-arrow-alt session-row-arrow'></i>
+        </a>
+      `).join('');
+    }
+
+    loadStats();
+    loadRecentSessions();
+  </script>
+</body>
+</html>
