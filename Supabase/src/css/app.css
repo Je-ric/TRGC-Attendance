@@ -385,8 +385,19 @@ dialog {
   max-width: 520px;
   width: calc(100vw - 2rem);
   font-family: var(--font);
+  /* Force viewport centering — browser default is position:absolute which
+     only centers relative to the document, not the viewport */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
 }
-dialog::backdrop { background: rgba(26,26,26,0.55); }
+dialog::backdrop {
+  background: rgba(26,26,26,0.55);
+  position: fixed;
+  inset: 0;
+}
 
 .modal-header {
   padding: 1rem 1.25rem;
