@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Person, Family, AttendanceSession, AttendanceRecord, AttendanceSummary, AttendanceType};
+use App\Models\{Person, Family, Service, AttendanceRecord, AttendanceSummary};
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -11,7 +11,6 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
         $thirtyDaysAgo = $today->copy()->subDays(30);
-        $ninetyDaysAgo = $today->copy()->subDays(90);
 
         // ── Congregation overview ──────────────────────────────────────
         $totalPeople   = Person::count();
@@ -20,8 +19,8 @@ class DashboardController extends Controller
         $totalActive   = Person::whereIn('membership_status', ['Member', 'Regular Attendee'])->count();
 
         // ── Attendance overview ────────────────────────────────────────
-        $totalSessions     = AttendanceSession::count();
-        $sessionsThisMonth = AttendanceSession::whereMonth('date', $today->month)
+        $totalSessions     = Service::count();
+        $sessionsThisMonth = Service::whereMonth('date', $today->month)
             ->whereYear('date', $today->year)->count();
         $totalCheckins     = AttendanceRecord::where('status', 'present')->count();
 
@@ -31,30 +30,28 @@ class DashboardController extends Controller
             : 0;
 
         // ── Last session ───────────────────────────────────────────────
-        $lastSession = AttendanceSession::with('attendanceType')
-            ->orderByDesc('date')->first();
+        $lastSession = Service::orderByDesc('date')->orderByDesc('time')->first();
         $lastSessionCount = $lastSession
-            ? AttendanceRecord::where('attendance_session_id', $lastSession->id)
+            ? AttendanceRecord::where('service_id', $lastSession->id)
                 ->where('status', 'present')->count()
             : 0;
 
         // ── Attendance trend (last 8 sessions) ────────────────────────
-        $recentSessions = AttendanceSession::with('attendanceType')
-            ->orderByDesc('date')
+        $recentSessions = Service::orderByDesc('date')->orderByDesc('time')
             ->take(8)
             ->get()
             ->reverse()
             ->map(fn($s) => [
                 'label' => $s->date->format('M d'),
-                'type'  => $s->attendanceType?->name ?? '—',
-                'count' => AttendanceRecord::where('attendance_session_id', $s->id)
+                'type'  => $s->name,
+                'count' => AttendanceRecord::where('service_id', $s->id)
                     ->where('status', 'present')->count(),
             ])->values();
 
         // ── Category breakdown (last session) ─────────────────────────
         $categoryBreakdown = [];
         if ($lastSession) {
-            $records = AttendanceRecord::where('attendance_session_id', $lastSession->id)
+            $records = AttendanceRecord::where('service_id', $lastSession->id)
                 ->where('status', 'present')
                 ->with('person')
                 ->get();
@@ -64,7 +61,7 @@ class DashboardController extends Controller
             }
         }
 
-        // ── Top attendees (by attendance_rate, min 3 sessions) ────────
+        // ── Top attendees (by attendance_rate, min 3 services) ────────
         $topAttendees = AttendanceSummary::with('person')
             ->where('total_present', '>=', 3)
             ->orderByDesc('attendance_rate')
@@ -114,20 +111,37 @@ class DashboardController extends Controller
             ->take(5)
             ->values();
 
-        // ── Per-service summary ────────────────────────────────────────
-        $serviceSummaries = AttendanceType::withCount('sessions')
-            ->with(['sessions' => fn($q) => $q->orderByDesc('date')->take(1)])
-            ->orderBy('name')
+        // ── Per-service-category summary (Services Overview table) ────
+        // The view expects $s['type'] to behave like a service type object.
+        // We build a pseudo-object per unique service_category using a stdClass.
+        $serviceSummaries = Service::select('service_category')
+            ->selectRaw('COUNT(*) as total_sessions')
+            ->selectRaw('MAX(date) as last_date')
+            ->whereNotNull('service_category')
+            ->groupBy('service_category')
+            ->orderBy('service_category')
             ->get()
-            ->map(function ($type) {
-                $lastS = $type->sessions->first();
+            ->map(function ($cat) {
+                $lastS = Service::where('service_category', $cat->service_category)
+                    ->orderByDesc('date')
+                    ->orderByDesc('time')
+                    ->first();
                 $lastCount = $lastS
-                    ? AttendanceRecord::where('attendance_session_id', $lastS->id)
+                    ? AttendanceRecord::where('service_id', $lastS->id)
                         ->where('status', 'present')->count()
                     : 0;
+
+                // Build a pseudo-type object matching what the view accesses
+                $type = new \stdClass();
+                $type->id          = $cat->service_category; // used in route()
+                $type->name        = $cat->service_category;
+                $type->day_of_week = null;
+                $type->start_time  = $lastS?->time;
+                $type->location    = $lastS?->location;
+
                 return [
                     'type'       => $type,
-                    'sessions'   => $type->sessions_count,
+                    'sessions'   => $cat->total_sessions,
                     'last_date'  => $lastS?->date,
                     'last_count' => $lastCount,
                 ];

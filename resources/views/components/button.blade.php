@@ -9,82 +9,81 @@
 @php
     $iconFix = '[&_i]:leading-none [&_i]:text-[1.1em] [&_i]:translate-y-px ';
 
-    $tableBtn = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg
+    $tableBtn = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-[6px]
                  transition-colors duration-150
                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
-    $formBtn  = 'inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold rounded-lg
+    $formBtn  = 'inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold rounded-[6px]
                  transition-all duration-150 active:scale-95
                  focus:outline-none
                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
-    $smBtn    = 'inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg
+    $smBtn    = 'inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-[6px]
                  transition-colors duration-150
                  disabled:opacity-50 disabled:pointer-events-none ' . $iconFix;
 
     $styles = [
         // ── Table buttons ──────────────────────────────────────────────────────
-        'table-edit'    => $tableBtn . 'text-white bg-[#3b5bdb] hover:bg-[#2f4ac0]',
+        'table-edit'    => $tableBtn . 'text-white bg-[#635BFF] hover:bg-[#4f48d4]',
         'table-view'    => $tableBtn . 'text-white bg-[#0891b2] hover:bg-[#0e7490]',
-        'table-danger'  => $tableBtn . 'text-white bg-[#e11d48] hover:bg-[#be123c]',
+        'table-danger'  => $tableBtn . 'text-white bg-[#FF4B4B] hover:bg-[#e03e3e]',
         'table-restore' => $tableBtn . 'text-white bg-[#6d28d9] hover:bg-[#5b21b6]',
-        'table-cancel'  => $tableBtn . 'bg-white text-[#475569] border border-[#e4e0e2] hover:bg-[#f5f4f6]',
+        'table-cancel'  => $tableBtn . 'bg-white text-[#6B6B6B] border border-[#E6E6E6] hover:bg-[#F9F9F9]',
 
         // ── Form / CRUD buttons ────────────────────────────────────────────────
         'primary'  => $formBtn . '
-            bg-[linear-gradient(135deg,#93291e_0%,#ed213a_100%)]
-            text-white hover:brightness-110
-            focus:ring-2 focus:ring-[#ed213a]/30',
+            bg-[#635BFF] text-white
+            hover:bg-[#4f48d4]
+            focus:ring-2 focus:ring-[#635BFF]/30',
 
         'save'     => $formBtn . '
-            bg-[linear-gradient(135deg,#ed213a_0%,#c41a2e_100%)]
-            text-white hover:brightness-110
-            focus:ring-2 focus:ring-[#ed213a]/30',
+            bg-[#635BFF] text-white
+            hover:bg-[#4f48d4]
+            focus:ring-2 focus:ring-[#635BFF]/30',
 
         'secondary' => $formBtn . '
-            bg-[#93291e] text-white
-            hover:bg-[#7a1f15]
-            focus:ring-2 focus:ring-[#93291e]/30',
+            bg-[#242424] text-white
+            hover:bg-[#333333]
+            focus:ring-2 focus:ring-[#242424]/30',
 
         'cancel'   => $formBtn . '
-            bg-white text-[#475569]
-            border border-[#e4e0e2]
-            hover:bg-[#f5f4f6] hover:border-[#c9c4c6]
-            focus:ring-2 focus:ring-[#a09aa4]/20',
+            bg-white text-[#6B6B6B]
+            border border-[#E6E6E6]
+            hover:bg-[#F9F9F9] hover:border-[#c9c4c6]
+            focus:ring-2 focus:ring-[#635BFF]/20',
 
         'back'     => $formBtn . '
-            bg-white text-[#475569]
-            border border-[#e4e0e2]
-            hover:bg-[#f5f4f6] hover:border-[#c9c4c6]
-            focus:ring-2 focus:ring-[#a09aa4]/20',
+            bg-white text-[#6B6B6B]
+            border border-[#E6E6E6]
+            hover:bg-[#F9F9F9] hover:border-[#c9c4c6]
+            focus:ring-2 focus:ring-[#635BFF]/20',
 
         'danger'   => $formBtn . '
-            bg-[#e11d48] text-white
-            hover:bg-[#be123c]
-            focus:ring-2 focus:ring-[#e11d48]/30',
+            bg-[#FF4B4B] text-white
+            hover:bg-[#e03e3e]
+            focus:ring-2 focus:ring-[#FF4B4B]/30',
 
         'ghost'    => $formBtn . '
-            bg-white text-[#6b6570]
-            border border-[#e4e0e2]
-            hover:bg-[#f5f4f6] hover:text-[#1c1c1e]
-            focus:ring-2 focus:ring-[#a09aa4]/20',
+            bg-white text-[#6B6B6B]
+            border border-[#E6E6E6]
+            hover:bg-[#F9F9F9] hover:text-[#242424]
+            focus:ring-2 focus:ring-[#635BFF]/20',
 
         // ── Small buttons ──────────────────────────────────────────────────────
         'sm-primary' => $smBtn . '
-            bg-[linear-gradient(135deg,#93291e_0%,#ed213a_100%)]
-            text-white hover:brightness-110',
+            bg-[#635BFF] text-white hover:bg-[#4f48d4]',
 
         'sm-cancel'  => $smBtn . '
-            bg-white text-[#475569]
-            border border-[#e4e0e2]
-            hover:bg-[#f5f4f6]',
+            bg-white text-[#6B6B6B]
+            border border-[#E6E6E6]
+            hover:bg-[#F9F9F9]',
 
-        'sm-danger'  => $smBtn . 'bg-[#e11d48] text-white hover:bg-[#be123c]',
+        'sm-danger'  => $smBtn . 'bg-[#FF4B4B] text-white hover:bg-[#e03e3e]',
 
         'sm-ghost'   => $smBtn . '
-            bg-white text-[#6b6570]
-            border border-[#e4e0e2]
-            hover:bg-[#f5f4f6]',
+            bg-white text-[#6B6B6B]
+            border border-[#E6E6E6]
+            hover:bg-[#F9F9F9]',
     ];
 
     $class = $styles[strval($variant)] ?? $styles['primary'];
@@ -145,20 +144,20 @@
 VARIANTS
 ────────────────────────────────────────────────────────────────────
 Table (compact):
-  table-edit     → blue      — Edit actions
-  table-view     → cyan      — View / Preview
-  table-danger   → rose/red  — Delete, Reject
-  table-restore  → violet    — Restore, Undo
-  table-cancel   → white     — Cancel inline
+  table-edit     → blue (#635BFF) — Edit actions
+  table-view     → cyan           — View / Preview
+  table-danger   → red (#FF4B4B)  — Delete, Reject
+  table-restore  → violet         — Restore, Undo
+  table-cancel   → white/border   — Cancel inline
 
 Form (larger, scales on click):
-  primary    → red gradient  — main submit / CTA
-  save       → red gradient  — save / update
-  secondary  → dark maroon   — secondary action
-  cancel     → white/border  — cancel / dismiss
-  back       → white/border  — back navigation (use bx-arrow-left icon)
-  danger     → solid red     — destructive action
-  ghost      → white/border  — subtle action
+  primary    → blue (#635BFF)    — main submit / CTA
+  save       → blue (#635BFF)    — save / update
+  secondary  → dark (#242424)    — secondary action
+  cancel     → white/border      — cancel / dismiss
+  back       → white/border      — back navigation (use bx-arrow-left icon)
+  danger     → red (#FF4B4B)     — destructive action
+  ghost      → white/border      — subtle action
 
 Small:
   sm-primary  sm-cancel  sm-danger  sm-ghost

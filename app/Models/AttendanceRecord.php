@@ -7,14 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class AttendanceRecord extends Model
 {
     protected $fillable = [
-        'attendance_session_id',
+        'service_id',
         'person_id',
         'status',
+        'check_in_time',
+        'check_out_time',
+        'remarks',
     ];
 
-    public function session()
+    protected $casts = [
+        'check_in_time' => 'datetime:H:i:s',
+        'check_out_time' => 'datetime:H:i:s',
+    ];
+
+    public function service()
     {
-        return $this->belongsTo(AttendanceSession::class, 'attendance_session_id');
+        return $this->belongsTo(Service::class, 'service_id');
     }
 
     public function person()

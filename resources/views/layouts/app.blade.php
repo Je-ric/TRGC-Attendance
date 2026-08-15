@@ -4,60 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'TRGC Attendance' }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-    <style>
-        /* Only things Tailwind cannot express */
-
-        /* Sidebar width token used by both sidebar and content offset */
-        :root { --sidebar-w: 240px; }
-
-        /* Sidebar off-canvas toggle (driven by JS) */
-        #app-sidebar { transform: translateX(-100%); transition: transform 0.25s cubic-bezier(.4,0,.2,1); }
-        @media (min-width: 1024px) { #app-sidebar { transform: translateX(0); } }
-        #app-content { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1); }
-        @media (min-width: 1024px) { #app-content { margin-left: var(--sidebar-w); } }
-
-        /* Check-in row — stateful, applied via PHP @class */
-        .checkin-row {
-            display: flex; align-items: center;
-            padding: 10px 14px;
-            border-bottom: 1px solid #ede9eb;
-            cursor: pointer;
-            transition: background 0.1s;
-            border-left: 3px solid transparent;
-        }
-        .checkin-row:hover { background: #f5f4f6; }
-        .checkin-row.is-checked { background: rgba(237,33,58,0.05); border-left-color: #ed213a; }
-
-        /* Native dialog backdrop — no Tailwind equivalent */
-        dialog::backdrop { background: rgba(28,28,30,0.5); backdrop-filter: blur(3px); }
-
-        [x-cloak] { display: none !important; }
-    </style>
 </head>
 
-<body class="min-h-screen bg-[#f5f4f6] text-[#1c1c1e] font-['Inter'] antialiased">
+<body class="min-h-screen bg-[#F9F9F9] text-[#242424] font-['Inter'] antialiased">
 
     {{-- Mobile sidebar overlay --}}
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-30 hidden lg:hidden"></div>
 
     {{-- ── Sidebar ──────────────────────────────────────────────────── --}}
     <aside id="app-sidebar"
-           class="fixed inset-y-0 left-0 w-60 flex flex-col z-40 overflow-y-auto"
-           style="background: linear-gradient(180deg, #1a0a08 0%, #93291e 100%)">
+           class="fixed inset-y-0 left-0 w-60 flex flex-col z-40 overflow-y-auto bg-[#242424]">
 
         {{-- Brand --}}
         <div class="flex items-center justify-between px-4 py-5 border-b border-white/[0.08]">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-white/[0.12] flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-[6px] bg-[#635BFF] flex items-center justify-center shrink-0">
                     <i class='bx bx-cross text-white text-lg'></i>
                 </div>
                 <div>
                     <div class="text-[9px] font-bold uppercase tracking-[0.16em] text-white/40">TRGC</div>
-                    <div class="text-[15px] font-bold text-white leading-tight font-['Oswald']">Attendance</div>
+                    <div class="text-[15px] font-bold text-white leading-tight">Attendance</div>
                 </div>
             </div>
             <button id="sidebar-close"
@@ -83,10 +53,10 @@
             @foreach($navItems as $item)
                 @php $active = request()->routeIs($item['route']); @endphp
                 <a href="{{ route($item['route']) }}"
-                   class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13.5px] font-medium no-underline transition-all duration-150
+                   class="flex items-center gap-2.5 px-2.5 py-2 rounded-[6px] text-[13.5px] font-medium no-underline transition-all duration-150
                           border-l-[3px]
                           {{ $active
-                              ? 'bg-[#ed213a]/25 text-white font-semibold border-[#ed213a]'
+                              ? 'bg-[#635BFF]/20 text-white font-semibold border-[#635BFF]'
                               : 'text-white/55 border-transparent hover:bg-white/[0.08] hover:text-white/90' }}">
                     <i class='bx {{ $item["icon"] }} text-base shrink-0'></i>
                     {{ $item['label'] }}
@@ -104,30 +74,29 @@
     <div id="app-content" class="min-h-screen flex flex-col">
 
         {{-- Topbar --}}
-        <header class="sticky top-0 z-20 bg-white border-b border-[#e4e0e2] h-14 flex items-center justify-between px-6"
-                style="box-shadow: 0 2px 16px rgba(0,0,0,.07)">
+        <header class="sticky top-0 z-20 bg-white border-b border-[#E6E6E6] h-14 flex items-center justify-between px-6"
+                style="box-shadow: 0 2px 8px rgba(0,0,0,0.08)">
 
             <div class="flex items-center gap-3">
                 <button id="sidebar-open"
-                        class="lg:hidden text-[#6b6570] hover:text-[#1c1c1e] transition-colors p-1 flex items-center">
+                        class="lg:hidden text-[#6B6B6B] hover:text-[#242424] transition-colors p-1 flex items-center">
                     <i class="bx bx-menu text-xl"></i>
                 </button>
                 <div>
-                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#ed213a]">Management System</p>
-                    <p class="text-[15px] font-bold text-[#1c1c1e] leading-tight font-['Oswald']">Workspace</p>
+                    <p class="text-[11px] font-bold uppercase tracking-[0.12em] text-[#635BFF]">Management System</p>
+                    <p class="text-[15px] font-bold text-[#242424] leading-tight">Workspace</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-3">
                 {{-- User info --}}
                 <div class="hidden sm:flex flex-col items-end">
-                    <span class="text-[13px] font-semibold text-[#1c1c1e] leading-tight">{{ Auth::user()->name }}</span>
-                    <span class="text-[11px] text-[#a09aa4] leading-tight">{{ Auth::user()->email }}</span>
+                    <span class="text-[13px] font-semibold text-[#242424] leading-tight">{{ Auth::user()->name }}</span>
+                    <span class="text-[11px] text-[#A0A0A0] leading-tight">{{ Auth::user()->email }}</span>
                 </div>
 
                 {{-- Avatar --}}
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[13px] font-bold shrink-0"
-                     style="background: linear-gradient(135deg, #93291e, #ed213a)">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-[13px] font-bold shrink-0 bg-[#635BFF]">
                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 </div>
 
@@ -136,8 +105,8 @@
                     @csrf
                     <button type="submit"
                             title="Sign out"
-                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#e4e0e2] text-[#6b6570] text-[12px] font-medium
-                                   hover:bg-[#f5f4f6] hover:text-[#1c1c1e] hover:border-[#c9c4c6] transition-colors">
+                            class="flex items-center gap-1 px-2.5 py-1.5 rounded-[6px] border border-[#E6E6E6] text-[#6B6B6B] text-[12px] font-medium
+                                   hover:bg-[#F9F9F9] hover:text-[#242424] hover:border-[#c9c4c6] transition-colors">
                         <i class="bx bx-log-out text-base"></i>
                         <span class="hidden sm:inline">Sign out</span>
                     </button>

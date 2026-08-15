@@ -34,10 +34,10 @@
                     <div class="flex items-start justify-between gap-3 mb-4">
                         <div>
                             <p class="font-['Oswald'] text-[15px] font-bold text-[#1c1c1e]">
-                                {{ $lastSession->attendanceType?->name ?? '—' }}
+                                {{ $lastSession->service_category ?? $lastSession->name }}
                             </p>
-                            @if($lastSession->service_name)
-                                <p class="text-[12px] text-[#6b6570] mt-0.5">{{ $lastSession->service_name }}</p>
+                            @if($lastSession->name)
+                                <p class="text-[12px] text-[#6b6570] mt-0.5">{{ $lastSession->name }}</p>
                             @endif
                             <p class="text-[12px] text-[#a09aa4] mt-1 flex items-center gap-1">
                                 <i class='bx bx-calendar text-[11px]'></i>
@@ -148,7 +148,7 @@
                                 @endif
                             </x-table.td>
                             <x-table.td align="right">
-                                <x-button href="{{ route('attendance.show', $s['type']) }}" variant="table-edit">
+                                <x-button href="{{ route('services.index') }}" variant="table-edit">
                                     <i class='bx bx-log-in-circle'></i> Check-in
                                 </x-button>
                             </x-table.td>

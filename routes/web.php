@@ -4,7 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\AttendanceTypeController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\FamilyController;
 
@@ -18,15 +19,31 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Attendance
-    Route::get('/attendance',         [AttendanceController::class, 'index'])->name('attendance.index');
-    Route::get('/attendance/{type}',  [AttendanceController::class, 'show'])->name('attendance.show');
-    Route::get('/attendance-records', [AttendanceController::class, 'records'])->name('attendance.records');
+    // Services (New simplified structure)
+    Route::prefix('services')->group(function () {
+        Route::get('/',                     [ServiceController::class, 'index'])->name('services.index');
+        Route::get('/create',               [ServiceController::class, 'create'])->name('services.create');
+        Route::post('/',                    [ServiceController::class, 'store'])->name('services.store');
+        Route::get('/{service}',            [ServiceController::class, 'show'])->name('services.show');
+        Route::get('/{service}/edit',      [ServiceController::class, 'edit'])->name('services.edit');
+        Route::put('/{service}',            [ServiceController::class, 'update'])->name('services.update');
+        Route::delete('/{service}',         [ServiceController::class, 'destroy'])->name('services.destroy');
+        Route::get('/{service}/checkin',   [ServiceController::class, 'checkin'])->name('services.checkin');
+        Route::get('/weekly/{week?}',      [ServiceController::class, 'weekly'])->name('services.weekly');
+        Route::post('/quick-sunday',        [ServiceController::class, 'quickSundayService'])->name('services.quick-sunday');
+    });
 
-    // Attendance Types (Services)
-    Route::post('/attendance-types',                    [AttendanceTypeController::class, 'store'])->name('attendance-types.store');
-    Route::put('/attendance-types/{attendanceType}',    [AttendanceTypeController::class, 'update'])->name('attendance-types.update');
-    Route::delete('/attendance-types/{attendanceType}', [AttendanceTypeController::class, 'destroy'])->name('attendance-types.destroy');
+    // Exports
+    Route::prefix('export')->group(function () {
+        Route::get('/weekly/{week}',            [ExportController::class, 'exportWeeklyAttendance'])->name('export.weekly');
+        Route::get('/date-range',               [ExportController::class, 'exportDateRange'])->name('export.date-range');
+        Route::get('/service/{service}',        [ExportController::class, 'exportService'])->name('export.service');
+        Route::get('/person/{personId}',        [ExportController::class, 'exportPersonAttendance'])->name('export.person');
+    });
+
+    // Attendance (Redirects to services for backward compatibility)
+    Route::get('/attendance',         [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance-records', [AttendanceController::class, 'records'])->name('attendance.records');
 
     // People & Families
     Route::get('/people',   [PersonController::class, 'index'])->name('people.index');

@@ -15,7 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call([
-            AttendanceTypeSeeder::class,
+            AttendanceTypeSeeder::class, // This now seeds Services
+            AdminUserSeeder::class,
         ]);
         // User::factory()->create([
         //     'name' => 'Test User',

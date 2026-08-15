@@ -15,11 +15,11 @@ class AdminUserSeeder extends Seeder
             [
                 'name'              => 'TRGC Admin',
                 'email'             => 'admin@trgc.org',
-                'password'          => Hash::make('trgc@2024'),
+                'password'          => Hash::make('password123'),
                 'email_verified_at' => now(),
             ]
         );
 
-        $this->command->info('Admin user created: admin@trgc.org / trgc@2024');
+        $this->command->info('Admin user created: admin@trgc.org / password123');
     }
 }

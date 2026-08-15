@@ -4,30 +4,22 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
-use App\Models\{AttendanceType, AttendanceSession, AttendanceRecord, Person, Family};
+use App\Models\{Service, AttendanceRecord, Person, Family};
 use App\Services\AttendanceSummaryService;
 use Carbon\Carbon;
 
 class AttendanceCheckin extends Component
 {
-    public AttendanceType $attendanceType;
-    public $date;
-    public $service_name   = '';
+    public Service $service;
     public $checked        = [];
     public $viewMode       = 'flat';
     public $filterCategory = '';
     public $filterFamily   = null;
     public $search         = '';
 
-    public function mount(AttendanceType $attendanceType)
+    public function mount(Service $service)
     {
-        $this->attendanceType = $attendanceType;
-        $this->date           = Carbon::today()->format('Y-m-d');
-        $this->loadExistingRecords();
-    }
-
-    public function updatedDate()
-    {
+        $this->service = $service;
         $this->loadExistingRecords();
     }
 
@@ -35,43 +27,24 @@ class AttendanceCheckin extends Component
     {
         $this->checked = [];
 
-        $session = AttendanceSession::where('attendance_type_id', $this->attendanceType->id)
-            ->where('date', $this->date)
-            ->when($this->service_name,
-                fn($q) => $q->where('service_name', $this->service_name),
-                fn($q) => $q->whereNull('service_name')
-            )->first();
-
-        if ($session) {
-            $this->service_name = $session->service_name ?? '';
-            AttendanceRecord::where('attendance_session_id', $session->id)
-                ->where('status', 'present')
-                ->pluck('person_id')
-                ->each(fn($id) => $this->checked[$id] = true);
-        }
-    }
-
-    protected function getOrCreateSession(): AttendanceSession
-    {
-        return AttendanceSession::firstOrCreate(
-            ['attendance_type_id' => $this->attendanceType->id, 'date' => $this->date],
-            ['service_name' => $this->service_name ?: null]
-        );
+        AttendanceRecord::where('service_id', $this->service->id)
+            ->where('status', 'present')
+            ->pluck('person_id')
+            ->each(fn($id) => $this->checked[$id] = true);
     }
 
     #[On('togglePerson')]
     public function togglePerson($personId): void
     {
         $this->checked[$personId] = !($this->checked[$personId] ?? false);
-        $session = $this->getOrCreateSession();
 
         if ($this->checked[$personId]) {
             AttendanceRecord::updateOrCreate(
-                ['attendance_session_id' => $session->id, 'person_id' => $personId],
-                ['status' => 'present']
+                ['service_id' => $this->service->id, 'person_id' => $personId],
+                ['status' => 'present', 'check_in_time' => Carbon::now()->format('H:i:s')]
             );
         } else {
-            AttendanceRecord::where('attendance_session_id', $session->id)
+            AttendanceRecord::where('service_id', $this->service->id)
                 ->where('person_id', $personId)->delete();
         }
     }
@@ -80,10 +53,9 @@ class AttendanceCheckin extends Component
     public function addNewPerson($personId): void
     {
         $this->checked[$personId] = true;
-        $session = $this->getOrCreateSession();
         AttendanceRecord::updateOrCreate(
-            ['attendance_session_id' => $session->id, 'person_id' => $personId],
-            ['status' => 'present']
+            ['service_id' => $this->service->id, 'person_id' => $personId],
+            ['status' => 'present', 'check_in_time' => Carbon::now()->format('H:i:s')]
         );
     }
 
@@ -94,39 +66,22 @@ class AttendanceCheckin extends Component
 
     public function save(): void
     {
-        $this->validate([
-            'service_name' => 'nullable|string|max:255',
-            'date'         => 'required|date|before_or_equal:today',
-        ]);
-
-        // Upsert session
-        $session = AttendanceSession::where('attendance_type_id', $this->attendanceType->id)
-            ->where('date', $this->date)
-            ->when($this->service_name,
-                fn($q) => $q->where('service_name', $this->service_name),
-                fn($q) => $q->whereNull('service_name')
-            )->first()
-            ?? AttendanceSession::create([
-                'attendance_type_id' => $this->attendanceType->id,
-                'date'               => $this->date,
-                'service_name'       => $this->service_name ?: null,
-            ]);
-
         // Rebuild records
-        AttendanceRecord::where('attendance_session_id', $session->id)->delete();
+        AttendanceRecord::where('service_id', $this->service->id)->delete();
         $presentIds = [];
         foreach ($this->checked as $personId => $present) {
             if ($present) {
                 AttendanceRecord::create([
-                    'attendance_session_id' => $session->id,
-                    'person_id'             => $personId,
-                    'status'                => 'present',
+                    'service_id' => $this->service->id,
+                    'person_id'  => $personId,
+                    'status'     => 'present',
+                    'check_in_time' => Carbon::now()->format('H:i:s'),
                 ]);
                 $presentIds[] = $personId;
             }
         }
 
-        // Recompute summaries for everyone who was checked in this session
+        // Recompute summaries for everyone who was checked in this service
         $service = app(AttendanceSummaryService::class);
         foreach ($presentIds as $personId) {
             $service->recompute($personId);
@@ -167,23 +122,11 @@ class AttendanceCheckin extends Component
             }
         }
 
-        $latestSession = AttendanceSession::where('attendance_type_id', $this->attendanceType->id)
-            ->orderByDesc('date')->orderByDesc('created_at')->first();
-
-        $currentSession = AttendanceSession::where('attendance_type_id', $this->attendanceType->id)
-            ->where('date', $this->date)
-            ->when($this->service_name,
-                fn($q) => $q->where('service_name', $this->service_name),
-                fn($q) => $q->whereNull('service_name')
-            )->first();
-
         return view('livewire.attendance-checkin', [
             'allPeople'      => $allPeople,
             'totalCount'     => $allPeople->count(),
             'presentCount'   => $presentCount,
             'categoryCounts' => $categoryCounts,
-            'latestSession'  => $latestSession,
-            'currentSession' => $currentSession,
             'families'       => Family::orderBy('family_name')->get(),
             'categories'     => Person::CATEGORIES,
         ]);
