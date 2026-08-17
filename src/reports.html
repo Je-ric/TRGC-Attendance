@@ -90,6 +90,7 @@
   <div class="main-wrap">
 
     <header class="topbar">
+      <button class="topbar-hamburger" onclick="openSidebar()" aria-label="Open menu"><i class='bx bx-menu'></i></button>
       <div style="display:flex;gap:0.5rem">
         <button id="tabEvent"  onclick="switchTab('event')"  class="tab-btn active"><i class='bx bx-calendar'></i> By Event</button>
         <button id="tabPerson" onclick="switchTab('person')" class="tab-btn"><i class='bx bx-user'></i> By Person</button>
@@ -203,10 +204,13 @@
     </main>
   </div>
 
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/utils.js"></script>
   <script>
+    function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); document.body.classList.add('sidebar-open'); }
+    function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); document.body.classList.remove('sidebar-open'); }
     function switchTab(tab) {
       ['event','person','date'].forEach(t => {
         const panel = document.getElementById(`panel${t.charAt(0).toUpperCase()+t.slice(1)}`);

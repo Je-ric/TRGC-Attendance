@@ -49,6 +49,7 @@
   <div class="main-wrap">
 
     <header class="topbar">
+      <button class="topbar-hamburger" onclick="openSidebar()" aria-label="Open menu"><i class='bx bx-menu'></i></button>
       <div style="display:flex;gap:0.5rem">
         <button id="tabTypes"    onclick="switchTab('types')"    class="tab-btn active">Service Types</button>
         <button id="tabSessions" onclick="switchTab('sessions')" class="tab-btn">Sessions</button>
@@ -196,10 +197,13 @@
     </form>
   </dialog>
 
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/utils.js"></script>
   <script>
+    function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); document.body.classList.add('sidebar-open'); }
+    function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); document.body.classList.remove('sidebar-open'); }
     let activeTab = 'types';
     let allTypes = [];
     let allSessions = [];

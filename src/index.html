@@ -31,6 +31,7 @@
 
     <!-- Top bar -->
     <header class="topbar">
+      <button class="topbar-hamburger" onclick="openSidebar()" aria-label="Open menu"><i class='bx bx-menu'></i></button>
       <span class="topbar-title">Dashboard</span>
       <span id="todayLabel" class="topbar-meta"></span>
     </header>
@@ -63,7 +64,7 @@
       </div>
 
       <!-- Two-column: recent sessions + quick actions -->
-      <div style="display:grid;grid-template-columns:1fr 320px;gap:var(--gap);">
+      <div class="dashboard-grid">
 
         <!-- Recent sessions -->
         <div class="panel">
@@ -107,9 +108,12 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
   <script src="js/supabase.js"></script>
   <script src="js/utils.js"></script>
   <script>
+    function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); document.body.classList.add('sidebar-open'); }
+    function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); document.body.classList.remove('sidebar-open'); }
     document.getElementById('todayLabel').textContent = formatDate(todayISO()) + ' — ' + dayOfWeek(todayISO());
 
     async function loadStats() {
