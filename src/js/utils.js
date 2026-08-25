@@ -10,7 +10,7 @@ function calcAge(birthdate) {
 }
 
 function autoCategory(age) {
-  if (age === null) return 'Visitors';
+  if (age === null) return null;
   if (age <= 12) return 'Kids';
   if (age <= 24) return 'Youth';
   if (age <= 59) return 'Adults';
@@ -18,7 +18,7 @@ function autoCategory(age) {
 }
 
 function effectiveCategory(person) {
-  return person.category || autoCategory(calcAge(person.birthdate));
+  return person.category || autoCategory(calcAge(person.birthdate)) || 'Adults';
 }
 
 // ── Date helpers ──────────────────────────────────────────────
@@ -73,7 +73,6 @@ const categoryColors = {
   Youth:    'background:#ede9fe;color:#5b21b6',
   Adults:   'background:#dbeafe;color:#1e40af',
   Seniors:  'background:#fef3c7;color:#92400e',
-  Visitors: 'background:#f3f4f6;color:#6b7280',
 };
 const statusColors = {
   Member:             'background:#1A1A1A;color:#fff',

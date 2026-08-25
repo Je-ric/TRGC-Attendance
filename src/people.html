@@ -30,6 +30,7 @@
     <header class="topbar">
       <button class="topbar-hamburger" onclick="openSidebar()" aria-label="Open menu"><i class='bx bx-menu'></i></button>
       <span class="topbar-title">People</span>
+      <button onclick="autoCalculateCategories()" class="btn btn-outline" style="margin-right:0.5rem"><i class='bx bx-magic-wand'></i> Auto-Calculate Categories</button>
       <button onclick="openAddModal()" class="btn btn-primary"><i class='bx bx-user-plus'></i> Add Person</button>
     </header>
 
@@ -41,7 +42,7 @@
       </div>
       <select id="filterCategory" class="form-input" style="width:auto">
         <option value="">All Categories</option>
-        <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option><option>Visitors</option>
+        <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option>
       </select>
       <select id="filterStatus" class="form-input" style="width:auto">
         <option value="">All Statuses</option>
@@ -101,6 +102,7 @@
             <div>
               <label class="form-label">Birthdate</label>
               <input id="fBirthdate" type="date" class="form-input" oninput="updateAutoCategory()" />
+              <div id="ageDisplay" style="font-size:0.75rem;color:var(--grey);margin-top:0.25rem"></div>
             </div>
             <div>
               <label class="form-label">Gender</label>
@@ -117,9 +119,9 @@
               </select>
             </div>
             <div>
-              <label class="form-label">Category <span id="autoCatHint" style="font-size:0.625rem;color:var(--grey);font-weight:400;text-transform:none;letter-spacing:0"></span></label>
+              <label class="form-label">Category <span id="autoCatHint" style="font-size:0.625rem;color:var(--red);font-weight:400;text-transform:none;letter-spacing:0"></span></label>
               <select id="fCategory" class="form-input">
-                <option value="">Auto</option><option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option><option>Visitors</option>
+                <option value="">Auto-calculate</option><option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option>
               </select>
             </div>
           </div>
@@ -246,13 +248,13 @@
         </td></tr>`;
       } else {
         tbody.innerHTML = slice.map(p => {
-          const age = calcAge(p.birthdate);
           const ec = effectiveCategory(p);
+          const displayAge = p.age !== null ? p.age : calcAge(p.birthdate);
           return `<tr>
             <td style="font-weight:600">${p.last_name}, ${p.first_name}</td>
             <td>${badge(ec, categoryColors[ec] || '')}</td>
             <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
-            <td style="color:var(--grey)">${age !== null ? age : '—'}</td>
+            <td style="color:var(--grey)">${displayAge !== null ? displayAge : '—'}</td>
             <td style="color:var(--grey)">${p.families?.family_name ?? '—'}</td>
             <td style="color:var(--grey)">${p.contact_number || '—'}</td>
             <td>
@@ -271,7 +273,23 @@
     function updateAutoCategory() {
       const bd = document.getElementById('fBirthdate').value;
       const age = calcAge(bd);
-      document.getElementById('autoCatHint').textContent = age !== null ? `(auto: ${autoCategory(age)}, age ${age})` : '';
+      const categorySelect = document.getElementById('fCategory');
+      const autoCatHint = document.getElementById('autoCatHint');
+      const ageDisplay = document.getElementById('ageDisplay');
+
+      if (age !== null) {
+        const computedCategory = autoCategory(age);
+        ageDisplay.textContent = `Age: ${age} years old`;
+        autoCatHint.textContent = `(auto: ${computedCategory})`;
+
+        // Auto-fill category if it's currently empty or "Auto-calculate"
+        if (!categorySelect.value || categorySelect.value === '') {
+          categorySelect.value = computedCategory;
+        }
+      } else {
+        ageDisplay.textContent = '';
+        autoCatHint.textContent = '';
+      }
     }
 
     function openAddModal() {
@@ -279,6 +297,7 @@
       document.getElementById('personForm').reset();
       document.getElementById('personId').value = '';
       document.getElementById('autoCatHint').textContent = '';
+      document.getElementById('ageDisplay').textContent = '';
       openModal('personModal');
     }
 
@@ -311,10 +330,14 @@
       btn.disabled = true; btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Saving…';
 
       const id = document.getElementById('personId').value;
+      const birthdate = document.getElementById('fBirthdate').value || null;
+      const age = calcAge(birthdate);
+
       const payload = {
         first_name:        document.getElementById('fFirstName').value.trim(),
         last_name:         document.getElementById('fLastName').value.trim(),
-        birthdate:         document.getElementById('fBirthdate').value || null,
+        birthdate:         birthdate,
+        age:               age,
         gender:            document.getElementById('fGender').value || null,
         civil_status:      document.getElementById('fCivilStatus').value || null,
         category:          document.getElementById('fCategory').value || null,
@@ -350,7 +373,7 @@
     async function viewPerson(id) {
       const p = allPeople.find(x => x.id === id);
       if (!p) return;
-      const age = calcAge(p.birthdate);
+      const displayAge = p.age !== null ? p.age : calcAge(p.birthdate);
       const ec = effectiveCategory(p);
 
       const { data: records } = await db
@@ -363,8 +386,9 @@
       document.getElementById('viewName').textContent = `${p.first_name} ${p.last_name}`;
       document.getElementById('viewBody').innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem">
-          ${infoRow('Age', age !== null ? age : '—')}
-          ${infoRow('Category', `${ec}${p.category ? ' <span style="color:var(--grey);font-size:0.625rem">(manual)</span>' : ' <span style="color:var(--grey);font-size:0.625rem">(auto)</span>'}`)}
+          ${infoRow('Birthdate', p.birthdate ? formatDate(p.birthdate) : '—')}
+          ${infoRow('Age', displayAge !== null ? `${displayAge} years old` : '—')}
+          ${infoRow('Category', badge(ec, categoryColors[ec] || ''))}
           ${infoRow('Membership', badge(p.membership_status, statusColors[p.membership_status] || ''))}
           ${infoRow('Gender', p.gender || '—')}
           ${infoRow('Contact', p.contact_number || '—')}
@@ -391,6 +415,40 @@
         <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin-bottom:0.2rem">${label}</p>
         <p style="font-size:0.8125rem;color:var(--black)">${value}</p>
       </div>`;
+    }
+
+    async function autoCalculateCategories() {
+      if (!confirm('This will overwrite the category and age for all people based on their birthdate. Continue?')) return;
+
+      const updates = [];
+
+      allPeople.forEach(p => {
+        const age = calcAge(p.birthdate);
+        const computedCategory = autoCategory(age) || 'Adults'; // Default to Adults if no birthdate
+        // Update if category differs or age differs
+        if (p.category !== computedCategory || p.age !== age) {
+          updates.push({ id: p.id, category: computedCategory, age: age });
+        }
+      });
+
+      if (updates.length === 0) {
+        showToast('All categories and ages are already correct based on birthdate.', 'info');
+        return;
+      }
+
+      // Process updates individually to ensure correct category/age per person
+      for (const update of updates) {
+        const { error } = await db.from('people')
+          .update({ category: update.category, age: update.age })
+          .eq('id', update.id);
+        if (error) {
+          showToast(`Error updating record: ${error.message}`, 'error');
+          return;
+        }
+      }
+
+      showToast(`Updated ${updates.length} records with categories and ages based on birthdate.`);
+      loadPeople();
     }
 
     // Init
