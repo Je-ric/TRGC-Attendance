@@ -333,13 +333,16 @@
         const att = attendance[p.id];
         const existing = existingRecords[p.id];
         if (att?.status) {
-          toUpsert.push({
-            ...(existing ? { id: existing.id } : {}),
+          const record = {
             attendance_session_id: currentSessionId,
             person_id: p.id,
             status: att.status,
             remarks: att.remarks || null,
-          });
+          };
+          if (existing) {
+            record.id = existing.id;
+          }
+          toUpsert.push(record);
         } else if (existing) {
           toDelete.push(existing.id);
         }
