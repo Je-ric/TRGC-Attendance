@@ -218,6 +218,7 @@
         .order('last_name').order('first_name');
       if (error) { showToast('Failed to load people', 'error'); return; }
       allPeople = data || [];
+      console.log('Loaded people data sample:', allPeople.slice(0, 3)); // Debug log
       renderTable();
     }
 
@@ -421,33 +422,54 @@
       if (!confirm('This will overwrite the category and age for all people based on their birthdate. Continue?')) return;
 
       const updates = [];
+      const debugInfo = [];
 
       allPeople.forEach(p => {
         const age = calcAge(p.birthdate);
         const computedCategory = autoCategory(age) || 'Adults'; // Default to Adults if no birthdate
+
+        // Debug logging
+        debugInfo.push({
+          name: `${p.first_name} ${p.last_name}`,
+          birthdate: p.birthdate,
+          computedAge: age,
+          computedCategory: computedCategory,
+          currentCategory: p.category,
+          currentAge: p.age,
+          needsUpdate: p.category !== computedCategory || p.age !== age
+        });
+
         // Update if category differs or age differs
         if (p.category !== computedCategory || p.age !== age) {
           updates.push({ id: p.id, category: computedCategory, age: age });
         }
       });
 
+      console.log('Debug Info:', debugInfo);
+      console.log('Updates to process:', updates.length);
+
       if (updates.length === 0) {
         showToast('All categories and ages are already correct based on birthdate.', 'info');
+        console.log('No updates needed. Debug info:', debugInfo);
         return;
       }
 
       // Process updates individually to ensure correct category/age per person
+      let successCount = 0;
       for (const update of updates) {
         const { error } = await db.from('people')
           .update({ category: update.category, age: update.age })
           .eq('id', update.id);
         if (error) {
           showToast(`Error updating record: ${error.message}`, 'error');
+          console.error('Update error:', error);
           return;
         }
+        successCount++;
       }
 
-      showToast(`Updated ${updates.length} records with categories and ages based on birthdate.`);
+      showToast(`Updated ${successCount} records with categories and ages based on birthdate.`);
+      console.log(`Successfully updated ${successCount} records`);
       loadPeople();
     }
 
