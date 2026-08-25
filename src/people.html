@@ -436,6 +436,8 @@
           computedCategory: computedCategory,
           currentCategory: p.category,
           currentAge: p.age,
+          categoryMatch: p.category === computedCategory,
+          ageMatch: p.age === age,
           needsUpdate: p.category !== computedCategory || p.age !== age
         });
 
@@ -446,11 +448,15 @@
       });
 
       console.log('Debug Info:', debugInfo);
+      console.log('Sample debug info (first 5):', debugInfo.slice(0, 5));
       console.log('Updates to process:', updates.length);
 
       if (updates.length === 0) {
         showToast('All categories and ages are already correct based on birthdate.', 'info');
-        console.log('No updates needed. Debug info:', debugInfo);
+        console.log('No updates needed. Sample of current vs computed:');
+        debugInfo.slice(0, 5).forEach(d => {
+          console.log(`${d.name}: birthdate=${d.birthdate}, age=${d.currentAge}→${d.computedAge}, category=${d.currentCategory}→${d.computedCategory}`);
+        });
         return;
       }
 
