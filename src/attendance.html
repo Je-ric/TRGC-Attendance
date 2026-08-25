@@ -326,31 +326,55 @@
       btn.disabled = true;
       btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Saving…';
 
-      const toUpsert = [];
+      const toInsert = [];
+      const toUpdate = [];
       const toDelete = [];
 
       allPeople.forEach(p => {
         const att = attendance[p.id];
         const existing = existingRecords[p.id];
         if (att?.status) {
-          const record = {
-            attendance_session_id: currentSessionId,
-            person_id: p.id,
-            status: att.status,
-            remarks: att.remarks || null,
-          };
           if (existing) {
-            record.id = existing.id;
+            toUpdate.push({
+              id: existing.id,
+              attendance_session_id: currentSessionId,
+              person_id: p.id,
+              status: att.status,
+              remarks: att.remarks || null,
+            });
+          } else {
+            toInsert.push({
+              attendance_session_id: currentSessionId,
+              person_id: p.id,
+              status: att.status,
+              remarks: att.remarks || null,
+            });
           }
-          toUpsert.push(record);
         } else if (existing) {
           toDelete.push(existing.id);
         }
       });
 
+      const BATCH_SIZE = 100; // Process records in batches to avoid size limits
       const ops = [];
-      if (toUpsert.length) ops.push(db.from('attendance_records').upsert(toUpsert, { onConflict: 'attendance_session_id,person_id' }));
-      if (toDelete.length) ops.push(db.from('attendance_records').delete().in('id', toDelete));
+
+      // Batch insert operations
+      for (let i = 0; i < toInsert.length; i += BATCH_SIZE) {
+        const batch = toInsert.slice(i, i + BATCH_SIZE);
+        if (batch.length) ops.push(db.from('attendance_records').insert(batch));
+      }
+
+      // Batch update operations  
+      for (let i = 0; i < toUpdate.length; i += BATCH_SIZE) {
+        const batch = toUpdate.slice(i, i + BATCH_SIZE);
+        if (batch.length) ops.push(db.from('attendance_records').upsert(batch, { onConflict: 'id' }));
+      }
+
+      // Batch delete operations
+      for (let i = 0; i < toDelete.length; i += BATCH_SIZE) {
+        const batch = toDelete.slice(i, i + BATCH_SIZE);
+        if (batch.length) ops.push(db.from('attendance_records').delete().in('id', batch));
+      }
 
       const results = await Promise.all(ops);
       const err = results.find(r => r.error);
