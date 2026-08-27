@@ -91,6 +91,10 @@
             <option value="">All Categories</option>
             <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option>
           </select>
+          <select id="filterStatus" class="form-input" style="width:auto" onchange="renderPeopleList()">
+            <option value="">All Statuses</option>
+            <option>Member</option><option>Regular Attendee</option><option>Visitor</option><option>Inactive</option>
+          </select>
           <select id="filterGender" class="form-input" style="width:auto" onchange="renderPeopleList()">
             <option value="">All Genders</option>
             <option>Male</option><option>Female</option>
@@ -229,11 +233,12 @@
     function filteredPeople() {
       const q = document.getElementById('peopleSearch').value.toLowerCase();
       const cat = document.getElementById('filterCat').value;
+      const st = document.getElementById('filterStatus').value;
       const gender = document.getElementById('filterGender').value;
       return allPeople.filter(p => {
         const name = `${p.first_name} ${p.last_name}`.toLowerCase();
         const ec = effectiveCategory(p);
-        return (!q || name.includes(q)) && (!cat || ec === cat) && (!gender || p.gender === gender);
+        return (!q || name.includes(q)) && (!cat || ec === cat) && (!st || p.membership_status === st) && (!gender || p.gender === gender);
       });
     }
 

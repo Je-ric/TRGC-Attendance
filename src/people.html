@@ -347,12 +347,27 @@
       btn.disabled = true; btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Saving…';
 
       const id = document.getElementById('personId').value;
+      const firstName = document.getElementById('fFirstName').value.trim();
+      const lastName = document.getElementById('fLastName').value.trim();
       const birthdate = document.getElementById('fBirthdate').value || null;
       const age = calcAge(birthdate);
 
+      // Check for duplicate person (same first and last name)
+      const duplicate = allPeople.find(p => 
+        p.first_name.toLowerCase() === firstName.toLowerCase() && 
+        p.last_name.toLowerCase() === lastName.toLowerCase() &&
+        p.id !== id // Exclude current person when editing
+      );
+
+      if (duplicate) {
+        btn.disabled = false; btn.innerHTML = '<i class=\'bx bx-save\'></i> Save';
+        showToast(`A person named "${firstName} ${lastName}" already exists.`, 'error');
+        return;
+      }
+
       const payload = {
-        first_name:        document.getElementById('fFirstName').value.trim(),
-        last_name:         document.getElementById('fLastName').value.trim(),
+        first_name:        firstName,
+        last_name:         lastName,
         birthdate:         birthdate,
         age:               age,
         gender:            document.getElementById('fGender').value || null,
@@ -500,6 +515,7 @@
     document.getElementById('searchInput').addEventListener('input', debouncedRender);
     document.getElementById('filterCategory').addEventListener('change', debouncedRender);
     document.getElementById('filterStatus').addEventListener('change', debouncedRender);
+    document.getElementById('filterGender').addEventListener('change', debouncedRender);
 
     if (new URLSearchParams(location.search).get('action') === 'create') {
       window.addEventListener('load', openAddModal);
