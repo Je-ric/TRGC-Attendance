@@ -422,12 +422,17 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem">
           ${infoRow('Birthdate', p.birthdate ? formatDate(p.birthdate) : '—')}
           ${infoRow('Age', displayAge !== null ? `${displayAge} years old` : '—')}
+          ${infoRow('Gender', p.gender || '—')}
+          ${infoRow('Civil Status', p.civil_status || '—')}
           ${infoRow('Category', badge(ec, categoryColors[ec] || ''))}
           ${infoRow('Membership', badge(p.membership_status, statusColors[p.membership_status] || ''))}
-          ${infoRow('Gender', p.gender || '—')}
-          ${infoRow('Contact', p.contact_number || '—')}
+          ${infoRow('Family', p.families?.family_name || '—')}
+          ${infoRow('Contact Number', p.contact_number || '—')}
           ${infoRow('Email', p.email || '—')}
+          ${infoRow('Joined Date', p.joined_date ? formatDate(p.joined_date) : '—')}
+          ${infoRow('Date of Baptism', p.date_of_baptism ? formatDate(p.date_of_baptism) : '—')}
           <div style="grid-column:1/-1">${infoRow('Address', p.address || '—')}</div>
+          ${p.notes ? `<div style="grid-column:1/-1">${infoRow('Notes', p.notes)}</div>` : ''}
         </div>
         <div style="border-top:1px solid var(--border);padding-top:1rem">
           <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--grey);margin-bottom:0.75rem">Recent Attendance</p>
