@@ -30,6 +30,7 @@
     <header class="topbar">
       <button class="topbar-hamburger" onclick="openSidebar()" aria-label="Open menu"><i class='bx bx-menu'></i></button>
       <span class="topbar-title">Attendance</span>
+      <button onclick="exportAttendance()" id="exportBtn" class="btn btn-outline" style="margin-left:auto" disabled><i class='bx bx-download'></i> Export Attendance</button>
     </header>
 
     <!-- Session selector bar -->
@@ -136,6 +137,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/utils.js"></script>
+  <script src="js/export.js"></script>
   <script>
     function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); document.body.classList.add('sidebar-open'); }
     function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); document.body.classList.remove('sidebar-open'); }
@@ -194,6 +196,7 @@
         emptyState.style.display = 'flex';
         panel.style.display = 'none';
         infoBar.style.display = 'none';
+        document.getElementById('exportBtn').disabled = true;
         return;
       }
 
@@ -228,6 +231,9 @@
       panel.style.flexDirection = 'column';
       panel.style.gap = '1.25rem';
       renderPeopleList();
+      
+      // Enable export button when session is loaded
+      document.getElementById('exportBtn').disabled = false;
     }
 
     function filteredPeople() {
@@ -405,6 +411,46 @@
       if (err) { showToast(err.error.message, 'error'); return; }
       showToast('Attendance saved.');
       loadSession();
+    }
+
+    async function exportAttendance() {
+      if (!currentSessionId) {
+        showToast('Please select a session first', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('exportBtn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Exporting…';
+
+      try {
+        const session = allSessions.find(s => s.id === currentSessionId);
+        
+        // Build attendance data from existing attendance object and allPeople
+        const attendanceData = Object.keys(attendance)
+          .filter(personId => attendance[personId].status === 'present')
+          .map(personId => {
+            const person = allPeople.find(p => p.id === personId);
+            return {
+              status: attendance[personId].status,
+              remarks: attendance[personId].remarks,
+              person: person
+            };
+          });
+        
+        if (attendanceData.length === 0) {
+          showToast('No present people to export', 'warning');
+          return;
+        }
+        
+        await exportAttendanceToCSV(session, attendanceData);
+      } catch (error) {
+        showToast('Export failed: ' + error.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
     }
 
     init();

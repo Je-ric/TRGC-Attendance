@@ -30,6 +30,7 @@
     <header class="topbar">
       <button class="topbar-hamburger" onclick="openSidebar()" aria-label="Open menu"><i class='bx bx-menu'></i></button>
       <span class="topbar-title">People</span>
+      <button onclick="exportPeople()" class="btn btn-outline" style="margin-right:0.5rem"><i class='bx bx-download'></i> Export</button>
       <button onclick="autoCalculateCategories()" class="btn btn-outline" style="margin-right:0.5rem"><i class='bx bx-magic-wand'></i> Auto-Calculate Categories</button>
       <button onclick="openAddModal()" class="btn btn-primary"><i class='bx bx-user-plus'></i> Add Person</button>
     </header>
@@ -196,6 +197,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
   <script src="js/utils.js"></script>
+  <script src="js/export.js"></script>
   <script>
     function openSidebar()  { document.querySelector('.sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); document.body.classList.add('sidebar-open'); }
     function closeSidebar() { document.querySelector('.sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); document.body.classList.remove('sidebar-open'); }
@@ -508,6 +510,25 @@
       showToast(`Updated ${successCount} records with categories and ages based on birthdate.`);
       console.log(`Successfully updated ${successCount} records`);
       loadPeople();
+    }
+
+    async function exportPeople() {
+      const btn = document.querySelector('button[onclick="exportPeople()"]');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Exporting…';
+
+      try {
+        const people = await fetchAllPeopleForExport();
+        if (people) {
+          await exportPeopleToCSV(people);
+        }
+      } catch (error) {
+        showToast('Export failed: ' + error.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
     }
 
     // Init
