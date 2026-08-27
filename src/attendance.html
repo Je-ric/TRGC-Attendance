@@ -91,6 +91,10 @@
             <option value="">All Categories</option>
             <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option>
           </select>
+          <select id="filterGender" class="form-input" style="width:auto" onchange="renderPeopleList()">
+            <option value="">All Genders</option>
+            <option>Male</option><option>Female</option>
+          </select>
           <button onclick="markAll('present')" class="btn btn-outline btn-sm"><i class='bx bx-check'></i> Mark All Present</button>
           <button onclick="markAll('absent')"  class="btn btn-ghost btn-sm"><i class='bx bx-x'></i> Mark All Absent</button>
           <button onclick="clearAll()" class="btn btn-ghost btn-sm" style="color:var(--grey)"><i class='bx bx-reset'></i> Clear All</button>
@@ -143,7 +147,7 @@
           .select('id, date, service_name, attendance_types(name)')
           .order('date', { ascending: false }),
         db.from('people')
-          .select('id, first_name, last_name, birthdate, category, membership_status')
+          .select('id, first_name, last_name, birthdate, category, membership_status, gender')
           .order('last_name').order('first_name'),
       ]);
       allSessions = sessions || [];
@@ -225,10 +229,11 @@
     function filteredPeople() {
       const q = document.getElementById('peopleSearch').value.toLowerCase();
       const cat = document.getElementById('filterCat').value;
+      const gender = document.getElementById('filterGender').value;
       return allPeople.filter(p => {
         const name = `${p.first_name} ${p.last_name}`.toLowerCase();
         const ec = effectiveCategory(p);
-        return (!q || name.includes(q)) && (!cat || ec === cat);
+        return (!q || name.includes(q)) && (!cat || ec === cat) && (!gender || p.gender === gender);
       });
     }
 
@@ -250,9 +255,19 @@
           : att.status === 'absent'
           ? 'background:#f9f9f9'
           : '';
+        
+        // Gender circle indicator
+        let genderCircle = '';
+        if (p.gender === 'Male') {
+          genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#3b82f6;margin-right:0.5rem" title="Male"></span>`;
+        } else if (p.gender === 'Female') {
+          genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#ec4899;margin-right:0.5rem" title="Female"></span>`;
+        } else {
+          genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#d1d5db;margin-right:0.5rem" title="Not specified"></span>`;
+        }
 
         return `<tr id="row-${p.id}" style="${rowStyle}">
-          <td style="font-weight:600">${p.last_name}, ${p.first_name}</td>
+          <td style="font-weight:600">${genderCircle}${p.last_name}, ${p.first_name}</td>
           <td>${badge(ec, categoryColors[ec] || '')}</td>
           <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
           <td style="text-align:center">

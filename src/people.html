@@ -48,6 +48,10 @@
         <option value="">All Statuses</option>
         <option>Member</option><option>Regular Attendee</option><option>Visitor</option><option>Inactive</option>
       </select>
+      <select id="filterGender" class="form-input" style="width:auto">
+        <option value="">All Genders</option>
+        <option>Male</option><option>Female</option>
+      </select>
       <span id="countLabel" style="margin-left:auto;font-size:0.6875rem;color:var(--grey);letter-spacing:0.06em;text-transform:uppercase;font-weight:700;"></span>
     </div>
 
@@ -226,10 +230,11 @@
       const q = document.getElementById('searchInput').value.toLowerCase();
       const cat = document.getElementById('filterCategory').value;
       const st = document.getElementById('filterStatus').value;
+      const gender = document.getElementById('filterGender').value;
       return allPeople.filter(p => {
         const name = `${p.first_name} ${p.last_name}`.toLowerCase();
         const ec = effectiveCategory(p);
-        return (!q || name.includes(q)) && (!cat || ec === cat) && (!st || p.membership_status === st);
+        return (!q || name.includes(q)) && (!cat || ec === cat) && (!st || p.membership_status === st) && (!gender || p.gender === gender);
       });
     }
 
@@ -251,8 +256,19 @@
         tbody.innerHTML = slice.map(p => {
           const ec = effectiveCategory(p);
           const displayAge = p.age !== null ? p.age : calcAge(p.birthdate);
+          
+          // Gender circle indicator
+          let genderCircle = '';
+          if (p.gender === 'Male') {
+            genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#3b82f6;margin-right:0.5rem" title="Male"></span>`;
+          } else if (p.gender === 'Female') {
+            genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#ec4899;margin-right:0.5rem" title="Female"></span>`;
+          } else {
+            genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#d1d5db;margin-right:0.5rem" title="Not specified"></span>`;
+          }
+          
           return `<tr>
-            <td style="font-weight:600">${p.last_name}, ${p.first_name}</td>
+            <td style="font-weight:600">${genderCircle}${p.last_name}, ${p.first_name}</td>
             <td>${badge(ec, categoryColors[ec] || '')}</td>
             <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
             <td style="color:var(--grey)">${displayAge !== null ? displayAge : '—'}</td>
