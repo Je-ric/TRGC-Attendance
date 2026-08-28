@@ -156,64 +156,7 @@
   <script src="js/supabase.js"></script>
   <script src="js/utils.js"></script>
   <script>
-    // Hero banner functionality
-    function updateHeroBanner() {
-      const now = new Date();
-      const hour = now.getHours();
-      const greeting = hour < 12 ? 'Good Morning' : (hour < 18 ? 'Good Afternoon' : 'Good Evening');
-      
-      // Update clock
-      const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
-      const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-      
-      const clockEl = document.getElementById('heroClock');
-      const dateEl = document.getElementById('heroClockDate');
-      const greetingEl = document.getElementById('heroGreeting');
-      const heroDateEl = document.getElementById('heroDate');
-      
-      if (clockEl) clockEl.textContent = timeStr;
-      if (dateEl) dateEl.textContent = dateStr;
-      if (heroDateEl) heroDateEl.textContent = dateStr;
-      if (greetingEl) {
-        greetingEl.innerHTML = `<span class="accent">${greeting}</span>, Ka-TRGC`;
-      }
-    }
-    
-    // Nav glide effect
-    function initNavGlide() {
-      const nav = document.querySelector('.hero-nav');
-      if (!nav || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const glide = nav.querySelector('.hero-nav-glide');
-      if (!glide) return;
-      
-      function place(link) {
-        glide.style.width = link.offsetWidth + 'px';
-        glide.style.height = link.offsetHeight + 'px';
-        glide.style.transform = 'translateX(' + link.offsetLeft + 'px) translateY(' + link.offsetTop + 'px)';
-      }
-      
-      // Place on active link initially
-      const activeLink = nav.querySelector('.hero-nav-link.active');
-      if (activeLink) place(activeLink);
-      
-      nav.querySelectorAll('.hero-nav-link').forEach(function(link) {
-        link.addEventListener('mouseenter', function () {
-          if (link.classList.contains('active')) { nav.classList.remove('glide-on'); return; }
-          place(link);
-          nav.classList.add('glide-on');
-        });
-      });
-      
-      nav.addEventListener('mouseleave', function () { 
-        nav.classList.remove('glide-on');
-        if (activeLink) place(activeLink);
-      });
-    }
-    
-    // Initialize
-    updateHeroBanner();
-    setInterval(updateHeroBanner, 1000);
-    initNavGlide();
+    initHeroBanner();
     
     const PAGE_SIZE = 15;
     let currentPage = 1;
@@ -262,7 +205,7 @@
             <div style="display:flex;gap:0.25rem;justify-content:flex-end">
               <button onclick="viewFamily('${f.id}')" class="btn btn-ghost btn-sm" title="View"><i class='bx bx-show'></i></button>
               <button onclick="editFamily('${f.id}')" class="btn btn-ghost btn-sm" title="Edit"><i class='bx bx-edit'></i></button>
-              <button onclick="deleteFamily('${f.id}', '${f.family_name.replace(/'/g, "\\'")}', ${f.people?.length ?? 0})" class="btn btn-sm" style="background:var(--light);border:1px solid var(--border);color:var(--red)" title="Delete"><i class='bx bx-trash'></i></button>
+              <button onclick="deleteFamily('${f.id}', '${f.family_name.replace(/'/g, "\\'")}', ${f.people?.length ?? 0})" class="btn btn-danger btn-sm" title="Delete"><i class='bx bx-trash'></i></button>
             </div>
           </td>
         </tr>`).join('');

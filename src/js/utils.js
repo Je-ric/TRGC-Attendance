@@ -1,3 +1,53 @@
+// ── Hero Banner ──────────────────────────────────────────────
+function initHeroBanner() {
+  const clockEl    = document.getElementById('heroClock');
+  const clockDate  = document.getElementById('heroClockDate');
+  const greetingEl = document.getElementById('heroGreeting');
+  const heroDateEl = document.getElementById('heroDate');
+
+  function tick() {
+    const now  = new Date();
+    const hour = now.getHours();
+    const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+    const timeStr  = now.toLocaleTimeString('en-US', { hour12: false });
+    const dateStr  = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    if (clockEl)    clockEl.textContent = timeStr;
+    if (clockDate)  clockDate.textContent = dateStr;
+    if (heroDateEl) heroDateEl.textContent = dateStr;
+    if (greetingEl) greetingEl.innerHTML = `<span class="accent">${greeting}</span>, Ka-TRGC`;
+  }
+
+  tick();
+  setInterval(tick, 1000);
+
+  // Nav glide
+  const nav = document.querySelector('.hero-nav');
+  if (!nav || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const glide = nav.querySelector('.hero-nav-glide');
+  if (!glide) return;
+
+  function place(link) {
+    glide.style.width     = link.offsetWidth  + 'px';
+    glide.style.height    = link.offsetHeight + 'px';
+    glide.style.transform = `translateX(${link.offsetLeft}px) translateY(${link.offsetTop}px)`;
+  }
+
+  const activeLink = nav.querySelector('.hero-nav-link.active');
+  if (activeLink) place(activeLink);
+
+  nav.querySelectorAll('.hero-nav-link').forEach(link => {
+    link.addEventListener('mouseenter', () => {
+      if (link.classList.contains('active')) { nav.classList.remove('glide-on'); return; }
+      place(link);
+      nav.classList.add('glide-on');
+    });
+  });
+  nav.addEventListener('mouseleave', () => {
+    nav.classList.remove('glide-on');
+    if (activeLink) place(activeLink);
+  });
+}
+
 // ── Age & Category ────────────────────────────────────────────
 function calcAge(birthdate) {
   if (!birthdate) return null;
