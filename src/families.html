@@ -144,12 +144,19 @@
   <!-- View Modal -->
   <dialog id="viewModal" style="max-width:580px">
     <div class="modal-header">
-      <span id="viewTitle" class="modal-title">Family Details</span>
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <div class="avatar-circle" id="viewAvatar"><i class='bx bx-home-heart' style="font-size:1.1rem"></i></div>
+        <div>
+          <div id="viewTitle" style="font-size:0.9375rem;font-weight:700"></div>
+          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.08em">Family Details</div>
+        </div>
+      </div>
       <button onclick="closeModal('viewModal')" class="modal-close"><i class='bx bx-x'></i></button>
     </div>
     <div id="viewBody" class="modal-body"></div>
     <div class="modal-footer">
       <button onclick="closeModal('viewModal')" class="btn btn-ghost">Close</button>
+      <button id="viewEditBtn" class="btn btn-primary"><i class='bx bx-edit'></i> Edit</button>
     </div>
   </dialog>
 
@@ -273,13 +280,14 @@
       const f = allFamilies.find(x => x.id === id);
       if (!f) return;
       document.getElementById('viewTitle').textContent = f.family_name;
+      document.getElementById('viewEditBtn').onclick = () => { closeModal('viewModal'); editFamily(f.id); };
       document.getElementById('viewBody').innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem">
-          ${infoRow('Contact Person', f.contact_person || '—')}
-          ${infoRow('Contact Number', f.contact_number || '—')}
-          ${infoRow('Barangay', f.barangay || '—')}
-          <div style="grid-column:1/-1">${infoRow('Address', f.address || '—')}</div>
-          ${f.notes ? `<div style="grid-column:1/-1">${infoRow('Notes', f.notes)}</div>` : ''}
+        <div style="margin-bottom:1.25rem">
+          ${infoRow('Contact Person', f.contact_person || '—', 'bx-user')}
+          ${infoRow('Contact Number', f.contact_number || '—', 'bx-phone')}
+          ${infoRow('Barangay', f.barangay || '—', 'bx-map')}
+          ${infoRow('Address', f.address || '—', 'bx-map-pin')}
+          ${f.notes ? infoRow('Notes', f.notes, 'bx-note') : ''}
         </div>
         <div style="border-top:1px solid var(--border);padding-top:1rem">
           <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--grey);margin-bottom:0.75rem">
@@ -308,11 +316,8 @@
       openModal('viewModal');
     }
 
-    function infoRow(label, value) {
-      return `<div>
-        <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin-bottom:0.2rem">${label}</p>
-        <p style="font-size:0.8125rem;color:var(--black)">${value}</p>
-      </div>`;
+    function infoRow(label, value, icon = '') {
+      return `<div class="info-row"><span class="info-row-label">${icon ? `<i class='bx ${icon}'></i>` : ''}${label}</span><span class="info-row-value">${value}</span></div>`;
     }
 
     document.getElementById('searchInput').addEventListener('input', debounce(() => { currentPage = 1; renderTable(); }));

@@ -151,20 +151,32 @@ function debounce(fn, ms = 300) {
 
 // ── Badge HTML ────────────────────────────────────────────────
 const categoryColors = {
-  Kids:     'background:#fce7f3;color:#9d174d',
-  Youth:    'background:#ede9fe;color:#5b21b6',
-  Adults:   'background:#dbeafe;color:#1e40af',
-  Seniors:  'background:#fef3c7;color:#92400e',
+  Kids:    'background:#fdf1f7;color:#c0175a;border-color:#f7cfe1',
+  Youth:   'background:#f4f1fd;color:#6d28d9;border-color:#ded7fa',
+  Adults:  'background:#eef4ff;color:#1d4ed8;border-color:#cfe0fb',
+  Seniors: 'background:#fff8e8;color:#a16207;border-color:#f5e3b3',
 };
 const statusColors = {
-  Member:             'background:#1A1A1A;color:#fff',
-  'Regular Attendee': 'background:#dbeafe;color:#1e40af',
-  Visitor:            'background:#f3f4f6;color:#6b7280',
-  Inactive:           'background:#fee2e2;color:#991b1b',
+  Member:             'background:#1A1A1A;color:#fff;border-color:#1A1A1A',
+  'Regular Attendee': 'background:#eef4ff;color:#1d4ed8;border-color:#cfe0fb',
+  Visitor:            'background:#f4f4f4;color:#6b7280;border-color:#e2e2e2',
+  Inactive:           'background:#fdeeee;color:#b91c1c;border-color:#f6cfcf',
 };
 
 function badge(label, styleStr) {
   return `<span class="badge" style="${styleStr}">${label}</span>`;
+}
+
+function genderDot(gender) {
+  const color = gender === 'Male' ? '#3b82f6' : gender === 'Female' ? '#ec4899' : '#d1d5db';
+  return `<span class="gender-dot" style="--dot:${color}" title="${gender || 'Not specified'}"></span>`;
+}
+
+function infoRow(label, value, icon = '') {
+  return `<div class="info-row">
+    <span class="info-row-label">${icon ? `<i class='bx ${icon}'></i>` : ''}${label}</span>
+    <span class="info-row-value">${value}</span>
+  </div>`;
 }
 
 // ── Pagination ────────────────────────────────────────────────

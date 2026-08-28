@@ -146,10 +146,7 @@
                   <th>Name</th>
                   <th>Category</th>
                   <th>Membership</th>
-                  <th style="text-align:center;width:80px">
-                    <span style="color:var(--red)">Present</span>
-                  </th>
-                  <th style="text-align:center;width:80px">Absent</th>
+                  <th style="text-align:center;width:90px">Attendance</th>
                   <th>Remarks</th>
                 </tr>
               </thead>
@@ -289,43 +286,17 @@
       tbody.innerHTML = people.map(p => {
         const ec = effectiveCategory(p);
         const att = attendance[p.id] || { status: null, remarks: '' };
-        const rowStyle = att.status === 'present'
-          ? 'background:#fef9f9'
-          : att.status === 'absent'
-          ? 'background:#f9f9f9'
-          : '';
-        
-        // Gender circle indicator
-        let genderCircle = '';
-        if (p.gender === 'Male') {
-          genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#3b82f6;margin-right:0.5rem" title="Male"></span>`;
-        } else if (p.gender === 'Female') {
-          genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#ec4899;margin-right:0.5rem" title="Female"></span>`;
-        } else {
-          genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#d1d5db;margin-right:0.5rem" title="Not specified"></span>`;
-        }
+        const rowStyle = att.status === 'present' ? 'background:#fef9f9' : att.status === 'absent' ? 'background:#f9f9f9' : '';
 
-        return `<tr id="row-${p.id}" style="${rowStyle}">
-          <td style="font-weight:600">${genderCircle}${p.last_name}, ${p.first_name}</td>
+        return `<tr id="row-${p.id}" data-status="${att.status || ''}" style="${rowStyle}">
+          <td style="font-weight:600">${genderDot(p.gender)}${p.last_name}, ${p.first_name}</td>
           <td>${badge(ec, categoryColors[ec] || '')}</td>
           <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
           <td style="text-align:center">
-            <label style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:28px;height:28px;border-radius:50%;transition:background var(--duration-base) var(--ease-out),transform var(--duration-fast) var(--ease-out);${att.status === 'present' ? 'background:var(--red)' : 'background:var(--light)'}">
-              <input type="radio" name="att-${p.id}" value="present"
-                ${att.status === 'present' ? 'checked' : ''}
-                onchange="setStatus('${p.id}', 'present')"
-                style="position:absolute;opacity:0;width:0;height:0" />
-              <i class='bx bx-check' style="font-size:1rem;color:${att.status === 'present' ? '#fff' : 'var(--grey)'}"></i>
-            </label>
-          </td>
-          <td style="text-align:center">
-            <label style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:28px;height:28px;border-radius:50%;transition:background var(--duration-base) var(--ease-out),transform var(--duration-fast) var(--ease-out);${att.status === 'absent' ? 'background:var(--black)' : 'background:var(--light)'}">
-              <input type="radio" name="att-${p.id}" value="absent"
-                ${att.status === 'absent' ? 'checked' : ''}
-                onchange="setStatus('${p.id}', 'absent')"
-                style="position:absolute;opacity:0;width:0;height:0" />
-              <i class='bx bx-x' style="font-size:1rem;color:${att.status === 'absent' ? '#fff' : 'var(--grey)'}"></i>
-            </label>
+            <div class="att-toggle">
+              <button type="button" class="att-btn present ${att.status === 'present' ? 'active' : ''}" onclick="setStatus('${p.id}', 'present')"><i class='bx bx-check'></i></button>
+              <button type="button" class="att-btn absent ${att.status === 'absent' ? 'active' : ''}" onclick="setStatus('${p.id}', 'absent')"><i class='bx bx-x'></i></button>
+            </div>
           </td>
           <td>
             <input type="text" value="${att.remarks || ''}"
@@ -349,14 +320,11 @@
     function updateRowUI(personId, status) {
       const row = document.getElementById(`row-${personId}`);
       if (!row) return;
+      row.dataset.status = status || '';
       row.style.background = status === 'present' ? '#fef9f9' : status === 'absent' ? '#f9f9f9' : '';
-      const [presentLabel, absentLabel] = row.querySelectorAll('label');
-      presentLabel.style.background = status === 'present' ? 'var(--red)' : 'var(--light)';
-      presentLabel.querySelector('i').style.color = status === 'present' ? '#fff' : 'var(--grey)';
-      presentLabel.querySelector('input').checked = status === 'present';
-      absentLabel.style.background = status === 'absent' ? 'var(--black)' : 'var(--light)';
-      absentLabel.querySelector('i').style.color = status === 'absent' ? '#fff' : 'var(--grey)';
-      absentLabel.querySelector('input').checked = status === 'absent';
+      const [presentBtn, absentBtn] = row.querySelectorAll('.att-btn');
+      presentBtn.classList.toggle('active', status === 'present');
+      absentBtn.classList.toggle('active', status === 'absent');
     }
 
     function setRemarks(personId, value) {

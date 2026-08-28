@@ -212,13 +212,20 @@
 
   <!-- View Modal -->
   <dialog id="viewModal" style="max-width:600px">
-    <div class="modal-header">
-      <span id="viewName" class="modal-title">Person Details</span>
+    <div class="modal-header" id="viewModalHeader">
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <div class="avatar-circle" id="viewAvatar"></div>
+        <div>
+          <div id="viewName" style="font-size:0.9375rem;font-weight:700"></div>
+          <div style="font-size:0.6875rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.08em">Member Details</div>
+        </div>
+      </div>
       <button onclick="closeModal('viewModal')" class="modal-close"><i class='bx bx-x'></i></button>
     </div>
     <div id="viewBody" class="modal-body"></div>
     <div class="modal-footer">
       <button onclick="closeModal('viewModal')" class="btn btn-ghost">Close</button>
+      <button id="viewEditBtn" class="btn btn-primary"><i class='bx bx-edit'></i> Edit</button>
     </div>
   </dialog>
 
@@ -286,18 +293,8 @@
           const ec = effectiveCategory(p);
           const displayAge = p.age !== null ? p.age : calcAge(p.birthdate);
           
-          // Gender circle indicator
-          let genderCircle = '';
-          if (p.gender === 'Male') {
-            genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#3b82f6;margin-right:0.5rem" title="Male"></span>`;
-          } else if (p.gender === 'Female') {
-            genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#ec4899;margin-right:0.5rem" title="Female"></span>`;
-          } else {
-            genderCircle = `<span style="display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:#d1d5db;margin-right:0.5rem" title="Not specified"></span>`;
-          }
-          
           return `<tr>
-            <td style="font-weight:600">${genderCircle}${p.last_name}, ${p.first_name}</td>
+            <td style="font-weight:600">${genderDot(p.gender)}${p.last_name}, ${p.first_name}</td>
             <td>${badge(ec, categoryColors[ec] || '')}</td>
             <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
             <td style="color:var(--grey)">${displayAge !== null ? displayAge : '—'}</td>
@@ -444,22 +441,25 @@
         .order('created_at', { ascending: false })
         .limit(10);
 
+      const initials = `${p.first_name[0] ?? ''}${p.last_name[0] ?? ''}`.toUpperCase();
+      document.getElementById('viewAvatar').textContent = initials;
       document.getElementById('viewName').textContent = `${p.first_name} ${p.last_name}`;
+      document.getElementById('viewEditBtn').onclick = () => { closeModal('viewModal'); editPerson(p.id); };
       document.getElementById('viewBody').innerHTML = `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.25rem">
-          ${infoRow('Birthdate', p.birthdate ? formatDate(p.birthdate) : '—')}
-          ${infoRow('Age', displayAge !== null ? `${displayAge} years old` : '—')}
-          ${infoRow('Gender', p.gender || '—')}
-          ${infoRow('Civil Status', p.civil_status || '—')}
-          ${infoRow('Category', badge(ec, categoryColors[ec] || ''))}
-          ${infoRow('Membership', badge(p.membership_status, statusColors[p.membership_status] || ''))}
-          ${infoRow('Family', p.families?.family_name || '—')}
-          ${infoRow('Contact Number', p.contact_number || '—')}
-          ${infoRow('Email', p.email || '—')}
-          ${infoRow('Joined Date', p.joined_date ? formatDate(p.joined_date) : '—')}
-          ${infoRow('Date of Baptism', p.date_of_baptism ? formatDate(p.date_of_baptism) : '—')}
-          <div style="grid-column:1/-1">${infoRow('Address', p.address || '—')}</div>
-          ${p.notes ? `<div style="grid-column:1/-1">${infoRow('Notes', p.notes)}</div>` : ''}
+        <div style="margin-bottom:1.25rem">
+          ${infoRow('Birthdate', p.birthdate ? formatDate(p.birthdate) : '—', 'bx-cake')}
+          ${infoRow('Age', displayAge !== null ? `${displayAge} years old` : '—', 'bx-user')}
+          ${infoRow('Gender', p.gender || '—', 'bx-male-female')}
+          ${infoRow('Civil Status', p.civil_status || '—', 'bx-heart')}
+          ${infoRow('Category', badge(ec, categoryColors[ec] || ''), 'bx-tag')}
+          ${infoRow('Membership', badge(p.membership_status, statusColors[p.membership_status] || ''), 'bx-id-card')}
+          ${infoRow('Family', p.families?.family_name || '—', 'bx-home-heart')}
+          ${infoRow('Contact', p.contact_number || '—', 'bx-phone')}
+          ${infoRow('Email', p.email || '—', 'bx-envelope')}
+          ${infoRow('Joined', p.joined_date ? formatDate(p.joined_date) : '—', 'bx-calendar-plus')}
+          ${infoRow('Baptism', p.date_of_baptism ? formatDate(p.date_of_baptism) : '—', 'bx-droplet')}
+          ${infoRow('Address', p.address || '—', 'bx-map')}
+          ${p.notes ? infoRow('Notes', p.notes, 'bx-note') : ''}
         </div>
         <div style="border-top:1px solid var(--border);padding-top:1rem">
           <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--grey);margin-bottom:0.75rem">Recent Attendance</p>
@@ -476,11 +476,10 @@
       openModal('viewModal');
     }
 
-    function infoRow(label, value) {
-      return `<div>
-        <p style="font-size:0.625rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);margin-bottom:0.2rem">${label}</p>
-        <p style="font-size:0.8125rem;color:var(--black)">${value}</p>
-      </div>`;
+    function infoRow(label, value, icon = '') {
+      // falls back to shared util; defined here only if utils.js not yet loaded
+      if (typeof window.infoRow === 'function') return window.infoRow(label, value, icon);
+      return `<div class="info-row"><span class="info-row-label">${label}</span><span class="info-row-value">${value}</span></div>`;
     }
 
     async function autoCalculateCategories() {
