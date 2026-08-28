@@ -115,7 +115,7 @@
         <div style="display:flex;flex-wrap:wrap;gap:0.625rem;align-items:center">
           <div class="search-wrap">
             <i class='bx bx-search'></i>
-            <input id="peopleSearch" type="text" placeholder="Search person…" oninput="renderPeopleList()" />
+            <input id="peopleSearch" type="text" placeholder="Search person…" oninput="debouncedRender()" />
           </div>
           <select id="filterCat" class="form-input" style="width:auto" onchange="renderPeopleList()">
             <option value="">All Categories</option>
@@ -168,6 +168,7 @@
   <script src="js/export.js"></script>
   <script>
     initHeroBanner();
+    const debouncedRender = debounce(renderPeopleList, 250);
     let allSessions = [];
     let allPeople = [];
     let existingRecords = {};
@@ -342,8 +343,20 @@
       if (!attendance[personId]) attendance[personId] = { status: null, remarks: '' };
       attendance[personId].status = status;
       updateCounts();
-      // Re-render just this row by re-rendering the full list (fast enough at typical church sizes)
-      renderPeopleList();
+      updateRowUI(personId, status);
+    }
+
+    function updateRowUI(personId, status) {
+      const row = document.getElementById(`row-${personId}`);
+      if (!row) return;
+      row.style.background = status === 'present' ? '#fef9f9' : status === 'absent' ? '#f9f9f9' : '';
+      const [presentLabel, absentLabel] = row.querySelectorAll('label');
+      presentLabel.style.background = status === 'present' ? 'var(--red)' : 'var(--light)';
+      presentLabel.querySelector('i').style.color = status === 'present' ? '#fff' : 'var(--grey)';
+      presentLabel.querySelector('input').checked = status === 'present';
+      absentLabel.style.background = status === 'absent' ? 'var(--black)' : 'var(--light)';
+      absentLabel.querySelector('i').style.color = status === 'absent' ? '#fff' : 'var(--grey)';
+      absentLabel.querySelector('input').checked = status === 'absent';
     }
 
     function setRemarks(personId, value) {
@@ -354,15 +367,17 @@
     function markAll(status) {
       filteredPeople().forEach(p => {
         attendance[p.id] = { ...(attendance[p.id] || {}), status };
+        updateRowUI(p.id, status);
       });
-      renderPeopleList();
+      updateCounts();
     }
 
     function clearAll() {
       filteredPeople().forEach(p => {
         attendance[p.id] = { ...(attendance[p.id] || {}), status: null };
+        updateRowUI(p.id, null);
       });
-      renderPeopleList();
+      updateCounts();
     }
 
     function updateCounts() {

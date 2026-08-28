@@ -17,6 +17,7 @@ function initHeroBanner() {
     return `<span aria-hidden="true">${greetSpans}${restSpans}</span>`;
   }
 
+  let lastGreeting = '';
   function tick() {
     const now  = new Date();
     const hour = now.getHours();
@@ -27,7 +28,8 @@ function initHeroBanner() {
     if (clockEl)    clockEl.textContent = timeStr;
     if (clockDate)  clockDate.textContent = shortDate;
     if (heroDateEl) heroDateEl.textContent = longDate;
-    if (greetingEl) {
+    if (greetingEl && greeting !== lastGreeting) {
+      lastGreeting = greeting;
       greetingEl.setAttribute('aria-label', greeting + ', Ka-TRGC');
       greetingEl.innerHTML = buildGreeting(greeting, 'Ka-TRGC');
     }
