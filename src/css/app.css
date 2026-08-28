@@ -96,6 +96,23 @@ a { text-decoration: none; color: inherit; }
   opacity: 0.5;
 }
 
+.hero-banner.has-banner-image {
+  background-image: url('../assets/img/2026-Banner.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.hero-banner.has-banner-image::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(42,42,42,0.75) 100%);
+}
+
 .hero-banner-inner {
   position: relative;
   z-index: 1;
@@ -115,6 +132,12 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.hero-logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
 }
 
 .hero-brand-eyebrow {
