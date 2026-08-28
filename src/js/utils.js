@@ -5,16 +5,32 @@ function initHeroBanner() {
   const greetingEl = document.getElementById('heroGreeting');
   const heroDateEl = document.getElementById('heroDate');
 
+  let chOffset = 0;
+  function buildGreeting(greetWord, name) {
+    chOffset = 0;
+    const greetSpans = [...greetWord].map(ch =>
+      `<span class="hero-ch accent" style="--ch:${chOffset++}">${ch}</span>`
+    ).join('');
+    const restSpans = (', ' + name).split('').map(ch =>
+      `<span class="hero-ch" style="--ch:${chOffset++}">${ch === ' ' ? '&nbsp;' : ch}</span>`
+    ).join('');
+    return `<span aria-hidden="true">${greetSpans}${restSpans}</span>`;
+  }
+
   function tick() {
     const now  = new Date();
     const hour = now.getHours();
     const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
     const timeStr  = now.toLocaleTimeString('en-US', { hour12: false });
-    const dateStr  = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const shortDate = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const longDate  = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
     if (clockEl)    clockEl.textContent = timeStr;
-    if (clockDate)  clockDate.textContent = dateStr;
-    if (heroDateEl) heroDateEl.textContent = dateStr;
-    if (greetingEl) greetingEl.innerHTML = `<span class="accent">${greeting}</span>, Ka-TRGC`;
+    if (clockDate)  clockDate.textContent = shortDate;
+    if (heroDateEl) heroDateEl.textContent = longDate;
+    if (greetingEl) {
+      greetingEl.setAttribute('aria-label', greeting + ', Ka-TRGC');
+      greetingEl.innerHTML = buildGreeting(greeting, 'Ka-TRGC');
+    }
   }
 
   tick();

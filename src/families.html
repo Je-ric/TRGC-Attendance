@@ -17,14 +17,17 @@
 
     <!-- Hero Banner -->
     <header class="hero-banner has-banner-image">
+      <div aria-hidden="true">
+        <div class="hero-glow hero-glow-a"></div>
+        <div class="hero-glow hero-glow-b"></div>
+      </div>
       <div class="hero-banner-inner">
-        <!-- Top row: brand · clock -->
         <div class="hero-top-row">
           <div class="hero-brand">
             <img src="assets/img/TRGC-Logo.png" alt="TRGC Logo" class="hero-logo" />
             <div>
-              <p class="hero-brand-eyebrow">TRGC</p>
-              <h1 class="hero-brand-name">Attendance<span>.</span></h1>
+              <p class="hero-brand-title">TRGC Attendance</p>
+              <p class="hero-brand-sub">Church Management</p>
             </div>
           </div>
           <div class="hero-meta">
@@ -34,16 +37,12 @@
             </div>
           </div>
         </div>
-
-        <!-- Greeting -->
         <div class="hero-greeting-section">
           <p class="hero-eyebrow" id="heroDate">Loading...</p>
-          <h1 class="hero-greeting" id="heroGreeting">
-            <span class="accent">Good Morning</span>, Ka-TRGC
+          <h1 class="hero-greeting" id="heroGreeting" aria-label="Good Morning, Ka-TRGC">
+            <span aria-hidden="true"><span class="accent">Good Morning</span>, Ka-TRGC</span>
           </h1>
         </div>
-
-        <!-- Pill nav -->
         <div class="hero-nav-scroll">
           <nav class="hero-nav" aria-label="Main navigation">
             <div class="hero-nav-glide"></div>
@@ -51,7 +50,7 @@
             <a href="events.html"     class="hero-nav-link"><i class='bx bx-calendar-event'></i> Events</a>
             <a href="attendance.html" class="hero-nav-link"><i class='bx bx-check-square'></i> Attendance</a>
             <a href="people.html"     class="hero-nav-link"><i class='bx bx-group'></i> People</a>
-            <a href="families.html"   class="hero-nav-link active"><i class='bx bx-home-heart'></i> Families</a>
+            <a href="families.html"   class="hero-nav-link active" aria-current="page"><i class='bx bx-home-heart'></i> Families</a>
             <a href="reports.html"    class="hero-nav-link"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
           </nav>
         </div>
