@@ -1186,7 +1186,7 @@ tr.att-absent  td { background: #f9f9f9 !important; }
   .search-wrap input { width: 100%; }
 
   /* Modal full-screen on mobile */
-  dialog {
+  dialog[open] {
     position: fixed;
     top: 0; left: 0;
     width: 100vw;

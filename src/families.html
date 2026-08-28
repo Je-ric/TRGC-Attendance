@@ -318,6 +318,7 @@
     document.getElementById('searchInput').addEventListener('input', debounce(() => { currentPage = 1; renderTable(); }));
 
     if (new URLSearchParams(location.search).get('action') === 'create') {
+      history.replaceState(null, '', location.pathname);
       window.addEventListener('load', openAddModal);
     }
 

@@ -571,6 +571,7 @@
     document.getElementById('filterGender').addEventListener('change', debouncedRender);
 
     if (new URLSearchParams(location.search).get('action') === 'create') {
+      history.replaceState(null, '', location.pathname);
       window.addEventListener('load', openAddModal);
     }
 
