@@ -399,18 +399,12 @@ a { text-decoration: none; color: inherit; }
 }
 .hero-nav-link.active i { color: var(--red); }
 
-/* ── Workspace overlap — cards pull up over the band's bottom edge ── */
-.main-wrap > .page-content,
-.main-wrap > .actions-bar,
-.main-wrap > .filter-bar,
-.main-wrap > .session-info-bar {
+/* ── Stacking: bars and content sit above panels/tables ── */
+.actions-bar,
+.filter-bar,
+.session-info-bar {
   position: relative;
   z-index: 2;
-}
-
-.main-wrap > main.page-content:first-of-type,
-.main-wrap > .actions-bar:first-of-type {
-  margin-top: -52px;
 }
 
 /* ── Old Topbar (kept for compatibility) ─────────────────────────── */
