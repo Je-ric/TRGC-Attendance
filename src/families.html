@@ -11,23 +11,50 @@
 
   <div class="main-wrap">
 
-    <header class="topbar">
-      <div class="topbar-brand">
-        <p class="topbar-brand-eyebrow">TRGC</p>
-        <h1 class="topbar-brand-name">Attendance<span>.</span></h1>
-      </div>
-      <nav class="topbar-nav">
-        <a href="index.html"      class="topbar-link"><i class='bx bxs-dashboard'></i> Dashboard</a>
-        <a href="events.html"     class="topbar-link"><i class='bx bx-calendar-event'></i> Events</a>
-        <a href="attendance.html" class="topbar-link"><i class='bx bx-check-square'></i> Attendance</a>
-        <a href="people.html"     class="topbar-link"><i class='bx bx-group'></i> People</a>
-        <a href="families.html"   class="topbar-link active"><i class='bx bx-home-heart'></i> Families</a>
-        <a href="reports.html"    class="topbar-link"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
-      </nav>
-      <div class="topbar-actions">
-        <button onclick="openAddModal()" class="btn btn-primary btn-sm"><i class='bx bx-home-plus'></i> Add Family</button>
+    <!-- Hero Banner -->
+    <header class="hero-banner">
+      <div class="hero-banner-inner">
+        <!-- Top row: brand · clock -->
+        <div class="hero-top-row">
+          <div class="hero-brand">
+            <div>
+              <p class="hero-brand-eyebrow">TRGC</p>
+              <h1 class="hero-brand-name">Attendance<span>.</span></h1>
+            </div>
+          </div>
+          <div class="hero-meta">
+            <div class="hero-clock">
+              <p id="heroClock">--:--:--</p>
+              <p id="heroClockDate" class="hero-date">Loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Greeting -->
+        <div class="hero-greeting-section">
+          <p class="hero-eyebrow" id="heroDate">Loading...</p>
+          <h1 class="hero-greeting" id="heroGreeting">
+            <span class="accent">Manage</span> Families
+          </h1>
+        </div>
+
+        <!-- Pill nav -->
+        <nav class="hero-nav" aria-label="Main navigation">
+          <div class="hero-nav-glide"></div>
+          <a href="index.html"      class="hero-nav-link"><i class='bx bxs-dashboard'></i> Dashboard</a>
+          <a href="events.html"     class="hero-nav-link"><i class='bx bx-calendar-event'></i> Events</a>
+          <a href="attendance.html" class="hero-nav-link"><i class='bx bx-check-square'></i> Attendance</a>
+          <a href="people.html"     class="hero-nav-link"><i class='bx bx-group'></i> People</a>
+          <a href="families.html"   class="hero-nav-link active"><i class='bx bx-home-heart'></i> Families</a>
+          <a href="reports.html"    class="hero-nav-link"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+        </nav>
       </div>
     </header>
+
+    <!-- Actions bar -->
+    <div class="actions-bar">
+      <button onclick="openAddModal()" class="btn btn-primary btn-sm"><i class='bx bx-home-plus'></i> Add Family</button>
+    </div>
 
     <div class="filter-bar">
       <div class="search-wrap">
@@ -124,6 +151,65 @@
   <script src="js/supabase.js"></script>
   <script src="js/utils.js"></script>
   <script>
+    // Hero banner functionality
+    function updateHeroBanner() {
+      const now = new Date();
+      const hour = now.getHours();
+      const greeting = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+      
+      // Update clock
+      const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+      const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      
+      const clockEl = document.getElementById('heroClock');
+      const dateEl = document.getElementById('heroClockDate');
+      const greetingEl = document.getElementById('heroGreeting');
+      const heroDateEl = document.getElementById('heroDate');
+      
+      if (clockEl) clockEl.textContent = timeStr;
+      if (dateEl) dateEl.textContent = dateStr;
+      if (heroDateEl) heroDateEl.textContent = dateStr;
+      if (greetingEl) {
+        greetingEl.innerHTML = `<span class="accent">${greeting}</span>, Manage`;
+      }
+    }
+    
+    // Nav glide effect
+    function initNavGlide() {
+      const nav = document.querySelector('.hero-nav');
+      if (!nav || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const glide = nav.querySelector('.hero-nav-glide');
+      if (!glide) return;
+      
+      function place(link) {
+        glide.style.width = link.offsetWidth + 'px';
+        glide.style.height = link.offsetHeight + 'px';
+        glide.style.transform = 'translateX(' + link.offsetLeft + 'px) translateY(' + link.offsetTop + 'px)';
+      }
+      
+      // Place on active link initially
+      const activeLink = nav.querySelector('.hero-nav-link.active');
+      if (activeLink) place(activeLink);
+      
+      nav.querySelectorAll('.hero-nav-link').forEach(function(link) {
+        link.addEventListener('mouseenter', function () {
+          if (link.classList.contains('active')) { nav.classList.remove('glide-on'); return; }
+          place(link);
+          nav.classList.add('glide-on');
+        });
+      });
+      
+      nav.addEventListener('mouseleave', function () { 
+        nav.classList.remove('glide-on');
+        if (activeLink) place(activeLink);
+      });
+    }
+    
+    // Initialize
+    updateHeroBanner();
+    setInterval(updateHeroBanner, 1000);
+    initNavGlide();
+    
     const PAGE_SIZE = 15;
     let currentPage = 1;
     let allFamilies = [];
