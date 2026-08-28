@@ -18,10 +18,11 @@
       background: var(--white);
       color: var(--grey);
       cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      transition: background var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out), transform var(--duration-fast) var(--ease-out);
     }
     .tab-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
     .tab-btn:hover:not(.active) { border-color: var(--black); color: var(--black); }
+    .tab-btn:active:not(.active) { transform: scale(0.96); }
 
     .check-row { display: flex; align-items: center; gap: 0.5rem; }
     .check-row input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--red); cursor: pointer; }

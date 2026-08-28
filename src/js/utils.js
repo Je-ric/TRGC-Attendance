@@ -45,7 +45,11 @@ function showToast(message, type = 'success') {
   toast.className = `toast ${type}`;
   toast.innerHTML = `<i class="bx ${toastIcons[type] || toastIcons.success}"></i><span>${message}</span>`;
   document.body.appendChild(toast);
-  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(8px)';
+    setTimeout(() => toast.remove(), 350);
+  }, 3000);
 }
 
 // ── Modal helpers ─────────────────────────────────────────────

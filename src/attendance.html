@@ -282,7 +282,7 @@
           <td>${badge(ec, categoryColors[ec] || '')}</td>
           <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
           <td style="text-align:center">
-            <label style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:28px;height:28px;border-radius:50%;transition:background 0.15s;${att.status === 'present' ? 'background:var(--red)' : 'background:var(--light)'}">
+            <label style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:28px;height:28px;border-radius:50%;transition:background var(--duration-base) var(--ease-out),transform var(--duration-fast) var(--ease-out);${att.status === 'present' ? 'background:var(--red)' : 'background:var(--light)'}">
               <input type="radio" name="att-${p.id}" value="present"
                 ${att.status === 'present' ? 'checked' : ''}
                 onchange="setStatus('${p.id}', 'present')"
@@ -291,7 +291,7 @@
             </label>
           </td>
           <td style="text-align:center">
-            <label style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:28px;height:28px;border-radius:50%;transition:background 0.15s;${att.status === 'absent' ? 'background:var(--black)' : 'background:var(--light)'}">
+            <label style="display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:28px;height:28px;border-radius:50%;transition:background var(--duration-base) var(--ease-out),transform var(--duration-fast) var(--ease-out);${att.status === 'absent' ? 'background:var(--black)' : 'background:var(--light)'}">
               <input type="radio" name="att-${p.id}" value="absent"
                 ${att.status === 'absent' ? 'checked' : ''}
                 onchange="setStatus('${p.id}', 'absent')"
