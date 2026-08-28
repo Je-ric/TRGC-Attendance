@@ -20,8 +20,18 @@ function initHeroBanner() {
   tick();
   setInterval(tick, 1000);
 
-  // Nav glide
+  // Nav scroll affordance
+  const scrollWrap = document.querySelector('.hero-nav-scroll');
   const nav = document.querySelector('.hero-nav');
+  if (scrollWrap && nav) {
+    const updateFade = () => {
+      const atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 4;
+      scrollWrap.classList.toggle('at-end', atEnd);
+    };
+    nav.addEventListener('scroll', updateFade, { passive: true });
+    updateFade();
+  }
+
   if (!nav || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const glide = nav.querySelector('.hero-nav-glide');
   if (!glide) return;
