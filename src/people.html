@@ -477,9 +477,7 @@
     }
 
     function infoRow(label, value, icon = '') {
-      // falls back to shared util; defined here only if utils.js not yet loaded
-      if (typeof window.infoRow === 'function') return window.infoRow(label, value, icon);
-      return `<div class="info-row"><span class="info-row-label">${label}</span><span class="info-row-value">${value}</span></div>`;
+      return `<div class="info-row"><span class="info-row-label">${icon ? `<i class='bx ${icon}'></i>` : ''}${label}</span><span class="info-row-value">${value}</span></div>`;
     }
 
     async function autoCalculateCategories() {
