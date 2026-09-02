@@ -11,7 +11,7 @@
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="css/app.css" />
 </head>
-<body>
+<body class="attendance-page">
 
   <div class="main-wrap">
 
@@ -89,7 +89,7 @@
       </div>
 
       <!-- Attendance panel -->
-      <div id="attendancePanel" style="display:none" class="page-content" style="padding:0;gap:1.25rem">
+      <div id="attendancePanel" class="page-content attendance-panel" style="display:none">
 
         <!-- Count cards -->
         <div class="count-grid">
@@ -139,15 +139,13 @@
 
         <!-- People table -->
         <div class="panel">
-          <div style="overflow-x:auto">
-            <table class="data-table">
+          <div class="table-scroll">
+            <table class="data-table attendance-table">
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Category</th>
-                  <th>Membership</th>
                   <th style="text-align:center;width:90px">Attendance</th>
-                  <th>Remarks</th>
+                  <th>Notes / Remarks</th>
                 </tr>
               </thead>
               <tbody id="peopleBody"></tbody>
@@ -173,7 +171,7 @@
     let currentSessionId = null;
 
     async function init() {
-      const [{ data: sessions }, { data: people }] = await Promise.all([
+      const [{ data: sessions, error: sessionsError }, { data: people, error: peopleError }] = await Promise.all([
         db.from('attendance_sessions')
           .select('id, date, service_name, attendance_types(name)')
           .order('date', { ascending: false }),
@@ -181,6 +179,10 @@
           .select('id, first_name, last_name, birthdate, category, membership_status, gender')
           .order('last_name').order('first_name'),
       ]);
+      if (sessionsError || peopleError) {
+        showToast(sessionsError?.message || peopleError?.message || 'Unable to load attendance data.', 'error');
+        return;
+      }
       allSessions = sessions || [];
       allPeople = people || [];
       populateSessionSelect();
@@ -218,6 +220,7 @@
       const infoBar = document.getElementById('sessionInfo');
 
       if (!id) {
+        currentSessionId = null;
         emptyState.style.display = 'flex';
         panel.style.display = 'none';
         infoBar.style.display = 'none';
@@ -237,10 +240,15 @@
         <span>${formatDate(session?.date)} — ${dayOfWeek(session?.date)}</span>
       `;
 
-      const { data: records } = await db
+      const { data: records, error } = await db
         .from('attendance_records')
         .select('id, person_id, status, remarks')
         .eq('attendance_session_id', id);
+
+      if (error) {
+        showToast(error.message || 'Unable to load this session.', 'error');
+        return;
+      }
 
       existingRecords = {};
       (records || []).forEach(r => { existingRecords[r.person_id] = r; });
@@ -278,29 +286,27 @@
       const tbody = document.getElementById('peopleBody');
 
       if (!people.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2.5rem;color:var(--grey)">No people found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:2.5rem;color:var(--grey)">No people found.</td></tr>`;
         updateCounts();
         return;
       }
 
       tbody.innerHTML = people.map(p => {
-        const ec = effectiveCategory(p);
         const att = attendance[p.id] || { status: null, remarks: '' };
         const rowStyle = att.status === 'present' ? 'background:#fef9f9' : att.status === 'absent' ? 'background:#f9f9f9' : '';
 
         return `<tr id="row-${p.id}" data-status="${att.status || ''}" style="${rowStyle}">
-          <td style="font-weight:600">${genderDot(p.gender)}${p.last_name}, ${p.first_name}</td>
-          <td>${badge(ec, categoryColors[ec] || '')}</td>
-          <td>${badge(p.membership_status, statusColors[p.membership_status] || '')}</td>
+          <td class="attendance-name">${genderDot(p.gender)}<span>${escapeHtml(p.last_name)}, ${escapeHtml(p.first_name)}</span></td>
           <td style="text-align:center">
             <div class="att-toggle">
-              <button type="button" class="att-btn present ${att.status === 'present' ? 'active' : ''}" onclick="setStatus('${p.id}', 'present')"><i class='bx bx-check'></i></button>
-              <button type="button" class="att-btn absent ${att.status === 'absent' ? 'active' : ''}" onclick="setStatus('${p.id}', 'absent')"><i class='bx bx-x'></i></button>
+              <button type="button" class="att-btn present ${att.status === 'present' ? 'active' : ''}" aria-label="Mark present" aria-pressed="${att.status === 'present'}" onclick="setStatus('${p.id}', 'present')"><i class='bx bx-check'></i></button>
+              <button type="button" class="att-btn absent ${att.status === 'absent' ? 'active' : ''}" aria-label="Mark absent" aria-pressed="${att.status === 'absent'}" onclick="setStatus('${p.id}', 'absent')"><i class='bx bx-x'></i></button>
             </div>
           </td>
           <td>
-            <input type="text" value="${att.remarks || ''}"
-              placeholder="optional note"
+            <input type="text" value="${escapeHtml(att.remarks || '')}"
+              placeholder="Add a note…"
+              aria-label="Notes for ${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}"
               oninput="setRemarks('${p.id}', this.value)"
               class="remarks-input" />
           </td>
@@ -312,9 +318,9 @@
 
     function setStatus(personId, status) {
       if (!attendance[personId]) attendance[personId] = { status: null, remarks: '' };
-      attendance[personId].status = status;
+      attendance[personId].status = attendance[personId].status === status ? null : status;
       updateCounts();
-      updateRowUI(personId, status);
+      updateRowUI(personId, attendance[personId].status);
     }
 
     function updateRowUI(personId, status) {
@@ -325,6 +331,8 @@
       const [presentBtn, absentBtn] = row.querySelectorAll('.att-btn');
       presentBtn.classList.toggle('active', status === 'present');
       absentBtn.classList.toggle('active', status === 'absent');
+      presentBtn.setAttribute('aria-pressed', String(status === 'present'));
+      absentBtn.setAttribute('aria-pressed', String(status === 'absent'));
     }
 
     function setRemarks(personId, value) {
@@ -420,7 +428,7 @@
 
       if (err) { showToast(err.error.message, 'error'); return; }
       showToast('Attendance saved.');
-      loadSession();
+      await loadSession();
     }
 
     async function exportAttendance() {
@@ -438,19 +446,14 @@
         const session = allSessions.find(s => s.id === currentSessionId);
         
         // Build attendance data from existing attendance object and allPeople
-        const attendanceData = Object.keys(attendance)
-          .filter(personId => attendance[personId].status === 'present')
-          .map(personId => {
-            const person = allPeople.find(p => p.id === personId);
-            return {
-              status: attendance[personId].status,
-              remarks: attendance[personId].remarks,
-              person: person
-            };
-          });
+        const attendanceData = allPeople.map(person => ({
+          status: attendance[person.id]?.status || 'unmarked',
+          remarks: attendance[person.id]?.remarks || '',
+          person
+        }));
         
         if (attendanceData.length === 0) {
-          showToast('No present people to export', 'warning');
+          showToast('No attendance data to export', 'warning');
           return;
         }
         

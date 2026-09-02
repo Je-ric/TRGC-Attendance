@@ -111,6 +111,9 @@ create index on attendance_sessions(attendance_type_id);
 create index on attendance_sessions(date);
 create index on attendance_records(attendance_session_id);
 create index on attendance_records(person_id);
+create index on people(last_name, first_name);
+create index on attendance_sessions(date desc, attendance_type_id);
+create index on attendance_records(attendance_session_id, status);
 
 -- ============================================================
 -- updated_at trigger helper

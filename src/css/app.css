@@ -1307,6 +1307,92 @@ tr.att-absent  td { background: #f9f9f9 !important; }
   .quick-grid { grid-template-columns: 1fr; }
 }
 
+/* Responsive data workspace (hero/banner styles intentionally untouched) */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.attendance-table { table-layout: fixed; min-width: 560px; }
+.attendance-panel { padding: 0; gap: 1.25rem; }
+.attendance-table th:nth-child(1) { width: 38%; }
+.attendance-table th:nth-child(2) { width: 112px; }
+.attendance-table th:nth-child(3) { width: auto; }
+.attendance-name {
+  font-weight: 700;
+  display: table-cell;
+  min-width: 0;
+}
+.attendance-name span { vertical-align: middle; }
+.attendance-table .remarks-input { min-height: 40px; }
+
+button, a, input, select, textarea { touch-action: manipulation; }
+.form-input, .remarks-input { min-height: 40px; }
+.btn { min-height: 38px; }
+.panel { overflow: hidden; }
+
+@media (max-width: 768px) {
+  .actions-bar,
+  .filter-bar {
+    flex-wrap: wrap;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .actions-bar > *,
+  .filter-bar > * { margin-left: 0 !important; }
+  .filter-bar .search-wrap { flex: 1 1 100%; }
+  .filter-bar select.form-input { flex: 1 1 calc(50% - 0.625rem); width: auto !important; min-width: 0; }
+  .filter-bar .btn { flex: 1 1 auto; justify-content: center; }
+  .page-content { min-width: 0; }
+  .panel { border-radius: 12px; }
+  .panel > [style*="overflow-x:auto"] { -webkit-overflow-scrolling: touch; }
+  .data-table { min-width: 680px; }
+  .data-table th, .data-table td { padding: 0.75rem; }
+  .data-table tbody tr:hover { transform: none; }
+  .pagination { overflow-x: auto; padding: 0.75rem 1rem; }
+  .toast { left: 1rem; right: 1rem; bottom: 1rem; justify-content: center; }
+  .session-info-bar { flex-wrap: wrap; padding: 0.75rem 1rem; }
+
+  .attendance-table { min-width: 0; table-layout: fixed; }
+  .attendance-table th:nth-child(1) { width: 36%; }
+  .attendance-table th:nth-child(2) { width: 96px; }
+  .attendance-table th:nth-child(3) { width: auto; }
+  .attendance-table th, .attendance-table td { padding: 0.65rem 0.5rem; }
+  .attendance-table .att-btn { width: 36px; height: 36px; }
+}
+
+@media (max-width: 520px) {
+  .page-content { padding: 0.75rem; }
+  .stats-grid, .count-grid { gap: 0.625rem; }
+  .stat-card, .count-card { padding: 1rem; }
+  .count-value { font-size: 1.65rem; }
+  .actions-bar .btn { flex: 1 1 auto; justify-content: center; }
+
+  .attendance-table th:nth-child(1) { width: 34%; }
+  .attendance-table th:nth-child(2) { width: 88px; }
+  .attendance-table th, .attendance-table td { padding: 0.55rem 0.4rem; }
+  .attendance-name { line-height: 1.25; overflow-wrap: anywhere; }
+  .attendance-name .gender-dot { display: none; }
+  .remarks-input { padding: 0.5rem; font-size: 0.75rem; }
+
+  /* Keep the most useful columns visible on small screens. Full tables remain scrollable. */
+  .people-page .data-table th:nth-child(3),
+  .people-page .data-table td:nth-child(3),
+  .people-page .data-table th:nth-child(4),
+  .people-page .data-table td:nth-child(4),
+  .people-page .data-table th:nth-child(6),
+  .people-page .data-table td:nth-child(6),
+  .families-page .data-table th:nth-child(3),
+  .families-page .data-table td:nth-child(3),
+  .families-page .data-table th:nth-child(4),
+  .families-page .data-table td:nth-child(4) { display: none; }
+  .people-page .data-table { min-width: 500px; }
+  .families-page .data-table { min-width: 440px; }
+}
+
 /* ── Reduced motion ──────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

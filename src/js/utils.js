@@ -80,7 +80,8 @@ function initHeroBanner() {
 function calcAge(birthdate) {
   if (!birthdate) return null;
   const today = new Date();
-  const dob = new Date(birthdate);
+  const dob = parseLocalDate(birthdate);
+  if (Number.isNaN(dob.getTime())) return null;
   let age = today.getFullYear() - dob.getFullYear();
   const m = today.getMonth() - dob.getMonth();
   if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
@@ -102,14 +103,22 @@ function effectiveCategory(person) {
 // ── Date helpers ──────────────────────────────────────────────
 function formatDate(dateStr) {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-PH', {
+  return parseLocalDate(dateStr).toLocaleDateString('en-PH', {
     year: 'numeric', month: 'long', day: 'numeric'
   });
 }
 
 function dayOfWeek(dateStr) {
   if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('en-PH', { weekday: 'long' });
+  return parseLocalDate(dateStr).toLocaleDateString('en-PH', { weekday: 'long' });
+}
+
+function parseLocalDate(value) {
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  return new Date(value);
 }
 
 function todayISO() {
@@ -147,6 +156,12 @@ function confirmDelete(message = 'Are you sure you want to delete this?') {
 function debounce(fn, ms = 300) {
   let t;
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  })[char]);
 }
 
 // ── Badge HTML ────────────────────────────────────────────────

@@ -54,7 +54,7 @@ async function exportPeopleToCSV(people) {
       person.joined_date || '',
       person.date_of_baptism || '',
       person.notes || ''
-    ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',');
+    ].map(csvCell).join(',');
   });
 
   // Combine headers and rows
@@ -65,7 +65,7 @@ async function exportPeopleToCSV(people) {
 }
 
 /**
- * Export attendance for a specific session (present people only)
+ * Export attendance for a specific session, including every person's current state.
  * @param {Object} session - Session object with date and service info
  * @param {Array} attendanceData - Array of attendance records with person details
  */
@@ -106,15 +106,15 @@ async function exportAttendanceToCSV(session, attendanceData) {
       person.contact_number || '',
       record.status || '',
       record.remarks || ''
-    ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',');
+    ].map(csvCell).join(',');
   });
 
   // Combine headers and rows
   const csvContent = [headers.join(','), ...rows].join('\n');
 
   // Create filename with session info
-  const sessionName = session.attendance_types?.name || 'service';
-  const serviceName = session.service_name ? `_${session.service_name.replace(/[^a-zA-Z0-9]/g, '_')}` : '';
+  const sessionName = safeFilenamePart(session.attendance_types?.name || 'service');
+  const serviceName = session.service_name ? `_${safeFilenamePart(session.service_name)}` : '';
   const filename = `attendance_${sessionName}_${session.date}${serviceName}.csv`;
 
   // Create and trigger download
@@ -147,6 +147,20 @@ function downloadCSV(csvContent, filename) {
   }
   
   showToast('Export completed successfully');
+}
+
+// Quote every value, preserve Unicode, and neutralize spreadsheet formulas.
+function csvCell(value) {
+  let text = value == null ? '' : String(value);
+  if (/^[=+\-@]/.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function safeFilenamePart(value) {
+  return String(value)
+    .trim()
+    .replace(/[^a-z0-9_-]+/gi, '_')
+    .replace(/^_+|_+$/g, '') || 'export';
 }
 
 /**
