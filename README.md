@@ -53,6 +53,36 @@ Vercel will pick up `vercel.json` and serve `src/` as the root.
 
 ## Pages
 
+### Mobile app (PWA)
+
+All six pages share an installable Progressive Web App (PWA) manifest, app icons,
+theme color, and service worker. Open the deployed HTTPS site on your phone.
+On supporting Android browsers, choose **Install app** when offered, or use the
+browser's install menu. On iPhone/iPad, open in Safari and choose **Share → Add to
+Home Screen**. The installed app opens the Dashboard in its own window.
+Installation availability and menu wording depend on the browser.
+
+Phone navigation shows all six destinations in two rows. Controls have larger
+touch targets, inputs avoid iOS focus zoom, and layouts account for screen safe
+areas. Existing responsive directory cards and scrollable report tables remain.
+
+An internet connection is required to load and save data. The service worker
+caches only a self-contained offline help page; it does not cache database
+responses, personal records, or queue offline edits. A connection warning appears
+on an already-open page when the browser reports that it is offline. Keep any
+unsaved attendance page open and save after reconnecting. Navigating while offline
+shows a retry screen. A server error response is displayed as returned by the server.
+
+Use `npx serve src` or another HTTP server on localhost for local PWA testing;
+opening files directly does not enable the service worker or installation.
+Testing from another phone requires HTTPS, including on a local network.
+Worker updates wait for existing app tabs/windows to close, avoiding forced
+reloads during attendance entry. Increment the cache version in `src/sw.js` when
+changing `src/offline.html`.
+
+Implementation: `src/assets/favicon_io/site.webmanifest`, `src/js/pwa.js`,
+`src/sw.js`, `src/offline.html`, all six page heads, and `src/css/interface.css`.
+
 ### Interface and layout
 
 All six pages load `src/css/interface.css` after their base styles. The banner
