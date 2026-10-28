@@ -32,6 +32,7 @@
     .check-row input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--red); cursor: pointer; }
     .check-row label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--black); cursor: pointer; margin: 0; }
   </style>
+  <link rel="stylesheet" href="css/interface.css?v=20261028-2" />
 </head>
 <body class="events-page">
 
@@ -81,6 +82,7 @@
 
     <!-- Actions bar -->
     <div class="actions-bar">
+      <div class="page-heading"><h2>Events & services</h2><p>Organize your services and attendance sessions.</p></div>
       <div style="display:flex;gap:0.5rem">
         <button id="tabTypes"    onclick="switchTab('types')"    class="tab-btn active">Service Types</button>
         <button id="tabSessions" onclick="switchTab('sessions')" class="tab-btn">Sessions</button>
@@ -91,18 +93,9 @@
     <main class="page-content">
 
       <!-- Service Types panel -->
-      <div id="panelTypes" class="panel">
-        <div style="overflow-x:auto">
-          <table class="data-table">
-            <thead>
-              <tr><th>Name</th><th>Day</th><th>Time</th><th>Location</th><th>Recurring</th><th>Status</th><th style="width:90px"></th></tr>
-            </thead>
-            <tbody id="typesBody">
-              <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--grey)">
-                <i class='bx bx-loader-alt bx-spin' style="font-size:1.5rem"></i>
-              </td></tr>
-            </tbody>
-          </table>
+      <div id="panelTypes">
+        <div id="typesBody" class="directory-grid" aria-label="Service types">
+          <div class="empty-state"><i class="bx bx-loader-alt bx-spin"></i><p>Loading services…</p></div>
         </div>
       </div>
 
@@ -112,9 +105,9 @@
           <div class="filter-bar" style="border-bottom:none;padding:0.75rem 1rem">
             <div class="search-wrap">
               <i class='bx bx-search'></i>
-              <input id="sessionSearch" type="text" placeholder="Search service or label…" />
+              <input aria-label="Search service or label" id="sessionSearch" type="text" placeholder="Search service or label…" />
             </div>
-            <input id="sessionDateFilter" type="date" class="form-input" style="width:auto" />
+            <input aria-label="Filter sessions by date" id="sessionDateFilter" type="date" class="form-input" style="width:auto" />
             <span id="sessionCountLabel" style="margin-left:auto;font-size:0.6875rem;color:var(--grey);letter-spacing:0.06em;text-transform:uppercase;font-weight:700"></span>
           </div>
           <div style="overflow-x:auto">
@@ -148,16 +141,16 @@
         <div class="space-y-3">
           <div>
             <label class="form-label">Name <span style="color:var(--red)">*</span></label>
-            <input id="tName" class="form-input" required placeholder="e.g. Sunday Morning Service" />
+            <input aria-label="Name *" id="tName" class="form-input" required placeholder="e.g. Sunday Morning Service" />
           </div>
           <div>
             <label class="form-label">Description</label>
-            <input id="tDesc" class="form-input" />
+            <input aria-label="Description" id="tDesc" class="form-input" />
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">Day of Week</label>
-              <select id="tDay" class="form-input">
+              <select aria-label="Day of Week" id="tDay" class="form-input">
                 <option value="">—</option>
                 <option>Sunday</option><option>Monday</option><option>Tuesday</option>
                 <option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option>
@@ -165,12 +158,12 @@
             </div>
             <div>
               <label class="form-label">Start Time</label>
-              <input id="tTime" type="time" class="form-input" />
+              <input aria-label="Start Time" id="tTime" type="time" class="form-input" />
             </div>
           </div>
           <div>
             <label class="form-label">Location</label>
-            <input id="tLocation" class="form-input" />
+            <input aria-label="Location" id="tLocation" class="form-input" />
           </div>
           <div style="display:flex;gap:1.5rem;padding-top:0.25rem">
             <div class="check-row">
@@ -203,21 +196,21 @@
         <div class="space-y-3">
           <div>
             <label class="form-label">Service Type <span style="color:var(--red)">*</span></label>
-            <select id="sTypeId" class="form-input" required></select>
+            <select aria-label="Service Type *" id="sTypeId" class="form-input" required></select>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">Date <span style="color:var(--red)">*</span></label>
-              <input id="sDate" type="date" class="form-input" required />
+              <input aria-label="Date *" id="sDate" type="date" class="form-input" required />
             </div>
             <div>
               <label class="form-label">Sub-label / Sermon Title</label>
-              <input id="sServiceName" class="form-input" placeholder="e.g. Baptism Sunday" />
+              <input aria-label="Sub-label / Sermon Title" id="sServiceName" class="form-input" placeholder="e.g. Baptism Sunday" />
             </div>
           </div>
           <div>
             <label class="form-label">Notes</label>
-            <textarea id="sNotes" class="form-input" rows="2"></textarea>
+            <textarea aria-label="Notes" id="sNotes" class="form-input" rows="2"></textarea>
           </div>
         </div>
       </div>
@@ -230,7 +223,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/utils.js?v=20261028-2"></script>
   <script>
     initHeroBanner();
     
@@ -260,42 +253,42 @@
 
     // ── Service Types ─────────────────────────────────────────
     async function loadTypes() {
-      const { data } = await db.from('attendance_types').select('*').order('name');
+      const { data, error } = await db.from('attendance_types').select('*').order('name');
+      if (error) {
+        document.getElementById('typesBody').innerHTML = '<div class="empty-state"><i class="bx bx-wifi-off"></i><p>Unable to load services.</p><button class="btn btn-outline" onclick="loadTypes()">Retry</button></div>';
+        return;
+      }
       allTypes = data || [];
       renderTypes();
       populateTypeSelect();
     }
 
     function renderTypes() {
-      const tbody = document.getElementById('typesBody');
-      if (!allTypes.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--grey)">
-          <i class='bx bx-calendar-x' style="font-size:2rem;display:block;margin-bottom:0.5rem;color:var(--border)"></i>
-          No service types yet.
-        </td></tr>`;
-        return;
-      }
-      tbody.innerHTML = allTypes.map(t => `<tr>
-        <td style="font-weight:600">${t.name}</td>
-        <td style="color:var(--grey)">${t.day_of_week || '—'}</td>
-        <td style="color:var(--grey)">${t.start_time || '—'}</td>
-        <td style="color:var(--grey)">${t.location || '—'}</td>
-        <td>${t.is_recurring
-          ? `<i class='bx bx-check-circle' style="color:var(--red);font-size:1rem"></i>`
-          : `<i class='bx bx-minus-circle' style="color:var(--grey);font-size:1rem"></i>`}
-        </td>
-        <td>${t.is_active
-          ? badge('Active', 'background:#1A1A1A;color:#fff')
-          : badge('Inactive', 'background:#f3f4f6;color:#6b7280')}
-        </td>
-        <td>
-          <div style="display:flex;gap:0.25rem;justify-content:flex-end">
-            <button onclick="editType('${t.id}')" class="btn btn-ghost btn-sm" title="Edit"><i class='bx bx-edit'></i></button>
-            <button onclick="deleteType('${t.id}', '${t.name.replace(/'/g, "\\'")}')" class="btn btn-danger btn-sm" title="Delete"><i class='bx bx-trash'></i></button>
+      const grid = document.getElementById('typesBody');
+      grid.innerHTML = allTypes.length ? allTypes.map(t => `<article class="service-card">
+        <div class="directory-card-top"><i class="bx bx-calendar-event directory-icon" aria-hidden="true"></i>
+          ${badge(t.is_active ? 'Active' : 'Inactive', t.is_active ? 'background:#eaf5ef;color:#277148' : 'background:#edf0f5;color:#607089')}</div>
+        <h3 class="directory-card-title">${escapeHtml(t.name)}</h3>
+        <p class="directory-card-meta"><i class="bx bx-calendar" aria-hidden="true"></i>${escapeHtml(t.day_of_week || 'Day not set')}</p>
+        <p class="directory-card-meta"><i class="bx bx-time" aria-hidden="true"></i>${t.start_time ? formatTime(t.start_time) : 'Time not set'}</p>
+        <p class="directory-card-meta"><i class="bx bx-map" aria-hidden="true"></i>${escapeHtml(t.location || 'Location not set')}</p>
+        <div class="directory-card-footer"><span class="directory-card-meta">${t.is_recurring ? 'Recurring service' : 'One-time event'}</span>
+          <div class="directory-card-actions">
+            <button class="btn btn-outline btn-sm" data-service-action="edit" data-id="${escapeHtml(t.id)}" aria-label="Edit ${escapeHtml(t.name)}">Edit</button>
+            <button class="btn btn-danger btn-sm" data-service-action="delete" data-id="${escapeHtml(t.id)}" aria-label="Delete ${escapeHtml(t.name)}"><i class="bx bx-trash"></i></button>
           </div>
-        </td>
-      </tr>`).join('');
+        </div>
+      </article>`).join('') : '<div class="empty-state"><i class="bx bx-calendar-plus"></i><p>No services yet. Add your first service type above.</p></div>';
     }
+
+    document.getElementById('typesBody').addEventListener('click', event => {
+      const button = event.target.closest('button[data-service-action]');
+      if (!button) return;
+      const service = allTypes.find(t => t.id === button.dataset.id);
+      if (!service) return;
+      if (button.dataset.serviceAction === 'edit') editType(service.id);
+      if (button.dataset.serviceAction === 'delete') deleteType(service.id, service.name);
+    });
 
     function openTypeModal(id) {
       document.getElementById('typeModalTitle').textContent = id ? 'Edit Service Type' : 'Add Service Type';
@@ -458,7 +451,7 @@
     }
 
     async function deleteSession(id, name, date) {
-      if (!confirmDelete(`Delete session "${name}" on ${date}? All attendance records will be deleted.`)) return;
+      if (!confirmDelete(`Delete session "${name}" on ${formatDate(date)}? All attendance records will be deleted.`)) return;
       const { error } = await db.from('attendance_sessions').delete().eq('id', id);
       if (error) { showToast(error.message, 'error'); return; }
       showToast('Session deleted.');

@@ -4,6 +4,18 @@ function initHeroBanner() {
   const clockDate  = document.getElementById('heroClockDate');
   const greetingEl = document.getElementById('heroGreeting');
   const heroDateEl = document.getElementById('heroDate');
+  const clockFormatter = new Intl.DateTimeFormat('en-PH', {
+    timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit', hour12: true
+  });
+  const hourFormatter = new Intl.DateTimeFormat('en', {
+    timeZone: 'Asia/Manila', hour: 'numeric', hourCycle: 'h23'
+  });
+  const shortDateFormatter = new Intl.DateTimeFormat('en-PH', {
+    timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric'
+  });
+  const longDateFormatter = new Intl.DateTimeFormat('en-PH', {
+    timeZone: 'Asia/Manila', weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  });
 
   let chOffset = 0;
   function buildGreeting(greetWord, name) {
@@ -20,14 +32,14 @@ function initHeroBanner() {
   let lastGreeting = '';
   function tick() {
     const now  = new Date();
-    const hour = now.getHours();
+    const hour = Number(hourFormatter.format(now));
     const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
-    const timeStr  = now.toLocaleTimeString('en-US', { hour12: false });
-    const shortDate = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    const longDate  = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    if (clockEl)    clockEl.textContent = timeStr;
-    if (clockDate)  clockDate.textContent = shortDate;
-    if (heroDateEl) heroDateEl.textContent = longDate;
+    const timeStr = clockFormatter.format(now);
+    const shortDate = shortDateFormatter.format(now);
+    const longDate = longDateFormatter.format(now);
+    if (clockEl && clockEl.textContent !== timeStr) clockEl.textContent = timeStr;
+    if (clockDate && clockDate.textContent !== shortDate) clockDate.textContent = shortDate;
+    if (heroDateEl && heroDateEl.textContent !== longDate) heroDateEl.textContent = longDate;
     if (greetingEl && greeting !== lastGreeting) {
       lastGreeting = greeting;
       greetingEl.setAttribute('aria-label', greeting + ', Ka-TRGC');
@@ -103,14 +115,25 @@ function effectiveCategory(person) {
 // ── Date helpers ──────────────────────────────────────────────
 function formatDate(dateStr) {
   if (!dateStr) return '—';
-  return parseLocalDate(dateStr).toLocaleDateString('en-PH', {
+  const date = parseLocalDate(dateStr);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('en-PH', {
     year: 'numeric', month: 'long', day: 'numeric'
   });
 }
 
 function dayOfWeek(dateStr) {
   if (!dateStr) return '';
-  return parseLocalDate(dateStr).toLocaleDateString('en-PH', { weekday: 'long' });
+  const date = parseLocalDate(dateStr);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('en-PH', { weekday: 'long' });
+}
+
+function formatTime(value) {
+  if (typeof value !== 'string') return '—';
+  const match = /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/.exec(value);
+  if (!match) return '—';
+  const hour = Number(match[1]);
+  return `${hour % 12 || 12}:${match[2]} ${hour < 12 ? 'AM' : 'PM'}`;
 }
 
 function parseLocalDate(value) {
@@ -122,7 +145,9 @@ function parseLocalDate(value) {
 }
 
 function todayISO() {
-  return new Date().toISOString().split('T')[0];
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
 }
 
 // ── Toast ─────────────────────────────────────────────────────

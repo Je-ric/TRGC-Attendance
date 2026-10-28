@@ -10,8 +10,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/interface.css?v=20261028-2" />
 </head>
-<body class="families-page">
+<body class="families-page directory-page">
 
   <div class="main-wrap">
 
@@ -59,37 +60,22 @@
 
     <!-- Actions bar -->
     <div class="actions-bar">
+      <div class="page-heading"><h2>Families</h2><p>Bring people together by household.</p></div>
       <button onclick="openAddModal()" class="btn btn-primary btn-sm"><i class='bx bx-home-plus'></i> Add Family</button>
     </div>
 
     <div class="filter-bar">
       <div class="search-wrap">
         <i class='bx bx-search'></i>
-        <input id="searchInput" type="text" placeholder="Search family name…" />
+        <input aria-label="Search family name" id="searchInput" type="text" placeholder="Search family name…" />
       </div>
       <span id="countLabel" style="margin-left:auto;font-size:0.6875rem;color:var(--grey);letter-spacing:0.06em;text-transform:uppercase;font-weight:700"></span>
     </div>
 
     <main class="page-content">
       <div class="panel">
-        <div style="overflow-x:auto">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Family Name</th>
-                <th>Contact Person</th>
-                <th>Contact Number</th>
-                <th>Barangay</th>
-                <th>Members</th>
-                <th style="width:90px"></th>
-              </tr>
-            </thead>
-            <tbody id="familiesBody">
-              <tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--grey)">
-                <i class='bx bx-loader-alt bx-spin' style="font-size:1.5rem"></i>
-              </td></tr>
-            </tbody>
-          </table>
+        <div id="familiesBody" class="directory-grid" aria-label="Families">
+          <div class="empty-state"><i class="bx bx-loader-alt bx-spin"></i><p>Loading families…</p></div>
         </div>
         <div id="pagination"></div>
       </div>
@@ -108,29 +94,29 @@
         <div class="space-y-3">
           <div>
             <label class="form-label">Family Name <span style="color:var(--red)">*</span></label>
-            <input id="fName" class="form-input" required placeholder="e.g. Santos Family" />
+            <input aria-label="Family Name *" id="fName" class="form-input" required placeholder="e.g. Santos Family" />
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">Contact Person</label>
-              <input id="fContactPerson" class="form-input" />
+              <input aria-label="Contact Person" id="fContactPerson" class="form-input" />
             </div>
             <div>
               <label class="form-label">Contact Number</label>
-              <input id="fContactNumber" class="form-input" />
+              <input aria-label="Contact Number" id="fContactNumber" class="form-input" />
             </div>
           </div>
           <div>
             <label class="form-label">Address</label>
-            <input id="fAddress" class="form-input" />
+            <input aria-label="Address" id="fAddress" class="form-input" />
           </div>
           <div>
             <label class="form-label">Barangay</label>
-            <input id="fBarangay" class="form-input" />
+            <input aria-label="Barangay" id="fBarangay" class="form-input" />
           </div>
           <div>
             <label class="form-label">Notes</label>
-            <textarea id="fNotes" class="form-input" rows="2"></textarea>
+            <textarea aria-label="Notes" id="fNotes" class="form-input" rows="2"></textarea>
           </div>
         </div>
       </div>
@@ -162,7 +148,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/utils.js?v=20261028-2"></script>
   <script>
     initHeroBanner();
     
@@ -175,7 +161,10 @@
         .from('families')
         .select('*, people(id, first_name, last_name, membership_status)')
         .order('family_name');
-      if (error) { showToast('Failed to load families', 'error'); return; }
+      if (error) {
+        document.getElementById('familiesBody').innerHTML = '<div class="empty-state"><i class="bx bx-wifi-off"></i><p>Unable to load families.</p><button class="btn btn-outline" onclick="loadFamilies()">Retry</button></div>';
+        return;
+      }
       allFamilies = data || [];
       renderTable();
     }
@@ -190,36 +179,35 @@
       const totalPages = Math.max(1, Math.ceil(data.length / PAGE_SIZE));
       if (currentPage > totalPages) currentPage = 1;
       const slice = data.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-
       document.getElementById('countLabel').textContent = `${data.length} famil${data.length !== 1 ? 'ies' : 'y'}`;
-
-      const tbody = document.getElementById('familiesBody');
-      if (!slice.length) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--grey)">
-          <i class='bx bx-home-x' style="font-size:2rem;display:block;margin-bottom:0.5rem;color:var(--border)"></i>
-          No families found.
-        </td></tr>`;
-      } else {
-        tbody.innerHTML = slice.map(f => `<tr>
-          <td style="font-weight:600">${f.family_name}</td>
-          <td style="color:var(--grey)">${f.contact_person || '—'}</td>
-          <td style="color:var(--grey)">${f.contact_number || '—'}</td>
-          <td style="color:var(--grey)">${f.barangay || '—'}</td>
-          <td>
-            <span style="font-size:0.75rem;font-weight:700;color:var(--red)">${f.people?.length ?? 0}</span>
-            <span style="font-size:0.6875rem;color:var(--grey)"> member${(f.people?.length ?? 0) !== 1 ? 's' : ''}</span>
-          </td>
-          <td>
-            <div style="display:flex;gap:0.25rem;justify-content:flex-end">
-              <button onclick="viewFamily('${f.id}')" class="btn btn-ghost btn-sm" title="View"><i class='bx bx-show'></i></button>
-              <button onclick="editFamily('${f.id}')" class="btn btn-ghost btn-sm" title="Edit"><i class='bx bx-edit'></i></button>
-              <button onclick="deleteFamily('${f.id}', '${f.family_name.replace(/'/g, "\\'")}', ${f.people?.length ?? 0})" class="btn btn-danger btn-sm" title="Delete"><i class='bx bx-trash'></i></button>
-            </div>
-          </td>
-        </tr>`).join('');
-      }
+      const grid = document.getElementById('familiesBody');
+      grid.innerHTML = slice.length ? slice.map(f => `<article class="family-card">
+        <div class="directory-card-top"><i class="bx bx-home-heart directory-icon" aria-hidden="true"></i>
+          <span class="badge" style="background:#eef3fa;color:#49628b">${f.people?.length ?? 0} members</span></div>
+        <h3 class="directory-card-title">${escapeHtml(f.family_name)}</h3>
+        <p class="directory-card-meta"><i class="bx bx-user" aria-hidden="true"></i>${escapeHtml(f.contact_person || 'No contact person')}</p>
+        <p class="directory-card-meta"><i class="bx bx-phone" aria-hidden="true"></i>${escapeHtml(f.contact_number || 'No contact number')}</p>
+        <p class="directory-card-meta"><i class="bx bx-map" aria-hidden="true"></i>${escapeHtml(f.barangay || 'No barangay specified')}</p>
+        <div class="directory-card-footer">
+          <button class="btn btn-outline btn-sm" data-family-action="view" data-id="${escapeHtml(f.id)}">View Family</button>
+          <div class="directory-card-actions">
+            <button class="btn btn-ghost btn-sm" data-family-action="edit" data-id="${escapeHtml(f.id)}" aria-label="Edit ${escapeHtml(f.family_name)}"><i class="bx bx-edit"></i></button>
+            <button class="btn btn-danger btn-sm" data-family-action="delete" data-id="${escapeHtml(f.id)}" aria-label="Delete ${escapeHtml(f.family_name)}"><i class="bx bx-trash"></i></button>
+          </div>
+        </div>
+      </article>`).join('') : '<div class="empty-state"><i class="bx bx-home-heart"></i><p>No families match your search.</p></div>';
       renderPagination(document.getElementById('pagination'), currentPage, totalPages, p => { currentPage = p; renderTable(); });
     }
+
+    document.getElementById('familiesBody').addEventListener('click', event => {
+      const button = event.target.closest('button[data-family-action]');
+      if (!button) return;
+      const family = allFamilies.find(f => f.id === button.dataset.id);
+      if (!family) return;
+      if (button.dataset.familyAction === 'view') viewFamily(family.id);
+      if (button.dataset.familyAction === 'edit') editFamily(family.id);
+      if (button.dataset.familyAction === 'delete') deleteFamily(family.id, family.family_name, family.people?.length ?? 0);
+    });
 
     function openAddModal() {
       document.getElementById('modalTitle').textContent = 'Add Family';

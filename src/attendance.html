@@ -10,6 +10,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/interface.css?v=20261028-3" />
 </head>
 <body class="attendance-page">
 
@@ -59,33 +60,51 @@
 
     <!-- Actions bar -->
     <div class="actions-bar">
+      <div class="page-heading"><h2>Attendance</h2><p>Choose a session and record who is here.</p></div>
       <button onclick="exportAttendance()" id="exportBtn" class="btn btn-outline btn-sm" disabled><i class='bx bx-download'></i> Export</button>
     </div>
 
-    <!-- Session selector bar -->
-    <div class="filter-bar" style="gap:0.75rem;align-items:flex-end">
-      <div>
-        <label class="form-label">Session</label>
-        <select id="sessionSelect" class="form-input" style="width:320px" onchange="loadSession()">
-          <option value="">— Select a session —</option>
-        </select>
-      </div>
-      <div>
-        <label class="form-label">Filter by Date</label>
-        <input id="dateFilter" type="date" class="form-input" style="width:160px" onchange="filterSessionList()" />
-      </div>
-      <a href="events.html" class="btn btn-outline" style="margin-bottom:1px"><i class='bx bx-plus'></i> New Session</a>
-    </div>
-
-    <!-- Session info bar (hidden until session selected) -->
-    <div id="sessionInfo" class="session-info-bar" style="display:none"></div>
-
     <main class="page-content">
+
+      <details id="sessionBrowser" class="panel session-browser" open>
+        <summary><span class="panel-title">Browse sessions</span><span id="sessionBrowserMonthLabel" class="session-browser-caption"></span></summary>
+        <div class="session-browser-body">
+          <div class="session-browser-toolbar">
+            <div class="session-month-nav">
+              <button id="previousSessionMonth" type="button" class="btn btn-outline btn-sm" aria-label="Previous month"><i class="bx bx-chevron-left"></i></button>
+              <div><label for="sessionBrowserMonth" class="form-label">Month</label>
+                <select id="sessionBrowserMonth" class="form-input">
+                  <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+                  <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+                  <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+                  <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                </select>
+              </div>
+              <div><label for="sessionBrowserYear" class="form-label">Year</label><input id="sessionBrowserYear" type="number" min="1900" max="9998" step="1" class="form-input" /></div>
+              <button id="nextSessionMonth" type="button" class="btn btn-outline btn-sm" aria-label="Next month"><i class="bx bx-chevron-right"></i></button>
+            </div>
+            <button id="currentSessionMonth" type="button" class="btn btn-ghost btn-sm">This Month</button>
+            <a href="events.html?action=create" class="btn btn-primary btn-sm"><i class="bx bx-plus"></i> New Session</a>
+          </div>
+          <div class="search-wrap session-browser-search"><i class="bx bx-search" aria-hidden="true"></i>
+            <input id="sessionBrowserSearch" type="search" aria-label="Search all sessions by service or date" placeholder="Search all sessions by service or date…" />
+          </div>
+          <p id="sessionBrowserStatus" class="session-browser-status" role="status" aria-live="polite"></p>
+          <div id="sessionCards" class="directory-grid"><div class="empty-state"><i class="bx bx-loader-alt bx-spin"></i><p>Loading sessions…</p></div></div>
+          <div id="sessionBrowserPagination" class="session-browser-pagination" hidden>
+            <button id="previousSessionPage" class="btn btn-outline btn-sm" type="button">Previous</button>
+            <span id="sessionBrowserPageLabel"></span>
+            <button id="nextSessionPage" class="btn btn-outline btn-sm" type="button">Next</button>
+          </div>
+        </div>
+      </details>
+      <div id="sessionInfo" class="session-info-bar" style="display:none" role="status"></div>
+
 
       <!-- Empty state -->
       <div id="emptyState" class="empty-state" style="flex:1">
         <i class='bx bx-check-square'></i>
-        <p>Select a session above to take or view attendance.</p>
+        <p>Open a session card above to take or view attendance.</p>
       </div>
 
       <!-- Attendance panel -->
@@ -112,20 +131,20 @@
         </div>
 
         <!-- Controls -->
-        <div style="display:flex;flex-wrap:wrap;gap:0.625rem;align-items:center">
+        <div class="attendance-controls" style="display:flex;flex-wrap:wrap;gap:0.625rem;align-items:center">
           <div class="search-wrap">
             <i class='bx bx-search'></i>
-            <input id="peopleSearch" type="text" placeholder="Search person…" oninput="debouncedRender()" />
+            <input aria-label="Search person" id="peopleSearch" type="text" placeholder="Search person…" oninput="debouncedRender()" />
           </div>
-          <select id="filterCat" class="form-input" style="width:auto" onchange="renderPeopleList()">
+          <select aria-label="Filter by category" id="filterCat" class="form-input" style="width:auto" onchange="renderPeopleList()">
             <option value="">All Categories</option>
             <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option>
           </select>
-          <select id="filterStatus" class="form-input" style="width:auto" onchange="renderPeopleList()">
+          <select aria-label="Filter by membership" id="filterStatus" class="form-input" style="width:auto" onchange="renderPeopleList()">
             <option value="">All Statuses</option>
             <option>Member</option><option>Regular Attendee</option><option>Visitor</option><option>Inactive</option>
           </select>
-          <select id="filterGender" class="form-input" style="width:auto" onchange="renderPeopleList()">
+          <select aria-label="Filter by gender" id="filterGender" class="form-input" style="width:auto" onchange="renderPeopleList()">
             <option value="">All Genders</option>
             <option>Male</option><option>Female</option>
           </select>
@@ -159,8 +178,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/utils.js?v=20261028-2"></script>
   <script src="js/export.js"></script>
+  <script src="js/session-browser.js?v=20261028-1"></script>
   <script>
     initHeroBanner();
     const debouncedRender = debounce(renderPeopleList, 250);
@@ -170,103 +190,87 @@
     let attendance = {};
     let currentSessionId = null;
 
+    let sessionLoadRequest = 0;
+    let attendancePeopleLoaded = false;
+
     async function init() {
-      const [{ data: sessions, error: sessionsError }, { data: people, error: peopleError }] = await Promise.all([
-        db.from('attendance_sessions')
-          .select('id, date, service_name, attendance_types(name)')
-          .order('date', { ascending: false }),
-        db.from('people')
-          .select('id, first_name, last_name, birthdate, category, membership_status, gender')
-          .order('last_name').order('first_name'),
-      ]);
-      if (sessionsError || peopleError) {
-        showToast(sessionsError?.message || peopleError?.message || 'Unable to load attendance data.', 'error');
-        return;
-      }
-      allSessions = sessions || [];
-      allPeople = people || [];
-      populateSessionSelect();
-
-      const urlSession = new URLSearchParams(location.search).get('session');
-      if (urlSession) {
-        document.getElementById('sessionSelect').value = urlSession;
-        loadSession();
-      }
+      await initSessionBrowser();
     }
 
-    function populateSessionSelect(filtered = null) {
-      const sel = document.getElementById('sessionSelect');
-      const current = sel.value;
-      const list = filtered ?? allSessions;
-      sel.innerHTML = '<option value="">— Select a session —</option>';
-      list.forEach(s => {
-        const o = document.createElement('option');
-        o.value = s.id;
-        o.textContent = `${formatDate(s.date)} — ${s.attendance_types?.name ?? '?'}${s.service_name ? ' · ' + s.service_name : ''}`;
-        sel.appendChild(o);
+    function hasAttendanceChanges() {
+      return Object.entries(attendance).some(([personId, value]) => {
+        const original = existingRecords[personId];
+        return (value.status || null) !== (original?.status || null) ||
+          (value.remarks || '') !== (original?.remarks || '');
       });
-      if (current) sel.value = current;
     }
 
-    function filterSessionList() {
-      const d = document.getElementById('dateFilter').value;
-      populateSessionSelect(d ? allSessions.filter(s => s.date === d) : allSessions);
-    }
-
-    async function loadSession() {
-      const id = document.getElementById('sessionSelect').value;
-      const emptyState = document.getElementById('emptyState');
-      const panel = document.getElementById('attendancePanel');
-      const infoBar = document.getElementById('sessionInfo');
-
-      if (!id) {
-        currentSessionId = null;
-        emptyState.style.display = 'flex';
-        panel.style.display = 'none';
-        infoBar.style.display = 'none';
-        document.getElementById('exportBtn').disabled = true;
-        return;
+    async function loadSession(id = currentSessionId, reload = false) {
+      const status = document.getElementById('sessionBrowserStatus');
+      if (document.getElementById('saveBtn').disabled) {
+        status.textContent = 'Please wait for attendance to finish saving.';
+        return false;
       }
-
-      currentSessionId = id;
       const session = allSessions.find(s => s.id === id);
-
-      infoBar.style.display = 'flex';
-      infoBar.innerHTML = `
-        <i class='bx bx-calendar-check'></i>
-        <strong>${session?.attendance_types?.name ?? '—'}</strong>
-        ${session?.service_name ? `<span class="sep">·</span> <span>${session.service_name}</span>` : ''}
-        <span class="sep">|</span>
-        <span>${formatDate(session?.date)} — ${dayOfWeek(session?.date)}</span>
-      `;
-
-      const { data: records, error } = await db
-        .from('attendance_records')
-        .select('id, person_id, status, remarks')
-        .eq('attendance_session_id', id);
-
-      if (error) {
-        showToast(error.message || 'Unable to load this session.', 'error');
-        return;
+      if (!session) return false;
+      if (id === currentSessionId && !reload) {
+        document.getElementById('sessionBrowser').open = false;
+        return true;
       }
-
-      existingRecords = {};
-      (records || []).forEach(r => { existingRecords[r.person_id] = r; });
-
-      attendance = {};
-      allPeople.forEach(p => {
-        const rec = existingRecords[p.id];
-        attendance[p.id] = { status: rec?.status ?? null, remarks: rec?.remarks ?? '' };
-      });
-
-      emptyState.style.display = 'none';
-      panel.style.display = 'flex';
-      panel.style.flexDirection = 'column';
-      panel.style.gap = '1.25rem';
-      renderPeopleList();
-      
-      // Enable export button when session is loaded
-      document.getElementById('exportBtn').disabled = false;
+      if (id !== currentSessionId && hasAttendanceChanges() &&
+          !confirm('You have unsaved attendance changes. Discard them and open another session?')) return false;
+      const request = ++sessionLoadRequest;
+      const panel = document.getElementById('attendancePanel');
+      const emptyState = document.getElementById('emptyState');
+      panel.style.display = 'none';
+      document.getElementById('exportBtn').disabled = true;
+      status.textContent = `Loading ${formatDate(session.date)}…`;
+      try {
+        const [people, records] = await Promise.all([
+          attendancePeopleLoaded ? Promise.resolve(allPeople) : fetchAllRowsForExport('people',
+            'id, first_name, last_name, birthdate, category, membership_status, gender'),
+          fetchAllRowsForExport('attendance_records', 'id, person_id, status, remarks',
+            query => query.eq('attendance_session_id', id))
+        ]);
+        if (request !== sessionLoadRequest) return false;
+        allPeople = people.sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
+        attendancePeopleLoaded = true;
+        existingRecords = Object.fromEntries(records.map(record => [record.person_id, record]));
+        attendance = {};
+        allPeople.forEach(person => {
+          const record = existingRecords[person.id];
+          attendance[person.id] = { status: record?.status ?? null, remarks: record?.remarks ?? '' };
+        });
+        currentSessionId = id;
+        const infoBar = document.getElementById('sessionInfo');
+        infoBar.style.display = 'flex';
+        infoBar.innerHTML = `<i class="bx bx-calendar-check" aria-hidden="true"></i>
+          <div><strong>${escapeHtml(session.attendance_types?.name || 'Service')}</strong>
+          ${session.service_name ? `<span> · ${escapeHtml(session.service_name)}</span>` : ''}
+          <p>${dayOfWeek(session.date)}, ${formatDate(session.date)}${session.attendance_types?.start_time ? ' · ' + formatTime(session.attendance_types.start_time) : ''}</p></div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="openSessionBrowser()">Change Session</button>`;
+        emptyState.style.display = 'none';
+        panel.style.display = 'flex';
+        panel.style.flexDirection = 'column';
+        panel.style.gap = '1.25rem';
+        renderPeopleList();
+        document.getElementById('exportBtn').disabled = false;
+        document.getElementById('sessionBrowser').open = false;
+        status.textContent = '';
+        renderSessionCards();
+        const url = new URL(location.href);
+        url.searchParams.set('session', id);
+        history.replaceState(null, '', url);
+        return true;
+      } catch (error) {
+        if (request !== sessionLoadRequest) return false;
+        status.textContent = 'Unable to load attendance. Open the session again to retry.';
+        if (currentSessionId) {
+          panel.style.display = 'flex';
+          document.getElementById('exportBtn').disabled = false;
+        }
+        return false;
+      }
     }
 
     function filteredPeople() {
@@ -367,6 +371,7 @@
     async function saveAttendance() {
       if (!currentSessionId) return;
       const btn = document.getElementById('saveBtn');
+      if (btn.disabled) return;
       btn.disabled = true;
       btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Saving…';
 
@@ -420,7 +425,15 @@
         if (batch.length) ops.push(db.from('attendance_records').delete().in('id', batch));
       }
 
-      const results = await Promise.all(ops);
+      let results;
+      try {
+        results = await Promise.all(ops);
+      } catch (error) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class=\'bx bx-save\'></i> Save Attendance';
+        showToast('Unable to finish saving. Your changes are still on screen. Please retry.', 'error');
+        return;
+      }
       const err = results.find(r => r.error);
 
       btn.disabled = false;
@@ -428,7 +441,7 @@
 
       if (err) { showToast(err.error.message, 'error'); return; }
       showToast('Attendance saved.');
-      await loadSession();
+      await loadSession(currentSessionId, true);
     }
 
     async function exportAttendance() {
@@ -443,14 +456,29 @@
       btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Exporting…';
 
       try {
-        const session = allSessions.find(s => s.id === currentSessionId);
-        
-        // Build attendance data from existing attendance object and allPeople
-        const attendanceData = allPeople.map(person => ({
-          status: attendance[person.id]?.status || 'unmarked',
-          remarks: attendance[person.id]?.remarks || '',
-          person
-        }));
+        const sessionId = currentSessionId;
+        const session = allSessions.find(s => s.id === sessionId);
+        const draft = {};
+        for (const [personId, value] of Object.entries(attendance)) {
+          const original = existingRecords[personId];
+          if ((value.status || null) !== (original?.status || null) ||
+              (value.remarks || '') !== (original?.remarks || '')) {
+            draft[personId] = { ...value };
+          }
+        }
+        const people = await fetchAllPeopleForExport();
+        const records = await fetchAllRowsForExport('attendance_records', '*',
+          query => query.eq('attendance_session_id', sessionId));
+        const saved = new Map(records.map(record => [record.person_id, record]));
+        // Preserve the selected session's draft edits; fetch unloaded people and records too.
+        const attendanceData = people.map(person => {
+          const record = draft[person.id] ?? saved.get(person.id);
+          return {
+            status: record?.status || 'unmarked',
+            remarks: record?.remarks || '',
+            person
+          };
+        });
         
         if (attendanceData.length === 0) {
           showToast('No attendance data to export', 'warning');

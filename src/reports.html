@@ -73,6 +73,7 @@
     .present-num { color: var(--red); font-weight: 700; }
     .absent-num  { color: var(--grey); font-weight: 600; }
   </style>
+  <link rel="stylesheet" href="css/interface.css?v=20261028-4" />
 </head>
 <body class="reports-page">
 
@@ -122,33 +123,39 @@
 
     <!-- Actions bar -->
     <div class="actions-bar">
+      <div class="page-heading"><h2>Reports</h2><p>Explore attendance by service, person, month, or week.</p></div>
       <div style="display:flex;gap:0.5rem">
         <button id="tabEvent"  onclick="switchTab('event')"  class="tab-btn active"><i class='bx bx-calendar'></i> By Event</button>
         <button id="tabPerson" onclick="switchTab('person')" class="tab-btn"><i class='bx bx-user'></i> By Person</button>
-        <button id="tabDate"   onclick="switchTab('date')"   class="tab-btn"><i class='bx bx-calendar-week'></i> By Date</button>
+        <button id="tabDate"   onclick="switchTab('date')"   class="tab-btn"><i class='bx bx-calendar-week'></i> By Period</button>
       </div>
     </div>
 
     <main class="page-content">
+
+      <section class="report-filters report-period-filters" aria-label="Report period">
+        <div><label for="reportYear" class="form-label">Year</label><input id="reportYear" type="number" min="1900" max="9998" step="1" class="form-input" /></div>
+        <div><label for="reportMonth" class="form-label">Month</label><select id="reportMonth" class="form-input">
+          <option value="">Full year</option><option value="1">January</option><option value="2">February</option><option value="3">March</option>
+          <option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option>
+          <option value="8">August</option><option value="9">September</option><option value="10">October</option>
+          <option value="11">November</option><option value="12">December</option>
+        </select></div>
+        <div class="report-week-field"><label for="reportWeek" class="form-label">Week</label><select id="reportWeek" class="form-input"><option value="">All weeks</option></select></div>
+        <button type="button" onclick="refreshActiveReport()" class="btn btn-secondary"><i class="bx bx-refresh"></i> Refresh</button>
+        <p id="reportPeriodLabel" role="status" aria-live="polite"></p>
+      </section>
+
 
       <!-- ── By Event ─────────────────────────────────────────── -->
       <div id="panelEvent" style="display:flex;flex-direction:column;gap:1.25rem">
         <div class="report-filters">
           <div>
             <label class="form-label">Service Type</label>
-            <select id="evTypeFilter" class="form-input" style="width:220px" onchange="loadEventReport()">
+            <select aria-label="Service Type" id="evTypeFilter" class="form-input" style="width:220px" onchange="loadEventReport()">
               <option value="">All Types</option>
             </select>
           </div>
-          <div>
-            <label class="form-label">From</label>
-            <input id="evFrom" type="date" class="form-input" style="width:160px" onchange="loadEventReport()" />
-          </div>
-          <div>
-            <label class="form-label">To</label>
-            <input id="evTo" type="date" class="form-input" style="width:160px" onchange="loadEventReport()" />
-          </div>
-          <button onclick="loadEventReport()" class="btn btn-black" style="margin-bottom:1px"><i class='bx bx-refresh'></i> Refresh</button>
         </div>
         <div class="panel">
           <div style="overflow-x:auto">
@@ -169,17 +176,9 @@
         <div class="report-filters">
           <div>
             <label class="form-label">Person</label>
-            <select id="personFilter" class="form-input" style="width:260px" onchange="loadPersonReport()">
+            <select aria-label="Person" id="personFilter" class="form-input" style="width:260px" onchange="loadPersonReport()">
               <option value="">— Select person —</option>
             </select>
-          </div>
-          <div>
-            <label class="form-label">From</label>
-            <input id="prFrom" type="date" class="form-input" style="width:160px" onchange="loadPersonReport()" />
-          </div>
-          <div>
-            <label class="form-label">To</label>
-            <input id="prTo" type="date" class="form-input" style="width:160px" onchange="loadPersonReport()" />
           </div>
         </div>
 
@@ -212,19 +211,12 @@
 
       <!-- ── By Date ─────────────────────────────────────────── -->
       <div id="panelDate" style="display:none;flex-direction:column;gap:1.25rem">
-        <div class="report-filters">
-          <div>
-            <label class="form-label">Date</label>
-            <input id="dateFilter" type="date" class="form-input" style="width:180px" onchange="loadDateReport()" />
-          </div>
-          <button onclick="loadDateReport()" class="btn btn-black" style="margin-bottom:1px"><i class='bx bx-refresh'></i> Refresh</button>
-        </div>
         <div class="panel">
           <div style="overflow-x:auto">
             <table class="data-table">
-              <thead><tr><th>Service</th><th>Sub-label</th><th>Present</th><th>Absent</th><th>Total</th><th style="width:60px"></th></tr></thead>
+              <thead><tr><th>Date</th><th>Service</th><th>Sub-label</th><th>Present</th><th>Absent</th><th>Total</th><th style="width:60px"></th></tr></thead>
               <tbody id="dateBody">
-                <tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--grey)">Select a date above.</td></tr>
+                <tr><td colspan="7" style="text-align:center;padding:3rem;color:var(--grey)">Choose a month or week to view sessions.</td></tr>
               </tbody>
             </table>
           </div>
@@ -236,168 +228,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/utils.js?v=20261028-2"></script>
+  <script src="js/export.js"></script>
+  <script src="js/reports.js?v=20261028-1"></script>
   <script>
     initHeroBanner();
-    
-    function switchTab(tab) {
-      ['event','person','date'].forEach(t => {
-        const panel = document.getElementById(`panel${t.charAt(0).toUpperCase()+t.slice(1)}`);
-        panel.style.display = t === tab ? 'flex' : 'none';
-        document.getElementById(`tab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('active', t === tab);
-      });
-    }
-
-    function emptyRow(cols, msg) {
-      return `<tr><td colspan="${cols}" style="text-align:center;padding:3rem;color:var(--grey)">${msg}</td></tr>`;
-    }
-
-    // ── By Event ──────────────────────────────────────────────
-    async function loadEventReport() {
-      const typeId = document.getElementById('evTypeFilter').value;
-      const from   = document.getElementById('evFrom').value;
-      const to     = document.getElementById('evTo').value;
-
-      document.getElementById('eventBody').innerHTML = `<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--grey)"><i class='bx bx-loader-alt bx-spin' style="font-size:1.25rem"></i></td></tr>`;
-
-      let q = db.from('attendance_sessions')
-        .select('id, date, service_name, attendance_types(name), attendance_records(id, status)')
-        .order('date', { ascending: false });
-      if (typeId) q = q.eq('attendance_type_id', typeId);
-      if (from)   q = q.gte('date', from);
-      if (to)     q = q.lte('date', to);
-
-      const { data, error } = await q;
-      const tbody = document.getElementById('eventBody');
-      if (error || !data?.length) {
-        tbody.innerHTML = emptyRow(8, 'No sessions found for the selected filters.');
-        return;
-      }
-      tbody.innerHTML = data.map(s => {
-        const present = s.attendance_records?.filter(r => r.status === 'present').length ?? 0;
-        const absent  = s.attendance_records?.filter(r => r.status === 'absent').length ?? 0;
-        const total   = s.attendance_records?.length ?? 0;
-        return `<tr>
-          <td style="font-weight:600">${formatDate(s.date)}</td>
-          <td style="color:var(--grey)">${dayOfWeek(s.date)}</td>
-          <td>${s.attendance_types?.name ?? '—'}</td>
-          <td style="color:var(--grey)">${s.service_name || '—'}</td>
-          <td class="present-num">${present}</td>
-          <td class="absent-num">${absent}</td>
-          <td style="font-weight:600">${total}</td>
-          <td><a href="attendance.html?session=${s.id}" class="btn btn-ghost btn-sm" title="View"><i class='bx bx-link-external'></i></a></td>
-        </tr>`;
-      }).join('');
-    }
-
-    // ── By Person ─────────────────────────────────────────────
-    async function loadPersonReport() {
-      const personId = document.getElementById('personFilter').value;
-      if (!personId) return;
-      const from = document.getElementById('prFrom').value;
-      const to   = document.getElementById('prTo').value;
-
-      document.getElementById('personBody').innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--grey)"><i class='bx bx-loader-alt bx-spin' style="font-size:1.25rem"></i></td></tr>`;
-
-      const { data, error } = await db
-        .from('attendance_records')
-        .select('status, remarks, attendance_sessions(date, service_name, attendance_types(name))')
-        .eq('person_id', personId)
-        .order('created_at', { ascending: false });
-
-      const tbody = document.getElementById('personBody');
-      let rows = data || [];
-      if (from) rows = rows.filter(r => r.attendance_sessions?.date >= from);
-      if (to)   rows = rows.filter(r => r.attendance_sessions?.date <= to);
-
-      const summary = document.getElementById('personSummary');
-      if (error || !rows.length) {
-        tbody.innerHTML = emptyRow(5, 'No attendance records found.');
-        summary.style.display = 'none';
-        return;
-      }
-
-      const present = rows.filter(r => r.status === 'present').length;
-      const rate = rows.length ? Math.round(present / rows.length * 100) : 0;
-      summary.style.display = 'grid';
-      document.getElementById('sumTotal').textContent   = rows.length;
-      document.getElementById('sumPresent').textContent = present;
-      document.getElementById('sumRate').textContent    = rate + '%';
-
-      tbody.innerHTML = rows.map(r => `<tr>
-        <td style="font-weight:600">${formatDate(r.attendance_sessions?.date)}</td>
-        <td>${r.attendance_sessions?.attendance_types?.name ?? '—'}</td>
-        <td style="color:var(--grey)">${r.attendance_sessions?.service_name || '—'}</td>
-        <td>${badge(r.status, r.status === 'present'
-          ? 'background:#1A1A1A;color:#fff'
-          : 'background:#f3f4f6;color:#6b7280')}</td>
-        <td style="color:var(--grey)">${r.remarks || '—'}</td>
-      </tr>`).join('');
-    }
-
-    // ── By Date ───────────────────────────────────────────────
-    async function loadDateReport() {
-      const date = document.getElementById('dateFilter').value;
-      if (!date) return;
-
-      document.getElementById('dateBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--grey)"><i class='bx bx-loader-alt bx-spin' style="font-size:1.25rem"></i></td></tr>`;
-
-      const { data, error } = await db
-        .from('attendance_sessions')
-        .select('id, service_name, attendance_types(name), attendance_records(id, status)')
-        .eq('date', date);
-
-      const tbody = document.getElementById('dateBody');
-      if (error || !data?.length) {
-        tbody.innerHTML = emptyRow(6, `No sessions recorded on ${formatDate(date)}.`);
-        return;
-      }
-      tbody.innerHTML = data.map(s => {
-        const present = s.attendance_records?.filter(r => r.status === 'present').length ?? 0;
-        const absent  = s.attendance_records?.filter(r => r.status === 'absent').length ?? 0;
-        return `<tr>
-          <td style="font-weight:600">${s.attendance_types?.name ?? '—'}</td>
-          <td style="color:var(--grey)">${s.service_name || '—'}</td>
-          <td class="present-num">${present}</td>
-          <td class="absent-num">${absent}</td>
-          <td style="font-weight:600">${present + absent}</td>
-          <td><a href="attendance.html?session=${s.id}" class="btn btn-ghost btn-sm" title="View"><i class='bx bx-link-external'></i></a></td>
-        </tr>`;
-      }).join('');
-    }
-
-    // ── Init ──────────────────────────────────────────────────
-    async function init() {
-      const [{ data: types }, { data: people }] = await Promise.all([
-        db.from('attendance_types').select('id, name').eq('is_active', true).order('name'),
-        db.from('people').select('id, first_name, last_name').order('last_name').order('first_name'),
-      ]);
-
-      const typesSel = document.getElementById('evTypeFilter');
-      (types || []).forEach(t => {
-        const o = document.createElement('option');
-        o.value = t.id; o.textContent = t.name;
-        typesSel.appendChild(o);
-      });
-
-      const personSel = document.getElementById('personFilter');
-      (people || []).forEach(p => {
-        const o = document.createElement('option');
-        o.value = p.id; o.textContent = `${p.last_name}, ${p.first_name}`;
-        personSel.appendChild(o);
-      });
-
-      const today = todayISO();
-      const thirtyAgo = new Date();
-      thirtyAgo.setDate(thirtyAgo.getDate() - 30);
-      document.getElementById('evFrom').value = thirtyAgo.toISOString().split('T')[0];
-      document.getElementById('evTo').value   = today;
-      document.getElementById('dateFilter').value = today;
-
-      loadEventReport();
-    }
-
-    init();
+    initReports();
   </script>
 </body>
 </html>

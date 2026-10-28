@@ -10,6 +10,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/interface.css?v=20261028-2" />
 </head>
 <body class="people-page">
 
@@ -59,6 +60,7 @@
 
     <!-- Actions bar -->
     <div class="actions-bar">
+      <div class="page-heading"><h2>People</h2><p>Keep your church directory up to date.</p></div>
       <button onclick="exportPeople()" class="btn btn-outline btn-sm"><i class='bx bx-download'></i> Export</button>
       <button onclick="autoCalculateCategories()" class="btn btn-outline btn-sm"><i class='bx bx-magic-wand'></i> Auto-Calc</button>
       <button onclick="openAddModal()" class="btn btn-primary btn-sm"><i class='bx bx-user-plus'></i> Add Person</button>
@@ -68,17 +70,17 @@
     <div class="filter-bar">
       <div class="search-wrap">
         <i class='bx bx-search'></i>
-        <input id="searchInput" type="text" placeholder="Search name…" />
+        <input aria-label="Search name" id="searchInput" type="text" placeholder="Search name…" />
       </div>
-      <select id="filterCategory" class="form-input" style="width:auto">
+      <select aria-label="Filter by category" id="filterCategory" class="form-input" style="width:auto">
         <option value="">All Categories</option>
         <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option>
       </select>
-      <select id="filterStatus" class="form-input" style="width:auto">
+      <select aria-label="Filter by membership" id="filterStatus" class="form-input" style="width:auto">
         <option value="">All Statuses</option>
         <option>Member</option><option>Regular Attendee</option><option>Visitor</option><option>Inactive</option>
       </select>
-      <select id="filterGender" class="form-input" style="width:auto">
+      <select aria-label="Filter by gender" id="filterGender" class="form-input" style="width:auto">
         <option value="">All Genders</option>
         <option>Male</option><option>Female</option>
       </select>
@@ -125,22 +127,22 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">First Name <span style="color:var(--red)">*</span></label>
-              <input id="fFirstName" class="form-input" required />
+              <input aria-label="First Name *" id="fFirstName" class="form-input" required />
             </div>
             <div>
               <label class="form-label">Last Name <span style="color:var(--red)">*</span></label>
-              <input id="fLastName" class="form-input" required />
+              <input aria-label="Last Name *" id="fLastName" class="form-input" required />
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">Birthdate</label>
-              <input id="fBirthdate" type="date" class="form-input" oninput="updateAutoCategory()" />
+              <input aria-label="Birthdate" id="fBirthdate" type="date" class="form-input" oninput="updateAutoCategory()" />
               <div id="ageDisplay" style="font-size:0.75rem;color:var(--grey);margin-top:0.25rem"></div>
             </div>
             <div>
               <label class="form-label">Gender</label>
-              <select id="fGender" class="form-input">
+              <select aria-label="Gender" id="fGender" class="form-input">
                 <option value="">—</option><option>Male</option><option>Female</option>
               </select>
             </div>
@@ -148,13 +150,13 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">Civil Status</label>
-              <select id="fCivilStatus" class="form-input">
+              <select aria-label="Civil Status" id="fCivilStatus" class="form-input">
                 <option value="">—</option><option>Single</option><option>Married</option><option>Widowed</option><option>Separated</option>
               </select>
             </div>
             <div>
               <label class="form-label">Category <span id="autoCatHint" style="font-size:0.625rem;color:var(--red);font-weight:400;text-transform:none;letter-spacing:0"></span></label>
-              <select id="fCategory" class="form-input">
+              <select aria-label="Category" id="fCategory" class="form-input">
                 <option value="">Auto-calculate</option><option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option>
               </select>
             </div>
@@ -162,13 +164,13 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">Membership Status</label>
-              <select id="fMembershipStatus" class="form-input">
+              <select aria-label="Membership Status" id="fMembershipStatus" class="form-input">
                 <option>Visitor</option><option>Member</option><option>Regular Attendee</option><option>Inactive</option>
               </select>
             </div>
             <div>
               <label class="form-label">Family</label>
-              <select id="fFamilyId" class="form-input">
+              <select aria-label="Family" id="fFamilyId" class="form-input">
                 <option value="">— None —</option>
               </select>
             </div>
@@ -176,30 +178,30 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">Joined Date</label>
-              <input id="fJoinedDate" type="date" class="form-input" />
+              <input aria-label="Joined Date" id="fJoinedDate" type="date" class="form-input" />
             </div>
             <div>
               <label class="form-label">Date of Baptism</label>
-              <input id="fBaptismDate" type="date" class="form-input" />
+              <input aria-label="Date of Baptism" id="fBaptismDate" type="date" class="form-input" />
             </div>
           </div>
           <div>
             <label class="form-label">Address</label>
-            <input id="fAddress" class="form-input" />
+            <input aria-label="Address" id="fAddress" class="form-input" />
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
             <div>
               <label class="form-label">Contact Number</label>
-              <input id="fContact" class="form-input" />
+              <input aria-label="Contact Number" id="fContact" class="form-input" />
             </div>
             <div>
               <label class="form-label">Email</label>
-              <input id="fEmail" type="email" class="form-input" />
+              <input aria-label="Email" id="fEmail" type="email" class="form-input" />
             </div>
           </div>
           <div>
             <label class="form-label">Notes</label>
-            <textarea id="fNotes" class="form-input" rows="2"></textarea>
+            <textarea aria-label="Notes" id="fNotes" class="form-input" rows="2"></textarea>
           </div>
         </div>
       </div>
@@ -231,7 +233,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/utils.js?v=20261028-2"></script>
   <script src="js/export.js"></script>
   <script>
     initHeroBanner();
@@ -302,9 +304,9 @@
             <td style="color:var(--grey)">${p.contact_number || '—'}</td>
             <td>
               <div style="display:flex;gap:0.25rem;justify-content:flex-end">
-                <button onclick="viewPerson('${p.id}')" class="btn btn-ghost btn-sm" title="View"><i class='bx bx-show'></i></button>
-                <button onclick="editPerson('${p.id}')" class="btn btn-ghost btn-sm" title="Edit"><i class='bx bx-edit'></i></button>
-                <button onclick="deletePerson('${p.id}', '${p.first_name} ${p.last_name}')" class="btn btn-danger btn-sm" title="Delete"><i class='bx bx-trash'></i></button>
+                <button onclick="viewPerson('${p.id}')" class="btn btn-ghost btn-sm" aria-label="View person" title="View"><i class='bx bx-show'></i></button>
+                <button onclick="editPerson('${p.id}')" class="btn btn-ghost btn-sm" aria-label="Edit person" title="Edit"><i class='bx bx-edit'></i></button>
+                <button onclick="deletePerson('${p.id}', '${p.first_name} ${p.last_name}')" class="btn btn-danger btn-sm" aria-label="Delete person" title="Delete"><i class='bx bx-trash'></i></button>
               </div>
             </td>
           </tr>`;

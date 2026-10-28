@@ -167,15 +167,100 @@ function safeFilenamePart(value) {
  * Fetch all people with complete details for export
  */
 async function fetchAllPeopleForExport() {
-  const { data, error } = await db
-    .from('people')
-    .select('*, families(family_name)')
-    .order('last_name').order('first_name');
-  
-  if (error) {
-    showToast('Failed to fetch people for export', 'error');
-    return null;
+  const people = await fetchAllRowsForExport('people', '*, families(family_name)');
+  return people.sort((a, b) =>
+    a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name)
+  );
+}
+
+// Cursor pagination continues even when the server returns fewer than 500 rows.
+// Counts are checked separately because cursor filters change the query's count.
+async function fetchAllRowsForExport(table, columns = '*', filter = query => query, onProgress = () => {}) {
+  async function countRows() {
+    const { count, error } = await filter(db.from(table).select('id', { count: 'exact', head: true }));
+    if (error) throw new Error(`Unable to count ${table}. Please retry.`);
+    if (!Number.isInteger(count) || count < 0) throw new Error(`Unable to verify ${table}. Please retry.`);
+    return count;
   }
-  
-  return data || [];
+
+  const expectedCount = await countRows();
+  const rows = [];
+  let cursor = null;
+  while (true) {
+    let query = filter(db.from(table).select(columns)).order('id').limit(500);
+    if (cursor !== null) query = query.gt('id', cursor);
+    const { data, error } = await query;
+    if (error || !Array.isArray(data)) throw new Error(`Unable to export ${table}. Please retry.`);
+    if (!data.length) break;
+    for (const row of data) {
+      if (typeof row.id !== 'string' || (cursor !== null && row.id <= cursor)) {
+        throw new Error(`Unable to verify ${table} batches. Please retry.`);
+      }
+      cursor = row.id;
+      rows.push(row);
+    }
+    onProgress(rows.length, expectedCount);
+    if (rows.length > expectedCount) throw new Error(`${table} changed during export. Please retry when editing has stopped.`);
+  }
+
+  if (rows.length !== expectedCount || await countRows() !== expectedCount) {
+    throw new Error(`${table} changed during export. Please retry when editing has stopped.`);
+  }
+  return rows;
+}
+
+const BACKUP_TABLES = [
+  'families', 'people', 'attendance_types', 'attendance_sessions',
+  'attendance_records', 'attendance_summaries'
+];
+let backupExportPending = false;
+
+async function exportAllData() {
+  if (backupExportPending) return;
+  backupExportPending = true;
+  const button = document.getElementById('backupExportBtn');
+  const status = document.getElementById('backupExportStatus');
+  button.disabled = true;
+  button.textContent = 'Exporting…';
+
+  try {
+    const backup = {
+      format: 'trgc-attendance-data',
+      version: 1,
+      started_at: new Date().toISOString(),
+      completed_at: null,
+      row_counts: {},
+      tables: {}
+    };
+    for (const table of BACKUP_TABLES) {
+      status.textContent = `Reading ${table.replaceAll('_', ' ')}…`;
+      const rows = await fetchAllRowsForExport(table, '*', query => query, (loaded, total) => {
+        status.textContent = `${table.replaceAll('_', ' ')}: ${loaded.toLocaleString()} / ${total.toLocaleString()} rows`;
+      });
+      backup.tables[table] = rows;
+      backup.row_counts[table] = rows.length;
+    }
+    backup.completed_at = new Date().toISOString();
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    try {
+      link.href = url;
+      link.download = `trgc_backup_${backup.completed_at.replace(/[:.]/g, '-')}.json`;
+      document.body.appendChild(link);
+      link.click();
+    } finally {
+      link.remove();
+      // Give the browser time to start reading the download before revoking it.
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
+    const total = Object.values(backup.row_counts).reduce((sum, count) => sum + count, 0);
+    status.textContent = `Download started: ${total.toLocaleString()} rows across all ${BACKUP_TABLES.length} tables. Check your Downloads folder.`;
+  } catch (error) {
+    status.textContent = `Export failed. No backup downloaded. ${error.message}`;
+  } finally {
+    backupExportPending = false;
+    button.disabled = false;
+    button.textContent = 'Export All Data';
+  }
 }

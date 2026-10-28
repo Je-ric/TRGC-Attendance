@@ -10,6 +10,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon_io/apple-touch-icon.png" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/interface.css?v=20261028-2" />
 </head>
 <body class="dashboard-page">
 
@@ -65,29 +66,85 @@
     <!-- Content -->
     <main class="page-content">
 
+      <div class="overview-heading">
+        <div><h2>Church overview</h2><p>Attendance, people, and your next steps in one place.</p></div>
+        <div class="heading-actions">
+          <a href="events.html?action=create" class="btn btn-outline"><i class='bx bx-plus'></i> Create Event</a>
+          <a href="attendance.html" class="btn btn-primary"><i class='bx bx-check-square'></i> Take Attendance</a>
+        </div>
+      </div>
+      <p id="dashboardStatsStatus" class="dashboard-status" role="status"></p>
+
       <!-- Stat cards -->
       <div class="stats-grid">
         <div class="stat-card">
           <i class='bx bx-calendar-check stat-icon'></i>
           <p class="stat-eyebrow">Today's Events</p>
           <p id="statTodayEvents" class="stat-value">—</p>
+          <p class="stat-footnote">Scheduled for today</p>
         </div>
         <div class="stat-card blue">
           <i class='bx bx-group stat-icon'></i>
           <p class="stat-eyebrow">Total People</p>
           <p id="statPeople" class="stat-value">—</p>
+          <p class="stat-footnote">In your church directory</p>
         </div>
         <div class="stat-card black">
           <i class='bx bx-home-heart stat-icon'></i>
           <p class="stat-eyebrow">Total Families</p>
           <p id="statFamilies" class="stat-value">—</p>
+          <p class="stat-footnote">Connected households</p>
         </div>
-        <div class="stat-card grey">
+        <div class="stat-card attendance-stat">
           <i class='bx bx-user-check stat-icon'></i>
           <p class="stat-eyebrow">Today's Attendance</p>
           <p id="statTodayAttendance" class="stat-value">—</p>
+          <p class="stat-footnote">Present check-ins today</p>
         </div>
       </div>
+
+      <section class="panel monthly-attendance" aria-labelledby="monthlyAttendanceTitle">
+        <div class="panel-header monthly-attendance-header">
+          <h2 id="monthlyAttendanceTitle" class="panel-title">Attendance Trends</h2>
+          <form id="attendanceYearForm" class="attendance-year-form">
+            <label for="attendanceYear">Year</label>
+            <input aria-label="Year" id="attendanceYear" class="form-input" type="number" min="1900" max="9998" step="1" required />
+            <label for="attendanceGrouping">View by</label>
+            <select aria-label="View by" id="attendanceGrouping" class="form-input">
+              <option value="weekly">Week</option>
+              <option value="monthly">Month</option>
+            </select>
+            <label for="attendanceMonth">Month</label>
+            <select aria-label="Month" id="attendanceMonth" class="form-input">
+              <option value="">Full year</option>
+              <option value="1">January</option><option value="2">February</option>
+              <option value="3">March</option><option value="4">April</option>
+              <option value="5">May</option><option value="6">June</option>
+              <option value="7">July</option><option value="8">August</option>
+              <option value="9">September</option><option value="10">October</option>
+              <option value="11">November</option><option value="12">December</option>
+            </select>
+            <button type="submit" class="btn btn-secondary btn-sm">View</button>
+          </form>
+        </div>
+        <div class="monthly-attendance-body">
+          <p class="chart-note">Present check-ins across all services. Each person counts once per session attended.</p>
+          <p id="attendancePeriodNote" class="chart-note">Monday–Sunday weeks; first and last weeks include only dates within the selected year or month.</p>
+          <p id="monthlyAttendanceStatus" role="status" aria-live="polite">Loading attendance…</p>
+          <div id="monthlyAttendanceContent" hidden>
+            <div id="monthlyAttendanceChart"></div>
+            <p id="monthlyAttendanceSummary" class="chart-summary"></p>
+            <details class="chart-details">
+              <summary>View exact totals and date ranges</summary>
+              <table class="data-table">
+                <caption id="monthlyAttendanceCaption">Present check-ins by period</caption>
+                <thead><tr><th scope="col">Period</th><th scope="col">Present check-ins</th></tr></thead>
+                <tbody id="monthlyAttendanceRows"></tbody>
+              </table>
+            </details>
+          </div>
+        </div>
+      </section>
 
       <!-- Two-column: recent sessions + quick actions -->
       <div class="dashboard-grid">
@@ -104,14 +161,10 @@
         </div>
 
         <!-- Quick actions -->
-        <div style="display:flex;flex-direction:column;gap:var(--gap);">
+        <div class="dashboard-tools">
           <div class="panel">
             <div class="panel-header"><span class="panel-title">Quick Actions</span></div>
-            <div style="padding:0.75rem;display:flex;flex-direction:column;gap:0.5rem;">
-              <a href="events.html?action=create" class="quick-card">
-                <i class='bx bx-plus-circle'></i>
-                <div><p class="quick-card-label">New Event</p><p class="quick-card-sub">Create a service or activity</p></div>
-              </a>
+            <div class="quick-actions-list">
               <a href="people.html?action=create" class="quick-card">
                 <i class='bx bx-user-plus'></i>
                 <div><p class="quick-card-label">Add Person</p><p class="quick-card-sub">Register a new member</p></div>
@@ -120,74 +173,35 @@
                 <i class='bx bx-home-plus'></i>
                 <div><p class="quick-card-label">Add Family</p><p class="quick-card-sub">Create a family group</p></div>
               </a>
-              <a href="attendance.html" class="quick-card">
-                <i class='bx bx-check-double'></i>
-                <div><p class="quick-card-label">Take Attendance</p><p class="quick-card-sub">Mark a session now</p></div>
-              </a>
             </div>
           </div>
         </div>
 
       </div>
 
+      <details class="panel backup-panel">
+        <summary><i class='bx bx-cloud-download'></i> Data backup</summary>
+        <p>Download all people, families, events, sessions, attendance records, and summaries in one file.</p>
+        <p>Includes saved data only. Pause editing during export and keep the file private.</p>
+        <button id="backupExportBtn" type="button" class="btn btn-outline" onclick="exportAllData()">Export All Data</button>
+        <p id="backupExportStatus" role="status" aria-live="polite"></p>
+      </details>
+
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="js/supabase.js"></script>
-  <script src="js/utils.js"></script>
+  <script src="js/utils.js?v=20261028-2"></script>
+  <script src="js/export.js"></script>
+  <script src="js/dashboard-chart.js"></script>
+  <script src="js/dashboard.js"></script>
   <script>
     initHeroBanner();
 
-    async function loadStats() {
-      const today = todayISO();
-      const [{ count: peopleCount }, { count: familyCount }, { data: todaySessions }] = await Promise.all([
-        db.from('people').select('*', { count: 'exact', head: true }),
-        db.from('families').select('*', { count: 'exact', head: true }),
-        db.from('attendance_sessions').select('id').eq('date', today),
-      ]);
-      document.getElementById('statPeople').textContent = peopleCount ?? 0;
-      document.getElementById('statFamilies').textContent = familyCount ?? 0;
-      document.getElementById('statTodayEvents').textContent = todaySessions?.length ?? 0;
-
-      if (todaySessions?.length) {
-        const sessionIds = todaySessions.map(s => s.id);
-        const { count: attCount } = await db
-          .from('attendance_records')
-          .select('*', { count: 'exact', head: true })
-          .in('attendance_session_id', sessionIds)
-          .eq('status', 'present');
-        document.getElementById('statTodayAttendance').textContent = attCount ?? 0;
-      } else {
-        document.getElementById('statTodayAttendance').textContent = 0;
-      }
-    }
-
-    async function loadRecentSessions() {
-      const { data, error } = await db
-        .from('attendance_sessions')
-        .select('id, date, service_name, attendance_types(name)')
-        .order('date', { ascending: false })
-        .limit(8);
-
-      const container = document.getElementById('recentSessions');
-      if (error || !data?.length) {
-        container.innerHTML = '<div class="empty-state"><i class=\'bx bx-calendar-x\'></i><p>No sessions yet.</p></div>';
-        return;
-      }
-      container.innerHTML = data.map(s => `
-        <a href="attendance.html?session=${s.id}" class="session-row">
-          <div>
-            <p class="session-row-name">${s.attendance_types?.name ?? '—'}</p>
-            <p class="session-row-meta">${s.service_name ? s.service_name + ' &middot; ' : ''}${formatDate(s.date)} &mdash; ${dayOfWeek(s.date)}</p>
-          </div>
-          <i class='bx bx-right-arrow-alt session-row-arrow'></i>
-        </a>
-      `).join('');
-    }
-
     loadStats();
     loadRecentSessions();
+    initAttendanceChart();
   </script>
 </body>
 </html>
