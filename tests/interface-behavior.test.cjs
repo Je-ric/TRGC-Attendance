@@ -22,7 +22,7 @@ test('dashboard counts load independently and failures are unavailable instead o
       };
     } }
   });
-  vm.runInContext(fs.readFileSync('src/js/dashboard.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('assets/js/dashboard.js', 'utf8'), context);
   await context.loadStats();
   assert.equal(requests.length, 4);
   assert.equal(elements.statPeople.textContent, '1,234');
@@ -48,8 +48,8 @@ function cardContext(page, startMarker, endMarker, state) {
     editType: id => actions.push(['edit', id]),
     deleteType: (...args) => actions.push(['delete', ...args])
   });
-  vm.runInContext(fs.readFileSync('src/js/utils.js', 'utf8'), context);
-  const html = fs.readFileSync(`src/${page}`, 'utf8');
+  vm.runInContext(fs.readFileSync('assets/js/utils.js', 'utf8'), context);
+  const html = fs.readFileSync(`pages/${page}`, 'utf8');
   vm.runInContext(html.slice(html.indexOf(startMarker), html.indexOf(endMarker)), context);
   return { context, elements, actions };
 }

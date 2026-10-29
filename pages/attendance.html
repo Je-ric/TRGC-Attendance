@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#76213f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="TRGC Attendance" />
+  <link rel="manifest" href="../manifest.webmanifest" />
+  <script src="../assets/js/pwa.js" defer></script>
+  <title>Attendance — Church Attendance</title>
+  <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/images/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/images/favicon-32x32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/images/apple-touch-icon.png" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/app.css" />
+  <link rel="stylesheet" href="../assets/css/interface.css?v=20261028-5" />
+</head>
+<body class="attendance-page">
+
+  <div class="main-wrap">
+
+    <!-- Hero Banner -->
+    <header class="hero-banner has-banner-image">
+      <div aria-hidden="true">
+        <div class="hero-glow hero-glow-a"></div>
+        <div class="hero-glow hero-glow-b"></div>
+      </div>
+      <div class="hero-banner-inner">
+        <div class="hero-top-row">
+          <div class="hero-brand">
+            <img src="../assets/images/TRGC-Logo.png" alt="TRGC Logo" class="hero-logo" />
+            <div>
+              <p class="hero-brand-title">TRGC Attendance</p>
+              <p class="hero-brand-sub">Church Management</p>
+            </div>
+          </div>
+          <div class="hero-meta">
+            <div class="hero-clock">
+              <p id="heroClock">--:--:--</p>
+              <p id="heroClockDate" class="hero-date">Loading...</p>
+            </div>
+          </div>
+        </div>
+        <div class="hero-greeting-section">
+          <p class="hero-eyebrow" id="heroDate">Loading...</p>
+          <h1 class="hero-greeting" id="heroGreeting" aria-label="Good Morning, Ka-TRGC">
+            <span aria-hidden="true"><span class="accent">Good Morning</span>, Ka-TRGC</span>
+          </h1>
+        </div>
+        <div class="hero-nav-scroll">
+          <nav class="hero-nav" aria-label="Main navigation">
+            <div class="hero-nav-glide"></div>
+            <a href="../index.html"      class="hero-nav-link"><i class='bx bxs-dashboard'></i> Dashboard</a>
+            <a href="events.html"     class="hero-nav-link"><i class='bx bx-calendar-event'></i> Events</a>
+            <a href="attendance.html" class="hero-nav-link active" aria-current="page"><i class='bx bx-check-square'></i> Attendance</a>
+            <a href="people.html"     class="hero-nav-link"><i class='bx bx-group'></i> People</a>
+            <a href="families.html"   class="hero-nav-link"><i class='bx bx-home-heart'></i> Families</a>
+            <a href="reports.html"    class="hero-nav-link"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- Actions bar -->
+    <div class="actions-bar">
+      <div class="page-heading"><h2>Attendance</h2><p>Choose a session and record who is here.</p></div>
+      <button onclick="exportAttendance()" id="exportBtn" class="btn btn-outline btn-sm" disabled><i class='bx bx-download'></i> Export</button>
+    </div>
+
+    <main class="page-content">
+
+      <details id="sessionBrowser" class="panel session-browser" open>
+        <summary><span class="panel-title">Browse sessions</span><span id="sessionBrowserMonthLabel" class="session-browser-caption"></span></summary>
+        <div class="session-browser-body">
+          <div class="session-browser-toolbar">
+            <div class="session-month-nav">
+              <button id="previousSessionMonth" type="button" class="btn btn-outline btn-sm" aria-label="Previous month"><i class="bx bx-chevron-left"></i></button>
+              <div><label for="sessionBrowserMonth" class="form-label">Month</label>
+                <select id="sessionBrowserMonth" class="form-input">
+                  <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+                  <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+                  <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+                  <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                </select>
+              </div>
+              <div><label for="sessionBrowserYear" class="form-label">Year</label><input id="sessionBrowserYear" type="number" min="1900" max="9998" step="1" class="form-input" /></div>
+              <button id="nextSessionMonth" type="button" class="btn btn-outline btn-sm" aria-label="Next month"><i class="bx bx-chevron-right"></i></button>
+            </div>
+            <button id="currentSessionMonth" type="button" class="btn btn-ghost btn-sm">This Month</button>
+            <a href="events.html?action=create" class="btn btn-primary btn-sm"><i class="bx bx-plus"></i> New Session</a>
+          </div>
+          <div class="search-wrap session-browser-search"><i class="bx bx-search" aria-hidden="true"></i>
+            <input id="sessionBrowserSearch" type="search" aria-label="Search all sessions by service or date" placeholder="Search all sessions by service or date…" />
+          </div>
+          <p id="sessionBrowserStatus" class="session-browser-status" role="status" aria-live="polite"></p>
+          <div id="sessionCards" class="directory-grid"><div class="empty-state"><i class="bx bx-loader-alt bx-spin"></i><p>Loading sessions…</p></div></div>
+          <div id="sessionBrowserPagination" class="session-browser-pagination" hidden>
+            <button id="previousSessionPage" class="btn btn-outline btn-sm" type="button">Previous</button>
+            <span id="sessionBrowserPageLabel"></span>
+            <button id="nextSessionPage" class="btn btn-outline btn-sm" type="button">Next</button>
+          </div>
+        </div>
+      </details>
+      <div id="sessionInfo" class="session-info-bar" style="display:none" role="status"></div>
+
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state" style="flex:1">
+        <i class='bx bx-check-square'></i>
+        <p>Open a session card above to take or view attendance.</p>
+      </div>
+
+      <!-- Attendance panel -->
+      <div id="attendancePanel" class="page-content attendance-panel" style="display:none">
+
+        <!-- Count cards -->
+        <div class="count-grid">
+          <div class="count-card">
+            <p class="count-label">Present</p>
+            <p id="countPresent" class="count-value red">0</p>
+          </div>
+          <div class="count-card">
+            <p class="count-label">Absent</p>
+            <p id="countAbsent" class="count-value grey">0</p>
+          </div>
+          <div class="count-card">
+            <p class="count-label">Not Marked</p>
+            <p id="countUnmarked" class="count-value" style="color:var(--border)">0</p>
+          </div>
+          <div class="count-card">
+            <p class="count-label">Total People</p>
+            <p id="countTotal" class="count-value black">0</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="attendance-controls" style="display:flex;flex-wrap:wrap;gap:0.625rem;align-items:center">
+          <div class="search-wrap">
+            <i class='bx bx-search'></i>
+            <input aria-label="Search person" id="peopleSearch" type="text" placeholder="Search person…" oninput="debouncedRender()" />
+          </div>
+          <select aria-label="Filter by category" id="filterCat" class="form-input" style="width:auto" onchange="renderPeopleList()">
+            <option value="">All Categories</option>
+            <option>Kids</option><option>Youth</option><option>Adults</option><option>Seniors</option>
+          </select>
+          <select aria-label="Filter by membership" id="filterStatus" class="form-input" style="width:auto" onchange="renderPeopleList()">
+            <option value="">All Statuses</option>
+            <option>Member</option><option>Regular Attendee</option><option>Visitor</option><option>Inactive</option>
+          </select>
+          <select aria-label="Filter by gender" id="filterGender" class="form-input" style="width:auto" onchange="renderPeopleList()">
+            <option value="">All Genders</option>
+            <option>Male</option><option>Female</option>
+          </select>
+          <button onclick="markAll('present')" class="btn btn-outline btn-sm"><i class='bx bx-check'></i> Mark All Present</button>
+          <button onclick="markAll('absent')"  class="btn btn-ghost btn-sm"><i class='bx bx-x'></i> Mark All Absent</button>
+          <button onclick="clearAll()" class="btn btn-ghost btn-sm" style="color:var(--grey)"><i class='bx bx-reset'></i> Clear All</button>
+          <button onclick="saveAttendance()" id="saveBtn" class="btn btn-primary" style="margin-left:auto">
+            <i class='bx bx-save'></i> Save Attendance
+          </button>
+        </div>
+
+        <!-- People table -->
+        <div class="panel">
+          <div class="table-scroll">
+            <table class="data-table attendance-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th style="text-align:center">Attendance</th>
+                  <th>Notes / Remarks</th>
+                </tr>
+              </thead>
+              <tbody id="peopleBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="../assets/js/supabase.js"></script>
+  <script src="../assets/js/utils.js?v=20261028-2"></script>
+  <script src="../assets/js/export.js"></script>
+  <script src="../assets/js/session-browser.js?v=20261028-1"></script>
+  <script>
+    initHeroBanner();
+    const debouncedRender = debounce(renderPeopleList, 250);
+    let allSessions = [];
+    let allPeople = [];
+    let existingRecords = {};
+    let attendance = {};
+    let currentSessionId = null;
+
+    let sessionLoadRequest = 0;
+    let attendancePeopleLoaded = false;
+
+    async function init() {
+      await initSessionBrowser();
+    }
+
+    function hasAttendanceChanges() {
+      return Object.entries(attendance).some(([personId, value]) => {
+        const original = existingRecords[personId];
+        return (value.status || null) !== (original?.status || null) ||
+          (value.remarks || '') !== (original?.remarks || '');
+      });
+    }
+
+    async function loadSession(id = currentSessionId, reload = false) {
+      const status = document.getElementById('sessionBrowserStatus');
+      if (document.getElementById('saveBtn').disabled) {
+        status.textContent = 'Please wait for attendance to finish saving.';
+        return false;
+      }
+      const session = allSessions.find(s => s.id === id);
+      if (!session) return false;
+      if (id === currentSessionId && !reload) {
+        document.getElementById('sessionBrowser').open = false;
+        return true;
+      }
+      if (id !== currentSessionId && hasAttendanceChanges() &&
+          !confirm('You have unsaved attendance changes. Discard them and open another session?')) return false;
+      const request = ++sessionLoadRequest;
+      const panel = document.getElementById('attendancePanel');
+      const emptyState = document.getElementById('emptyState');
+      panel.style.display = 'none';
+      document.getElementById('exportBtn').disabled = true;
+      status.textContent = `Loading ${formatDate(session.date)}…`;
+      try {
+        const [people, records] = await Promise.all([
+          attendancePeopleLoaded ? Promise.resolve(allPeople) : fetchAllRowsForExport('people',
+            'id, first_name, last_name, birthdate, category, membership_status, gender'),
+          fetchAllRowsForExport('attendance_records', 'id, person_id, status, remarks',
+            query => query.eq('attendance_session_id', id))
+        ]);
+        if (request !== sessionLoadRequest) return false;
+        allPeople = people.sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
+        attendancePeopleLoaded = true;
+        existingRecords = Object.fromEntries(records.map(record => [record.person_id, record]));
+        attendance = {};
+        allPeople.forEach(person => {
+          const record = existingRecords[person.id];
+          attendance[person.id] = { status: record?.status ?? null, remarks: record?.remarks ?? '' };
+        });
+        currentSessionId = id;
+        const infoBar = document.getElementById('sessionInfo');
+        infoBar.style.display = 'flex';
+        infoBar.innerHTML = `<i class="bx bx-calendar-check" aria-hidden="true"></i>
+          <div><strong>${escapeHtml(session.attendance_types?.name || 'Service')}</strong>
+          ${session.service_name ? `<span> · ${escapeHtml(session.service_name)}</span>` : ''}
+          <p>${dayOfWeek(session.date)}, ${formatDate(session.date)}${session.attendance_types?.start_time ? ' · ' + formatTime(session.attendance_types.start_time) : ''}</p></div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="openSessionBrowser()">Change Session</button>`;
+        emptyState.style.display = 'none';
+        panel.style.display = 'flex';
+        panel.style.flexDirection = 'column';
+        panel.style.gap = '1.25rem';
+        renderPeopleList();
+        document.getElementById('exportBtn').disabled = false;
+        document.getElementById('sessionBrowser').open = false;
+        status.textContent = '';
+        renderSessionCards();
+        const url = new URL(location.href);
+        url.searchParams.set('session', id);
+        history.replaceState(null, '', url);
+        return true;
+      } catch (error) {
+        if (request !== sessionLoadRequest) return false;
+        status.textContent = 'Unable to load attendance. Open the session again to retry.';
+        if (currentSessionId) {
+          panel.style.display = 'flex';
+          document.getElementById('exportBtn').disabled = false;
+        }
+        return false;
+      }
+    }
+
+    function filteredPeople() {
+      const q = document.getElementById('peopleSearch').value.toLowerCase();
+      const cat = document.getElementById('filterCat').value;
+      const st = document.getElementById('filterStatus').value;
+      const gender = document.getElementById('filterGender').value;
+      return allPeople.filter(p => {
+        const name = `${p.first_name} ${p.last_name}`.toLowerCase();
+        const ec = effectiveCategory(p);
+        return (!q || name.includes(q)) && (!cat || ec === cat) && (!st || p.membership_status === st) && (!gender || p.gender === gender);
+      });
+    }
+
+    function renderPeopleList() {
+      const people = filteredPeople();
+      const tbody = document.getElementById('peopleBody');
+
+      if (!people.length) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:2.5rem;color:var(--grey)">No people found.</td></tr>`;
+        updateCounts();
+        return;
+      }
+
+      tbody.innerHTML = people.map(p => {
+        const att = attendance[p.id] || { status: null, remarks: '' };
+        const rowStyle = att.status === 'present' ? 'background:#fef9f9' : att.status === 'absent' ? 'background:#f9f9f9' : '';
+
+        return `<tr id="row-${p.id}" data-status="${att.status || ''}" style="${rowStyle}">
+          <td class="attendance-name">${genderDot(p.gender)}<span>${escapeHtml(p.last_name)}, ${escapeHtml(p.first_name)}</span></td>
+          <td style="text-align:center">
+            <div class="att-toggle">
+              <button type="button" class="att-btn present ${att.status === 'present' ? 'active' : ''}" aria-label="Mark present" aria-pressed="${att.status === 'present'}" onclick="setStatus('${p.id}', 'present')"><i class='bx bx-check'></i></button>
+              <button type="button" class="att-btn absent ${att.status === 'absent' ? 'active' : ''}" aria-label="Mark absent" aria-pressed="${att.status === 'absent'}" onclick="setStatus('${p.id}', 'absent')"><i class='bx bx-x'></i></button>
+            </div>
+          </td>
+          <td>
+            <input type="text" value="${escapeHtml(att.remarks || '')}"
+              placeholder="Add a note…"
+              aria-label="Notes for ${escapeHtml(p.first_name)} ${escapeHtml(p.last_name)}"
+              oninput="setRemarks('${p.id}', this.value)"
+              class="remarks-input" />
+          </td>
+        </tr>`;
+      }).join('');
+
+      updateCounts();
+    }
+
+    function setStatus(personId, status) {
+      if (!attendance[personId]) attendance[personId] = { status: null, remarks: '' };
+      attendance[personId].status = attendance[personId].status === status ? null : status;
+      updateCounts();
+      updateRowUI(personId, attendance[personId].status);
+    }
+
+    function updateRowUI(personId, status) {
+      const row = document.getElementById(`row-${personId}`);
+      if (!row) return;
+      row.dataset.status = status || '';
+      row.style.background = status === 'present' ? '#fef9f9' : status === 'absent' ? '#f9f9f9' : '';
+      const [presentBtn, absentBtn] = row.querySelectorAll('.att-btn');
+      presentBtn.classList.toggle('active', status === 'present');
+      absentBtn.classList.toggle('active', status === 'absent');
+      presentBtn.setAttribute('aria-pressed', String(status === 'present'));
+      absentBtn.setAttribute('aria-pressed', String(status === 'absent'));
+    }
+
+    function setRemarks(personId, value) {
+      if (!attendance[personId]) attendance[personId] = { status: null, remarks: '' };
+      attendance[personId].remarks = value;
+    }
+
+    function markAll(status) {
+      filteredPeople().forEach(p => {
+        attendance[p.id] = { ...(attendance[p.id] || {}), status };
+        updateRowUI(p.id, status);
+      });
+      updateCounts();
+    }
+
+    function clearAll() {
+      filteredPeople().forEach(p => {
+        attendance[p.id] = { ...(attendance[p.id] || {}), status: null };
+        updateRowUI(p.id, null);
+      });
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const vals = Object.values(attendance);
+      document.getElementById('countPresent').textContent  = vals.filter(a => a.status === 'present').length;
+      document.getElementById('countAbsent').textContent   = vals.filter(a => a.status === 'absent').length;
+      document.getElementById('countUnmarked').textContent = vals.filter(a => !a.status).length;
+      document.getElementById('countTotal').textContent    = allPeople.length;
+    }
+
+    async function saveAttendance() {
+      if (!currentSessionId) return;
+      const btn = document.getElementById('saveBtn');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Saving…';
+
+      const toInsert = [];
+      const toUpdate = [];
+      const toDelete = [];
+
+      allPeople.forEach(p => {
+        const att = attendance[p.id];
+        const existing = existingRecords[p.id];
+        if (att?.status) {
+          if (existing) {
+            toUpdate.push({
+              id: existing.id,
+              attendance_session_id: currentSessionId,
+              person_id: p.id,
+              status: att.status,
+              remarks: att.remarks || null,
+            });
+          } else {
+            toInsert.push({
+              attendance_session_id: currentSessionId,
+              person_id: p.id,
+              status: att.status,
+              remarks: att.remarks || null,
+            });
+          }
+        } else if (existing) {
+          toDelete.push(existing.id);
+        }
+      });
+
+      const BATCH_SIZE = 100; // Process records in batches to avoid size limits
+      const ops = [];
+
+      // Batch insert operations
+      for (let i = 0; i < toInsert.length; i += BATCH_SIZE) {
+        const batch = toInsert.slice(i, i + BATCH_SIZE);
+        if (batch.length) ops.push(db.from('attendance_records').insert(batch));
+      }
+
+      // Batch update operations  
+      for (let i = 0; i < toUpdate.length; i += BATCH_SIZE) {
+        const batch = toUpdate.slice(i, i + BATCH_SIZE);
+        if (batch.length) ops.push(db.from('attendance_records').upsert(batch, { onConflict: 'id' }));
+      }
+
+      // Batch delete operations
+      for (let i = 0; i < toDelete.length; i += BATCH_SIZE) {
+        const batch = toDelete.slice(i, i + BATCH_SIZE);
+        if (batch.length) ops.push(db.from('attendance_records').delete().in('id', batch));
+      }
+
+      let results;
+      try {
+        results = await Promise.all(ops);
+      } catch (error) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class=\'bx bx-save\'></i> Save Attendance';
+        showToast('Unable to finish saving. Your changes are still on screen. Please retry.', 'error');
+        return;
+      }
+      const err = results.find(r => r.error);
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class=\'bx bx-save\'></i> Save Attendance';
+
+      if (err) { showToast(err.error.message, 'error'); return; }
+      showToast('Attendance saved.');
+      await loadSession(currentSessionId, true);
+    }
+
+    async function exportAttendance() {
+      if (!currentSessionId) {
+        showToast('Please select a session first', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('exportBtn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Exporting…';
+
+      try {
+        const sessionId = currentSessionId;
+        const session = allSessions.find(s => s.id === sessionId);
+        const draft = {};
+        for (const [personId, value] of Object.entries(attendance)) {
+          const original = existingRecords[personId];
+          if ((value.status || null) !== (original?.status || null) ||
+              (value.remarks || '') !== (original?.remarks || '')) {
+            draft[personId] = { ...value };
+          }
+        }
+        const people = await fetchAllPeopleForExport();
+        const records = await fetchAllRowsForExport('attendance_records', '*',
+          query => query.eq('attendance_session_id', sessionId));
+        const saved = new Map(records.map(record => [record.person_id, record]));
+        // Preserve the selected session's draft edits; fetch unloaded people and records too.
+        const attendanceData = people.map(person => {
+          const record = draft[person.id] ?? saved.get(person.id);
+          return {
+            status: record?.status || 'unmarked',
+            remarks: record?.remarks || '',
+            person
+          };
+        });
+        
+        if (attendanceData.length === 0) {
+          showToast('No attendance data to export', 'warning');
+          return;
+        }
+        
+        await exportAttendanceToCSV(session, attendanceData);
+      } catch (error) {
+        showToast('Export failed: ' + error.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -30,8 +30,8 @@ function setup(tables = {}) {
       }));
     }
   });
-  vm.runInContext(fs.readFileSync('src/js/utils.js', 'utf8'), context);
-  vm.runInContext(fs.readFileSync('src/js/reports.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('assets/js/utils.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('assets/js/reports.js', 'utf8'), context);
   return { context, elements, reads };
 }
 

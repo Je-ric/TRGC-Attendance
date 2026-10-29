@@ -12,6 +12,30 @@ Static web app — HTML + Tailwind CSS + Vanilla JS + Supabase. Deployable to Ve
 | Database   | Supabase (PostgreSQL)         |
 | Hosting    | Vercel (static)               |
 
+## Project structure
+
+```text
+TRGC-Attendance/
+├── index.html             # Dashboard entry point
+├── pages/                 # People, families, events, attendance, reports, offline
+├── assets/
+│   ├── css/               # Shared styles
+│   ├── js/                # Application scripts and Supabase client
+│   └── images/            # Banner, logo, favicons, and app icons
+├── MD/
+│   ├── System/            # Implementation documentation
+│   ├── To be developed/   # Original project proposal
+│   └── Design.md          # Design reference
+├── supabase/              # Schema and maintenance SQL scripts
+├── tests/                 # Node.js verification
+├── manifest.webmanifest
+├── sw.js
+└── vercel.json
+```
+
+See [Project Structure](MD/System/01_Project_Structure.md) for hosting and path conventions.
+Run the existing checks with `node --test tests/*.test.cjs`.
+
 ---
 
 ## Setup
@@ -19,12 +43,12 @@ Static web app — HTML + Tailwind CSS + Vanilla JS + Supabase. Deployable to Ve
 ### 1. Create a Supabase project
 
 1. Go to [supabase.com](https://supabase.com) → New project.
-2. Open the **SQL Editor** and run `sql/schema.sql` in full.
+2. Open the **SQL Editor** and run `supabase/schema.sql` in full.
 3. Copy your **Project URL** and **anon public key** from Project Settings → API.
 
 ### 2. Configure the client
 
-Edit `src/js/supabase.js`:
+Edit `assets/js/supabase.js`:
 
 ```js
 const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
@@ -33,11 +57,11 @@ const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
 
 ### 3. Run locally
 
-Just open `src/index.html` in a browser — no build step needed.
+Just open `index.html` in a browser — no build step needed.
 Or use a simple static server:
 
 ```bash
-npx serve src
+npx serve .
 ```
 
 ### 4. Deploy to Vercel
@@ -47,7 +71,7 @@ npm i -g vercel
 vercel --prod
 ```
 
-Vercel will pick up `vercel.json` and serve `src/` as the root.
+Vercel will pick up `vercel.json` and serve `index.html`, `pages/`, and the shared application assets.
 
 ---
 
@@ -73,19 +97,19 @@ on an already-open page when the browser reports that it is offline. Keep any
 unsaved attendance page open and save after reconnecting. Navigating while offline
 shows a retry screen. A server error response is displayed as returned by the server.
 
-Use `npx serve src` or another HTTP server on localhost for local PWA testing;
+Use `npx serve .` or another HTTP server on localhost for local PWA testing;
 opening files directly does not enable the service worker or installation.
 Testing from another phone requires HTTPS, including on a local network.
 Worker updates wait for existing app tabs/windows to close, avoiding forced
-reloads during attendance entry. Increment the cache version in `src/sw.js` when
-changing `src/offline.html`.
+reloads during attendance entry. Increment the cache version in `sw.js` when
+changing `pages/offline.html`.
 
-Implementation: `src/assets/favicon_io/site.webmanifest`, `src/js/pwa.js`,
-`src/sw.js`, `src/offline.html`, all six page heads, and `src/css/interface.css`.
+Implementation: `manifest.webmanifest`, `assets/js/pwa.js`,
+`sw.js`, `pages/offline.html`, all six page heads, and `assets/css/interface.css`.
 
 ### Interface and layout
 
-All six pages load `src/css/interface.css` after their base styles. The banner
+All six pages load `assets/css/interface.css` after their base styles. The banner
 keeps its original appearance. Application content uses clearer text contrast,
 consistent form sizing, soft card shadows, subtle gradients, red primary actions,
 and slate secondary actions. No data-entry fields were added.
@@ -101,7 +125,7 @@ and slate secondary actions. No data-entry fields were added.
   controls, and the attendance table.
 - Reports: consistent filter panels, summary cards, tabs, and report tables.
 
-Dashboard logic lives in `src/js/dashboard.js`. Totals use database counts without
+Dashboard logic lives in `assets/js/dashboard.js`. Totals use database counts without
 downloading session IDs, and failures show unavailable values rather than zero.
 The recent-session list loads six records. The chart reuses counts for 30 seconds
 when changing filters; selecting **View** clears its cache and fetches fresh data.
@@ -124,8 +148,8 @@ Monday–Sunday and are clipped to the selected month/year so dates never overla
 The selected inclusive date range is shown below the controls. There are no
 calendar or From/To inputs. Report reads are batched; person/date filters are
 applied on the database, and session counts are computed from separately fetched
-attendance records to avoid nested row limits. Source: `src/js/reports.js` and
-`src/reports.html`.
+attendance records to avoid nested row limits. Source: `assets/js/reports.js` and
+`pages/reports.html`.
 
 ### Finding attendance sessions
 
@@ -145,8 +169,8 @@ Events, and Reports continue to open the correct session and month. Missing or
 failed session links show a recoverable message. People and attendance records
 load in batches when opening a session, and outdated responses are ignored.
 
-Implementation: `src/js/session-browser.js`, `src/attendance.html`, and
-`src/css/interface.css`.
+Implementation: `assets/js/session-browser.js`, `pages/attendance.html`, and
+`assets/css/interface.css`.
 
 ### Weekly and monthly attendance chart
 
@@ -169,8 +193,8 @@ The chart includes the selected period's total, highest week(s) or month(s), and
 expandable table of exact counts and period labels. Empty periods show zero.
 Database count queries avoid row limits, with at most four requests in flight per
 chart load; failed queries show a retry message instead of incomplete totals. The
-implementation lives in `src/js/dashboard-chart.js`, `src/index.html`, and
-`src/css/app.css`.
+implementation lives in `assets/js/dashboard-chart.js`, `index.html`, and
+`assets/css/app.css`.
 
 ### Full data backup
 
@@ -195,12 +219,12 @@ automatic restore/import is not provided.
 
 | File                  | Purpose                                      |
 |-----------------------|----------------------------------------------|
-| `src/index.html`      | Dashboard — stats + recent sessions          |
-| `src/people.html`     | People CRUD — add, edit, delete, view history |
-| `src/families.html`   | Family CRUD — manage groups + members        |
-| `src/events.html`     | Service types + session management           |
-| `src/attendance.html` | Take attendance for a session                |
-| `src/reports.html`    | Reports by event / person / date             |
+| `index.html`      | Dashboard — stats + recent sessions          |
+| `pages/people.html`     | People CRUD — add, edit, delete, view history |
+| `pages/families.html`   | Family CRUD — manage groups + members        |
+| `pages/events.html`     | Service types + session management           |
+| `pages/attendance.html` | Take attendance for a session                |
+| `pages/reports.html`    | Reports by event / person / date             |
 
 ---
 
@@ -215,7 +239,7 @@ automatic restore/import is not provided.
 | `attendance_records`   | Who attended which session                   |
 | `attendance_summaries` | Computed cache for dashboard queries         |
 
-See `sql/schema.sql` for full schema with indexes and cascade rules.
+See `supabase/schema.sql` for full schema with indexes and cascade rules.
 
 ---
 

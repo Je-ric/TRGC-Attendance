@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const source = fs.readFileSync('src/js/export.js', 'utf8');
+const source = fs.readFileSync('assets/js/export.js', 'utf8');
 
 function setup(tables, options = {}) {
   const calls = [];
@@ -121,7 +121,7 @@ test('backup failure downloads nothing and permits retry; duplicate clicks expor
 });
 
 test('session CSV includes unloaded people and saved records while preserving draft edits', async () => {
-  const html = fs.readFileSync('src/attendance.html', 'utf8');
+  const html = fs.readFileSync('pages/attendance.html', 'utf8');
   const start = html.indexOf('    async function exportAttendance()');
   const end = html.indexOf('\n    init();', start);
   let exported;
@@ -156,8 +156,8 @@ test('session CSV includes unloaded people and saved records while preserving dr
 });
 
 test('all inline page scripts parse successfully', () => {
-  for (const file of fs.readdirSync('src').filter(file => file.endsWith('.html'))) {
-    const html = fs.readFileSync(`src/${file}`, 'utf8');
+  for (const file of ['index.html', ...fs.readdirSync('pages').filter(file => file.endsWith('.html')).map(file => `pages/${file}`)]) {
+    const html = fs.readFileSync(`${file}`, 'utf8');
     for (const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) {
       new vm.Script(match[1], { filename: file });
     }

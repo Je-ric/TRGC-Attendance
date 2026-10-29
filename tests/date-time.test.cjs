@@ -16,7 +16,7 @@ function setup(now = '2026-10-27T16:05:00Z') {
       querySelector: () => null
     }
   });
-  vm.runInContext(fs.readFileSync('src/js/utils.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('assets/js/utils.js', 'utf8'), context);
   return { context, elements };
 }
 

@@ -10,7 +10,7 @@ function setup(sessions = [], search = '') {
   const context = vm.createContext({
     Intl, Date, URLSearchParams, URL,
     allSessions: [], currentSessionId: null,
-    location: { search, href: `http://localhost/attendance.html${search}` },
+    location: { search, href: `http://localhost/pages/attendance.html${search}` },
     document: { getElementById: id => elements[id] ??= {
       value: id === 'sessionBrowserYear' ? '2026' : id === 'sessionBrowserMonth' ? '10' : '',
       innerHTML: '', textContent: '', style: {}, disabled: false,
@@ -28,10 +28,10 @@ function setup(sessions = [], search = '') {
     }) },
     loadSession: async id => { opened.push(id); return true; }
   });
-  vm.runInContext(fs.readFileSync('src/js/utils.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('assets/js/utils.js', 'utf8'), context);
   context.todayISO = () => '2026-10-28';
   context.debounce = fn => fn;
-  vm.runInContext(fs.readFileSync('src/js/session-browser.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('assets/js/session-browser.js', 'utf8'), context);
   return { context, elements, reads, opened };
 }
 
@@ -127,7 +127,7 @@ test('session switching preserves drafts on cancel or reopening the selected car
     attendance: { person: { status: 'present', remarks: '' } }, existingRecords: {},
     confirm: () => false
   });
-  const html = fs.readFileSync('src/attendance.html', 'utf8');
+  const html = fs.readFileSync('pages/attendance.html', 'utf8');
   vm.runInContext(html.slice(html.indexOf('    function hasAttendanceChanges()'), html.indexOf('    function filteredPeople()')), env.context);
   assert.equal(await env.context.loadSession('older'), false);
   assert.equal(env.context.currentSessionId, 'current');
@@ -150,7 +150,7 @@ test('rapid session opens ignore an older attendance response and retain the lat
       return new Promise(resolve => pending.set(sessionId, resolve));
     }
   });
-  const html = fs.readFileSync('src/attendance.html', 'utf8');
+  const html = fs.readFileSync('pages/attendance.html', 'utf8');
   vm.runInContext(html.slice(html.indexOf('    function hasAttendanceChanges()'), html.indexOf('    function filteredPeople()')), env.context);
   const older = env.context.loadSession('older');
   const newer = env.context.loadSession('current');

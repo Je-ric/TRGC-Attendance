@@ -37,7 +37,7 @@ function setup(counts = Array(12).fill(0), fail = false) {
       return query;
     } }
   });
-  vm.runInContext(fs.readFileSync('src/js/dashboard-chart.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync('assets/js/dashboard-chart.js', 'utf8'), context);
   return { context, elements, requests };
 }
 
